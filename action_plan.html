@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action Plan — Weekly Forex</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080a0f;
+  --bg2:#0e1117;
+  --bg3:#13171f;
+  --bg4:#1a1f2b;
+  --border:#1e2535;
+  --border2:#2a3348;
+  --text:#dde3f0;
+  --text2:#7b88a8;
+  --text3:#3d4d6a;
+  --gold:#f0b429;
+  --gold2:#ffd166;
+  --silver:#94a3b8;
+  --green:#10b981;
+  --red:#f43f5e;
+  --blue:#3b82f6;
+  --purple:#8b5cf6;
+  --orange:#f97316;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --font-body:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh}
+
+/* BG TEXTURE */
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(59,130,246,.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(139,92,246,.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+/* HEADER */
+.header{position:sticky;top:0;z-index:100;background:rgba(8,10,15,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--font-display);font-size:20px;letter-spacing:.12em;color:var(--text)}
+.logo span{color:var(--gold)}
+.week-badge{font-family:var(--font-mono);font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border2);padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .2s}
+.week-badge:hover{border-color:var(--gold);color:var(--gold)}
+.header-right{display:flex;gap:8px;align-items:center}
+.btn-save{padding:5px 14px;background:var(--gold);color:#000;font-size:11px;font-weight:600;font-family:var(--font-mono);border:none;border-radius:6px;cursor:pointer;letter-spacing:.06em;transition:all .2s}
+.btn-save:hover{background:var(--gold2)}
+.btn-new{padding:5px 14px;background:transparent;color:var(--text2);font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);border-radius:6px;cursor:pointer;transition:all .2s}
+.btn-new:hover{border-color:var(--text2);color:var(--text)}
+
+/* WEEK SELECTOR */
+.week-bar{padding:12px 24px;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;align-items:center}
+.week-bar::-webkit-scrollbar{display:none}
+.week-pill{padding:4px 14px;border-radius:20px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .2s}
+.week-pill.active{background:var(--gold);color:#000;border-color:var(--gold);font-weight:600}
+.week-pill:hover:not(.active){border-color:var(--text3);color:var(--text2)}
+.week-bar label{font-size:10px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap;margin-right:4px}
+
+/* MAIN LAYOUT */
+.main{position:relative;z-index:1;padding:20px 24px;max-width:1400px;margin:0 auto}
+
+/* MARKET OVERVIEW CARD */
+.overview-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;position:relative;overflow:hidden}
+.overview-card::before{content:'OVERVIEW';position:absolute;right:20px;top:14px;font-family:var(--font-display);font-size:72px;color:rgba(255,255,255,.025);line-height:1;pointer-events:none}
+.section-tag{font-family:var(--font-display);font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:10px}
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.overview-field label{font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:.08em;display:block;margin-bottom:4px}
+.field-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:13px;padding:8px 12px;border-radius:8px;outline:none;transition:border-color .2s;resize:none}
+.field-input:focus{border-color:var(--gold)}
+.field-input::placeholder{color:var(--text3)}
+textarea.field-input{min-height:80px;line-height:1.6}
+
+/* DXY BIAS BAR */
+.dxy-bar{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 16px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)}
+.dxy-label{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.1em}
+.bias-pills{display:flex;gap:6px}
+.bias-pill{padding:3px 12px;border-radius:4px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s}
+.bias-pill.selected-LONG{background:#052e16;color:#4ade80;border-color:#16a34a55}
+.bias-pill.selected-SHORT{background:#450a0a;color:#f87171;border-color:#b91c1c55}
+.bias-pill.selected-NEUTRAL{background:#1e1b4b;color:#818cf8;border-color:#4338ca55}
+.bias-pill.selected-WAIT{background:#1c1917;color:#a8a29e;border-color:#57534e55}
+.bias-pill:hover:not([class*="selected"]){color:var(--text2);border-color:var(--text3)}
+
+/* SYMBOLS GRID */
+.symbols-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px}
+
+/* SYMBOL CARD */
+.sym-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s}
+.sym-card:hover{border-color:var(--border2)}
+.sym-header{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sym-name{font-family:var(--font-display);font-size:22px;letter-spacing:.08em}
+.sym-tf{font-family:var(--font-mono);font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
+.sym-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-group label{font-size:9px;color:var(--text3);font-family:var(--font-mono);letter-spacing:.1em;display:block;margin-bottom:4px;text-transform:uppercase}
+.field-sm{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:12px;padding:6px 10px;border-radius:7px;outline:none;transition:border-color .2s}
+.field-sm:focus{border-color:var(--gold)}
+.field-sm::placeholder{color:var(--text3);font-size:11px}
+select.field-sm{cursor:pointer}
+select.field-sm option{background:var(--bg2)}
+
+/* BIAS DISPLAY */
+.bias-display{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:4px;font-family:var(--font-mono);font-size:11px;font-weight:500}
+.bias-LONG{background:#052e1644;color:#4ade80;border:1px solid #16a34a55}
+.bias-SHORT{background:#450a0a44;color:#f87171;border:1px solid #b91c1c55}
+.bias-NEUTRAL{background:#1e1b4b44;color:#818cf8;border:1px solid #4338ca55}
+.bias-WAIT{background:#1c191744;color:#a8a29e;border:1px solid #57534e55}
+
+/* STRATEGY BADGE */
+.strat-badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:4px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);color:var(--text2);background:var(--bg3)}
+
+/* CHART SECTION */
+.chart-section{background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border)}
+.chart-section label{font-size:9px;color:var(--text3);font-family:var(--font-mono);letter-spacing:.1em;display:block;margin-bottom:6px;text-transform:uppercase}
+.chart-url-row{display:flex;gap:6px;align-items:center}
+.chart-url-input{flex:1;background:transparent;border:none;color:var(--text3);font-size:10px;font-family:var(--font-mono);outline:none}
+.chart-url-input:focus{color:var(--text2)}
+.chart-url-input::placeholder{color:var(--text3)}
+.chart-view-btn{padding:3px 10px;background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:10px;font-family:var(--font-mono);border-radius:5px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.chart-view-btn:hover{color:var(--gold);border-color:var(--gold)}
+.chart-preview{display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.chart-preview img{width:100%;display:block}
+.chart-preview.show{display:block}
+
+/* NOTE AREA */
+.note-field{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:12px;padding:8px 10px;border-radius:7px;outline:none;resize:none;min-height:60px;line-height:1.6;transition:border-color .2s}
+.note-field:focus{border-color:var(--gold)}
+.note-field::placeholder{color:var(--text3);font-size:11px}
+
+/* SYMBOL COLORS */
+.sym-xau .sym-name{color:#fbbf24}
+.sym-xag .sym-name{color:#94a3b8}
+.sym-btc .sym-name{color:#f97316}
+.sym-jpy .sym-name{color:#34d399}
+.sym-eur .sym-name{color:#60a5fa}
+.sym-gbp .sym-name{color:#c084fc}
+.sym-s50 .sym-name{color:#f472b6}
+.sym-oil .sym-name{color:#84cc16}
+
+.sym-xau{border-left:3px solid #fbbf24}
+.sym-xag{border-left:3px solid #94a3b8}
+.sym-btc{border-left:3px solid #f97316}
+.sym-jpy{border-left:3px solid #34d399}
+.sym-eur{border-left:3px solid #60a5fa}
+.sym-gbp{border-left:3px solid #c084fc}
+.sym-s50{border-left:3px solid #f472b6}
+.sym-oil{border-left:3px solid #84cc16}
+
+/* SUMMARY CARD */
+.summary-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-top:20px}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.summary-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:4px}
+.summary-sym{font-family:var(--font-display);font-size:15px;letter-spacing:.08em}
+.summary-bias{font-family:var(--font-mono);font-size:11px}
+.summary-strat{font-size:10px;color:var(--text3);font-family:var(--font-mono)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:8px;font-size:12px;font-family:var(--font-mono);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;background:#14532d;color:#4ade80;border:1px solid #16a34a55}
+.toast.show{opacity:1}
+
+/* PRINT STYLES */
+@media print{
+  .header,.week-bar,.btn-save,.btn-new,.chart-url-row button{display:none!important}
+  body{background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">ACTION <span>PLAN</span></div>
+  <div class="header-right">
+    <div class="week-badge" id="currentWeekLabel" onclick="promptNewWeek()">+ New Week</div>
+    <button class="btn-new" onclick="exportData()">📋 Export</button>
+    <button class="btn-save" onclick="saveData()">💾 SAVE</button>
+  </div>
+</div>
+
+<!-- WEEK SELECTOR -->
+<div class="week-bar">
+  <label>WEEK:</label>
+  <div id="weekPills"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- MARKET OVERVIEW -->
+  <div class="overview-card">
+    <div class="section-tag">MARKET OVERVIEW</div>
+    <div class="overview-grid">
+      <div class="overview-field">
+        <label>WEEK RANGE</label>
+        <input class="field-input" id="ov_week" placeholder="e.g. 18-22 MAY 2026" oninput="autoSave()">
+      </div>
+      <div class="overview-field">
+        <label>KEY RISK / EVENT THIS WEEK</label>
+        <input class="field-input" id="ov_risk" placeholder="e.g. CPI, FED, NFP..." oninput="autoSave()">
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="overview-field">
+        <label>MARKET ANALYSIS (DXY / OVERALL BIAS)</label>
+        <textarea class="field-input" id="ov_analysis" placeholder="วิเคราะห์ภาพรวม อิง DXY เป็นหลัก..." rows="3" oninput="autoSave()"></textarea>
+      </div>
+    </div>
+    <div class="dxy-bar">
+      <span class="dxy-label">DXY BIAS:</span>
+      <div class="bias-pills">
+        <button class="bias-pill" onclick="setBias('dxy','LONG',this)">LONG</button>
+        <button class="bias-pill" onclick="setBias('dxy','SHORT',this)">SHORT</button>
+        <button class="bias-pill" onclick="setBias('dxy','NEUTRAL',this)">NEUTRAL</button>
+        <button class="bias-pill" onclick="setBias('dxy','WAIT',this)">WAIT & SEE</button>
+      </div>
+      <span id="dxy_bias_display" style="margin-left:8px"></span>
+    </div>
+  </div>
+
+  <!-- SYMBOLS GRID -->
+  <div class="symbols-grid" id="symbolsGrid"></div>
+
+  <!-- SUMMARY -->
+  <div class="summary-card">
+    <div class="section-tag">WEEKLY SUMMARY</div>
+    <div class="summary-grid" id="summaryGrid"></div>
+    <div style="margin-top:14px">
+      <div class="overview-field">
+        <label style="font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:.08em;display:block;margin-bottom:6px">TRADE PLAN NOTE</label>
+        <textarea class="field-input" id="ov_summary" placeholder="สรุปแผนการเทรด สัปดาห์นี้จะ Focus คู่ไหน Strategy อะไร..." rows="3" oninput="autoSave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================
+// SYMBOLS CONFIG
+// ============================================
+const SYMBOLS = [
+  {id:'xagusd', name:'XAGUSD', tf:'H4 — H1', cls:'sym-xag'},
+  {id:'xauusd', name:'XAUUSD', tf:'H4 — H1', cls:'sym-xau'},
+  {id:'btcusdt', name:'BTCUSDT', tf:'Day — H4', cls:'sym-btc'},
+  {id:'usdjpy', name:'USDJPY', tf:'Day — H4', cls:'sym-jpy'},
+  {id:'eurusd', name:'EURUSD', tf:'Day — H4', cls:'sym-eur'},
+  {id:'gbpusd', name:'GBPUSD', tf:'H4 — H1', cls:'sym-gbp'},
+  {id:'s50', name:'S50', tf:'H1', cls:'sym-s50'},
+  {id:'usoil', name:'USOIL', tf:'H4', cls:'sym-oil'},
+];
+
+const PATTERNS = ['Uptrend','Downtrend','Sideway Up','Sideway Down','Sideway','Breakout','Reversal','Consolidation','Other'];
+const STRATEGIES = ['BUY The Dip','SELL The Rally','Defensive','Conservative','Wait and See','Breakout Play','Reversal Play','Follow Trend'];
+const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
+
+// ============================================
+// STATE
+// ============================================
+let currentWeek = '';
+let allData = {};
+let biasState = {};
+let autoSaveTimer;
+
+// ============================================
+// INIT
+// ============================================
+window.onload = function() {
+  // โหลดข้อมูลจาก localStorage
+  const saved = localStorage.getItem('forex_action_plan');
+  if (saved) {
+    allData = JSON.parse(saved);
+  }
+
+  // หา week ล่าสุด หรือสร้างใหม่
+  const weeks = Object.keys(allData);
+  if (weeks.length === 0) {
+    currentWeek = getThisWeekLabel();
+    allData[currentWeek] = {};
+  } else {
+    currentWeek = weeks[weeks.length - 1];
+  }
+
+  renderWeekPills();
+  renderSymbols();
+  loadWeekData();
+};
+
+// ============================================
+// WEEK MANAGEMENT
+// ============================================
+function getThisWeekLabel() {
+  const now = new Date();
+  const day = now.getDay() || 7;
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - day + 1);
+  const fri = new Date(mon);
+  fri.setDate(mon.getDate() + 4);
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  return `${mon.getDate()}-${fri.getDate()} ${months[fri.getMonth()]} ${fri.getFullYear()}`;
+}
+
+function promptNewWeek() {
+  const label = prompt('ใส่ช่วงสัปดาห์ใหม่ (เช่น 18-22 MAY 2026):', getThisWeekLabel());
+  if (!label || label.trim() === '') return;
+  const wk = label.trim().toUpperCase();
+  if (!allData[wk]) allData[wk] = {};
+  currentWeek = wk;
+  saveData();
+  renderWeekPills();
+  loadWeekData();
+  clearAllFields();
+}
+
+function switchWeek(wk) {
+  saveData();
+  currentWeek = wk;
+  renderWeekPills();
+  clearAllFields();
+  loadWeekData();
+}
+
+function renderWeekPills() {
+  const container = document.getElementById('weekPills');
+  const weeks = Object.keys(allData);
+  container.innerHTML = weeks.map(wk =>
+    `<button class="week-pill ${wk === currentWeek ? 'active' : ''}" onclick="switchWeek('${wk}')">${wk}</button>`
+  ).join('');
+  document.getElementById('currentWeekLabel').textContent = currentWeek || '+ New Week';
+}
+
+// ============================================
+// RENDER SYMBOLS
+// ============================================
+function renderSymbols() {
+  const grid = document.getElementById('symbolsGrid');
+  grid.innerHTML = SYMBOLS.map(sym => `
+    <div class="sym-card ${sym.cls}" id="card_${sym.id}">
+      <div class="sym-header">
+        <span class="sym-name">${sym.name}</span>
+        <span class="sym-tf">${sym.tf}</span>
+      </div>
+      <div class="sym-body">
+        <div class="field-row">
+          <div class="field-group">
+            <label>Pattern</label>
+            <select class="field-sm" id="${sym.id}_pattern" onchange="autoSave();updateSummary()">
+              <option value="">— เลือก —</option>
+              ${PATTERNS.map(p=>`<option value="${p}">${p}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Strategy</label>
+            <select class="field-sm" id="${sym.id}_strategy" onchange="autoSave();updateSummary()">
+              <option value="">— เลือก —</option>
+              ${STRATEGIES.map(s=>`<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label>Bias</label>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px">
+              ${BIASES.map(b=>`<button class="bias-pill" onclick="setBias('${sym.id}','${b}',this)">${b}</button>`).join('')}
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Risk / Note</label>
+            <input class="field-sm" id="${sym.id}_risk" placeholder="False Break, ข่าว..." oninput="autoSave()">
+          </div>
+        </div>
+        <div class="chart-section">
+          <label>Chart URL (TradingView)</label>
+          <div class="chart-url-row">
+            <input class="chart-url-input" id="${sym.id}_chart" placeholder="https://www.tradingview.com/x/..." oninput="autoSave();updateChartPreview('${sym.id}')">
+            <button class="chart-view-btn" onclick="openChart('${sym.id}')">↗ Open</button>
+            <button class="chart-view-btn" onclick="togglePreview('${sym.id}')">👁 Preview</button>
+          </div>
+          <div class="chart-preview" id="${sym.id}_preview">
+            <img id="${sym.id}_previewImg" src="" alt="Chart" onerror="this.parentNode.classList.remove('show')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Analysis / Note</label>
+          <textarea class="note-field" id="${sym.id}_note" placeholder="วิเคราะห์เพิ่มเติม Key Level, Setup ที่รอ..." oninput="autoSave()"></textarea>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================
+// BIAS
+// ============================================
+function setBias(id, bias, btn) {
+  // remove selected from siblings
+  const parent = btn.parentNode;
+  parent.querySelectorAll('.bias-pill').forEach(b => {
+    b.className = 'bias-pill';
+  });
+  btn.className = `bias-pill selected-${bias}`;
+  biasState[id] = bias;
+  autoSave();
+  updateSummary();
+
+  // update DXY display
+  if (id === 'dxy') {
+    const el = document.getElementById('dxy_bias_display');
+    el.innerHTML = `<span class="bias-display bias-${bias}">${bias}</span>`;
+  }
+}
+
+function restoreBias(id, bias) {
+  if (!bias) return;
+  biasState[id] = bias;
+  const container = id === 'dxy'
+    ? document.querySelector('.dxy-bar .bias-pills')
+    : document.querySelector(`#card_${id} .bias-pills, #card_${id} [style*="flex"]`);
+
+  // find all bias pills for this id
+  const allPills = document.querySelectorAll(`[onclick*="setBias('${id}'"]`);
+  allPills.forEach(btn => {
+    const b = btn.getAttribute('onclick').match(/,'(\w+)'/)?.[1];
+    if (b === bias) {
+      btn.className = `bias-pill selected-${bias}`;
+      if (id === 'dxy') {
+        document.getElementById('dxy_bias_display').innerHTML = `<span class="bias-display bias-${bias}">${bias}</span>`;
+      }
+    } else {
+      btn.className = 'bias-pill';
+    }
+  });
+}
+
+// ============================================
+// CHART
+// ============================================
+function openChart(id) {
+  const url = document.getElementById(`${id}_chart`).value.trim();
+  if (url) window.open(url, '_blank');
+}
+
+function togglePreview(id) {
+  const preview = document.getElementById(`${id}_preview`);
+  const img = document.getElementById(`${id}_previewImg`);
+  const url = document.getElementById(`${id}_chart`).value.trim();
+  if (!url) return;
+  if (preview.classList.contains('show')) {
+    preview.classList.remove('show');
+    return;
+  }
+  const imgUrl = url.includes('tradingview.com/x/') ? url.replace(/\/$/, '') + '.png' : url;
+  img.src = imgUrl;
+  preview.classList.add('show');
+}
+
+function updateChartPreview(id) {
+  const preview = document.getElementById(`${id}_preview`);
+  if (preview.classList.contains('show')) {
+    togglePreview(id);
+    togglePreview(id);
+  }
+}
+
+// ============================================
+// LOAD / SAVE
+// ============================================
+function loadWeekData() {
+  const data = allData[currentWeek] || {};
+  biasState = {};
+
+  // overview
+  setVal('ov_week', data.ov_week || '');
+  setVal('ov_risk', data.ov_risk || '');
+  setVal('ov_analysis', data.ov_analysis || '');
+  setVal('ov_summary', data.ov_summary || '');
+
+  // dxy bias
+  if (data.dxy_bias) restoreBias('dxy', data.dxy_bias);
+
+  // symbols
+  SYMBOLS.forEach(sym => {
+    const d = data[sym.id] || {};
+    setVal(`${sym.id}_pattern`, d.pattern || '');
+    setVal(`${sym.id}_strategy`, d.strategy || '');
+    setVal(`${sym.id}_risk`, d.risk || '');
+    setVal(`${sym.id}_chart`, d.chart || '');
+    setVal(`${sym.id}_note`, d.note || '');
+    if (d.bias) restoreBias(sym.id, d.bias);
+
+    // hide preview
+    const preview = document.getElementById(`${sym.id}_preview`);
+    if (preview) preview.classList.remove('show');
+  });
+
+  updateSummary();
+  renderWeekPills();
+}
+
+function clearAllFields() {
+  setVal('ov_week', '');
+  setVal('ov_risk', '');
+  setVal('ov_analysis', '');
+  setVal('ov_summary', '');
+
+  // clear all bias pills
+  document.querySelectorAll('.bias-pill').forEach(b => b.className = 'bias-pill');
+  document.getElementById('dxy_bias_display').innerHTML = '';
+  biasState = {};
+
+  SYMBOLS.forEach(sym => {
+    setVal(`${sym.id}_pattern`, '');
+    setVal(`${sym.id}_strategy`, '');
+    setVal(`${sym.id}_risk`, '');
+    setVal(`${sym.id}_chart`, '');
+    setVal(`${sym.id}_note`, '');
+    const preview = document.getElementById(`${sym.id}_preview`);
+    if (preview) preview.classList.remove('show');
+  });
+  updateSummary();
+}
+
+function collectData() {
+  const data = {
+    ov_week: getVal('ov_week'),
+    ov_risk: getVal('ov_risk'),
+    ov_analysis: getVal('ov_analysis'),
+    ov_summary: getVal('ov_summary'),
+    dxy_bias: biasState['dxy'] || '',
+  };
+  SYMBOLS.forEach(sym => {
+    data[sym.id] = {
+      pattern: getVal(`${sym.id}_pattern`),
+      strategy: getVal(`${sym.id}_strategy`),
+      bias: biasState[sym.id] || '',
+      risk: getVal(`${sym.id}_risk`),
+      chart: getVal(`${sym.id}_chart`),
+      note: getVal(`${sym.id}_note`),
+    };
+  });
+  return data;
+}
+
+function saveData() {
+  allData[currentWeek] = collectData();
+  localStorage.setItem('forex_action_plan', JSON.stringify(allData));
+  showToast('💾 บันทึกแล้ว');
+}
+
+function autoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    allData[currentWeek] = collectData();
+    localStorage.setItem('forex_action_plan', JSON.stringify(allData));
+  }, 800);
+}
+
+// ============================================
+// SUMMARY
+// ============================================
+function updateSummary() {
+  const grid = document.getElementById('summaryGrid');
+  grid.innerHTML = SYMBOLS.map(sym => {
+    const bias = biasState[sym.id] || '—';
+    const pattern = getVal(`${sym.id}_pattern`) || '—';
+    const strategy = getVal(`${sym.id}_strategy`) || '—';
+    const biasCls = bias !== '—' ? `bias-${bias}` : '';
+    return `<div class="summary-item">
+      <span class="summary-sym ${sym.cls.replace('sym-card ','')}" style="font-family:var(--font-display);font-size:15px;letter-spacing:.06em;color:inherit">${sym.name}</span>
+      <span class="summary-bias ${biasCls}" style="font-family:var(--font-mono);font-size:11px;padding:1px 7px;border-radius:3px;width:fit-content">${bias}</span>
+      <span class="summary-strat">${strategy}</span>
+      <span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${pattern}</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================
+// EXPORT
+// ============================================
+function exportData() {
+  const data = collectData();
+  let text = `ACTION PLAN — ${currentWeek}\n`;
+  text += `${'='.repeat(50)}\n\n`;
+  text += `WEEK: ${data.ov_week}\n`;
+  text += `KEY RISK: ${data.ov_risk}\n`;
+  text += `DXY BIAS: ${data.dxy_bias}\n`;
+  text += `ANALYSIS: ${data.ov_analysis}\n\n`;
+  SYMBOLS.forEach(sym => {
+    const d = data[sym.id] || {};
+    text += `${sym.name} (${sym.tf})\n`;
+    text += `  Pattern: ${d.pattern} | Strategy: ${d.strategy} | Bias: ${d.bias}\n`;
+    text += `  Risk: ${d.risk}\n`;
+    text += `  Note: ${d.note}\n\n`;
+  });
+  text += `SUMMARY: ${data.ov_summary}`;
+
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ActionPlan_${currentWeek.replace(/\s/g,'_')}.txt`;
+  a.click();
+  showToast('📋 Export สำเร็จ');
+}
+
+// ============================================
+// HELPERS
+// ============================================
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = val;
+}
+function getVal(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
