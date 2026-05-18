@@ -122,10 +122,10 @@ textarea.field-input{min-height:80px;line-height:1.6}
 .symbols-grid{display:grid;grid-template-columns:1fr;gap:14px}
 
 /* SYMBOL CARD */
-.sym-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,box-shadow .2s,opacity .2s,transform .15s;box-shadow:0 2px 6px rgba(0,0,0,.04);cursor:default}
+.sym-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,box-shadow .2s,opacity .2s,transform .15s;box-shadow:0 2px 6px rgba(0,0,0,.04);cursor:default;user-select:none}
 .sym-card:hover{border-color:var(--border2);box-shadow:0 4px 14px rgba(0,0,0,.08)}
-.sym-card.dragging{opacity:.45;transform:scale(.98);box-shadow:0 8px 24px rgba(0,0,0,.18);cursor:grabbing}
-.sym-card.drag-over{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold);}
+.sym-card.dragging{opacity:.45;transform:scale(.99);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.sym-card.drag-over{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
 .sym-header{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
 .sym-name{font-family:var(--font-display);font-size:22px;letter-spacing:.08em}
 .sym-tf{font-family:var(--font-mono);font-size:10px;color:var(--text3);background:var(--bg2);padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
@@ -199,7 +199,8 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 /* Image Preview */
 .chart-img-wrap{display:none;position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-top:0}
 .chart-img-wrap.show{display:block}
-.chart-img-wrap img{width:100%;display:block;max-height:220px;object-fit:contain;background:#fff}
+.chart-img-wrap img{width:100%;display:block;max-height:420px;object-fit:contain;background:#111;cursor:zoom-in}
+.chart-img-wrap img:hover{opacity:.95}
 .chart-img-actions{display:flex;gap:6px;padding:7px 8px;background:var(--bg3);border-top:1px solid var(--border);align-items:center}
 .chart-img-btn{padding:3px 10px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);font-size:10px;font-family:var(--font-mono);border-radius:5px;cursor:pointer;transition:all .15s}
 .chart-img-btn:hover{color:var(--text);border-color:var(--text3)}
@@ -478,14 +479,15 @@ function getThisWeekLabel() {
 function renderSymbols() {
   const grid = document.getElementById('symbolsGrid');
   grid.innerHTML = SYMBOLS.map(sym => `
-    <div class="sym-card ${sym.cls}" id="card_${sym.id}" draggable="true"
-      ondragstart="onCardDragStart(event,'${sym.id}')"
+    <div class="sym-card ${sym.cls}" id="card_${sym.id}"
       ondragover="onCardDragOver(event,'${sym.id}')"
       ondragleave="onCardDragLeave(event,'${sym.id}')"
       ondrop="onCardDrop(event,'${sym.id}')">
       <div class="sym-header">
         <div style="display:flex;align-items:center;gap:8px">
-          <span class="drag-handle" title="ลากเพื่อเรียงลำดับ">⠿</span>
+          <span class="drag-handle" title="ลากเพื่อเรียงลำดับ"
+            draggable="true"
+            ondragstart="onCardDragStart(event,'${sym.id}')">⠿</span>
           <span class="sym-name">${sym.name}</span>
         </div>
       </div>
@@ -547,7 +549,7 @@ function renderSymbols() {
                 <div class="chart-dropzone-hint">Ctrl+V วาง Chart ได้ทันที</div>
               </div>
               <div class="chart-img-wrap" id="imgwrap_${sym.id}_${d}">
-                <img id="chartimg_${sym.id}_${d}" src="" alt="Chart ${d}">
+                <img id="chartimg_${sym.id}_${d}" src="" alt="Chart ${d}" onclick="openChartFullscreen('${sym.id}','${d}')" title="คลิกดูเต็มจอ">
                 <div class="chart-img-actions">
                   <button class="chart-img-btn" onclick="openChartFullscreen('${sym.id}','${d}')">🔍 เต็มจอ</button>
                   <button class="chart-img-btn danger" onclick="removeChartImage('${sym.id}','${d}')">🗑 ลบ</button>
