@@ -87,42 +87,20 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .overview-field label{font-size:11px;color:var(--text);font-family:var(--font-mono);letter-spacing:.08em;font-weight:700;display:block;margin-bottom:5px}
 
-/* Colored overview field wrappers */
-.ov-box{border-radius:10px;padding:12px 14px;border-left:4px solid transparent}
-.ov-box-week{background:#fffbeb;border-color:#f59e0b;border:1px solid #fde68a;border-left:4px solid #f59e0b}
-.ov-box-week label{color:#92400e}
-.ov-box-week .field-input{background:#fffdf0;border-color:#fde68a;color:#78350f;font-size:14px;font-weight:600}
-.ov-box-week .field-input:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.15)}
-.ov-box-week .field-input::placeholder{color:#d97706}
+/* Colored overview field wrappers - label color only */
+.ov-box{border-radius:10px;padding:0}
+.ov-box-week label{color:#b45309}
+.ov-box-week .field-input{color:var(--text)}
+.ov-box-risk label{color:#be123c}
+.ov-box-risk .field-input{color:var(--text)}
+.ov-box-cal label{color:#047857}
+.ov-box-analysis label{color:#1d4ed8}
+.ov-box-analysis .field-input{color:var(--text)}
 
-.ov-box-risk{background:#fff1f2;border:1px solid #fecdd3;border-left:4px solid #f43f5e}
-.ov-box-risk label{color:#9f1239}
-.ov-box-risk .field-input{background:#fff5f6;border-color:#fecdd3;color:#881337;font-size:13.5px;font-weight:500}
-.ov-box-risk .field-input:focus{border-color:#f43f5e;box-shadow:0 0 0 3px rgba(244,63,94,.15)}
-.ov-box-risk .field-input::placeholder{color:#fb7185}
-
-.ov-box-cal{background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #10b981}
-.ov-box-cal label{color:#065f46}
-
-.ov-box-analysis{background:#eff6ff;border:1px solid #bfdbfe;border-left:4px solid #3b82f6}
-.ov-box-analysis label{color:#1e3a8a}
-.ov-box-analysis .field-input{background:#f5f9ff;border-color:#bfdbfe;color:#1e3a8a}
-.ov-box-analysis .field-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
-
-/* Dark theme overrides for colored ov-boxes */
-[data-theme="dark"] .ov-box-week{background:#1a1200;border-color:#92400e;border-left-color:#f59e0b}
 [data-theme="dark"] .ov-box-week label{color:#fbbf24}
-[data-theme="dark"] .ov-box-week .field-input{background:#120e00;border-color:#78350f;color:#fde68a}
-[data-theme="dark"] .ov-box-week .field-input::placeholder{color:#b45309}
-[data-theme="dark"] .ov-box-risk{background:#1a0007;border-color:#9f1239;border-left-color:#f43f5e}
 [data-theme="dark"] .ov-box-risk label{color:#fb7185}
-[data-theme="dark"] .ov-box-risk .field-input{background:#110005;border-color:#881337;color:#fda4af}
-[data-theme="dark"] .ov-box-risk .field-input::placeholder{color:#be123c}
-[data-theme="dark"] .ov-box-cal{background:#001a0b;border-color:#065f46;border-left-color:#10b981}
 [data-theme="dark"] .ov-box-cal label{color:#34d399}
-[data-theme="dark"] .ov-box-analysis{background:#00091a;border-color:#1e3a8a;border-left-color:#3b82f6}
 [data-theme="dark"] .ov-box-analysis label{color:#60a5fa}
-[data-theme="dark"] .ov-box-analysis .field-input{background:#000d1f;border-color:#1e3a8a;color:#bfdbfe}
 
 .field-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:13px;padding:8px 12px;border-radius:8px;outline:none;transition:border-color .2s;resize:none}
 .field-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,154,0,.12)}
@@ -141,11 +119,13 @@ textarea.field-input{min-height:80px;line-height:1.6}
 .bias-pill:hover:not([class*="selected"]){color:var(--text);border-color:var(--text3)}
 
 /* SYMBOLS GRID */
-.symbols-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px}
+.symbols-grid{display:grid;grid-template-columns:1fr;gap:14px}
 
 /* SYMBOL CARD */
-.sym-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s, box-shadow .2s;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.sym-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,box-shadow .2s,opacity .2s,transform .15s;box-shadow:0 2px 6px rgba(0,0,0,.04);cursor:default}
 .sym-card:hover{border-color:var(--border2);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.sym-card.dragging{opacity:.45;transform:scale(.98);box-shadow:0 8px 24px rgba(0,0,0,.18);cursor:grabbing}
+.sym-card.drag-over{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold);}
 .sym-header{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
 .sym-name{font-family:var(--font-display);font-size:22px;letter-spacing:.08em}
 .sym-tf{font-family:var(--font-mono);font-size:10px;color:var(--text3);background:var(--bg2);padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
@@ -158,7 +138,10 @@ textarea.field-input{min-height:80px;line-height:1.6}
 select.field-sm{cursor:pointer}
 select.field-sm option{background:var(--bg2);color:var(--text)}
 
-/* BIAS DISPLAY */
+/* DRAG HANDLE */
+.drag-handle{cursor:grab;color:var(--text3);font-size:16px;padding:2px 6px;border-radius:4px;line-height:1;user-select:none;transition:color .15s}
+.drag-handle:hover{color:var(--text2)}
+.drag-handle:active{cursor:grabbing}
 .bias-display{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:4px;font-family:var(--font-mono);font-size:11px;font-weight:600}
 .bias-LONG{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
 .bias-SHORT{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
@@ -246,6 +229,20 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 .note-field::placeholder{color:var(--text3);font-size:12px;font-style:italic}
 [data-theme="dark"] .note-field{background:#0a0d14;border-color:#2a3348}
 
+/* DAY TABS */
+.day-tabs{display:flex;gap:3px;margin-bottom:8px}
+.day-tab{padding:3px 9px;border-radius:4px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;transition:all .15s;font-weight:500;position:relative}
+.day-tab:hover:not(.day-active){color:var(--text2);border-color:var(--text3)}
+.day-tab.day-active{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700}
+[data-theme="dark"] .day-tab.day-active{color:#000}
+.day-tab.has-img::after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#10b981}
+.day-content{display:none}
+.day-content.day-visible{display:flex;flex-direction:column;gap:6px}
+.day-note{width:100%;background:var(--bg2);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:12px;padding:7px 10px;border-radius:7px;outline:none;resize:none;min-height:52px;line-height:1.65;transition:border-color .2s}
+.day-note:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,154,0,.1)}
+.day-note::placeholder{color:var(--text3);font-size:11px;font-style:italic}
+[data-theme="dark"] .day-note{background:#0a0d14;border-color:#2a3348}
+
 /* SUMMARY CARD */
 .summary-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-top:20px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
@@ -267,7 +264,6 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 
 @media(max-width:600px){
   .overview-grid,.field-row{grid-template-columns:1fr}
-  .symbols-grid{grid-template-columns:1fr}
   .main{padding:14px}
 }
 </style>
@@ -379,7 +375,7 @@ const SYMBOLS = [
 ];
 
 const PATTERNS = ['Uptrend','Downtrend','Sideway Up','Sideway Down','Sideway','Breakout','Reversal','Consolidation','Other'];
-const STRATEGIES = ['BUY The Dip','SELL The Rally','Defensive','Conservative','Wait and See','Breakout Play','Reversal Play','Follow Trend'];
+const STRATEGIES = ['BUY The Dip','SELL The Rally','Aggressive','Defensive','Conservative','Wait and See','Breakout Play','Reversal Play','Follow Trend'];
 const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
 
 // ============================================
@@ -388,9 +384,9 @@ const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
 let currentWeek = '';
 let allData = {};
 let biasState = {};
-let tfState = {};  // tfState[symId] = 'H4' etc.
+let tfState = {};
+let activeDayState = {}; // activeDayState[symId] = 'MON'|'TUE'|...
 let autoSaveTimer;
-// chartImages[week][symId] = base64 string
 let chartImages = {};
 
 // ============================================
@@ -406,6 +402,18 @@ window.onload = function() {
   // โหลด theme preference
   const savedTheme = localStorage.getItem('forex_theme') || 'light';
   applyTheme(savedTheme);
+
+  // โหลด symbol order
+  const savedOrder = localStorage.getItem('forex_sym_order');
+  if (savedOrder) {
+    try {
+      const order = JSON.parse(savedOrder);
+      SYMBOLS.sort((a, b) => {
+        const ai = order.indexOf(a.id), bi = order.indexOf(b.id);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+    } catch(e) {}
+  }
 
   const weeks = Object.keys(allData);
   if (weeks.length === 0) {
@@ -470,17 +478,19 @@ function getThisWeekLabel() {
 function renderSymbols() {
   const grid = document.getElementById('symbolsGrid');
   grid.innerHTML = SYMBOLS.map(sym => `
-    <div class="sym-card ${sym.cls}" id="card_${sym.id}">
+    <div class="sym-card ${sym.cls}" id="card_${sym.id}" draggable="true"
+      ondragstart="onCardDragStart(event,'${sym.id}')"
+      ondragover="onCardDragOver(event,'${sym.id}')"
+      ondragleave="onCardDragLeave(event,'${sym.id}')"
+      ondrop="onCardDrop(event,'${sym.id}')">
       <div class="sym-header">
-        <span class="sym-name">${sym.name}</span>
-        <div class="tf-selector" id="tfselector_${sym.id}">
-          ${['Week','Day','H4','H1','M30','M15'].map(tf =>
-            `<button class="tf-pill" onclick="setTF('${sym.id}','${tf}',this)">${tf}</button>`
-          ).join('')}
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="drag-handle" title="ลากเพื่อเรียงลำดับ">⠿</span>
+          <span class="sym-name">${sym.name}</span>
         </div>
       </div>
       <div class="sym-body">
-        <div class="field-row">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr 1fr;gap:10px">
           <div class="field-group">
             <label>Pattern</label>
             <select class="field-sm" id="${sym.id}_pattern" onchange="autoSave();updateSummary()">
@@ -495,8 +505,6 @@ function renderSymbols() {
               ${STRATEGIES.map(s=>`<option value="${s}">${s}</option>`).join('')}
             </select>
           </div>
-        </div>
-        <div class="field-row">
           <div class="field-group">
             <label>Bias</label>
             <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px">
@@ -509,30 +517,50 @@ function renderSymbols() {
           </div>
         </div>
 
-        <!-- CHART IMAGE SECTION -->
+        <!-- DAILY CHART + NOTE SECTION -->
         <div class="chart-section" id="chart_section_${sym.id}">
-          <span class="chart-section-label">Chart Screenshot</span>
-
-          <!-- Drop Zone (shown when no image) -->
-          <div class="chart-dropzone" id="dropzone_${sym.id}"
-            ondragover="onDragOver(event,'${sym.id}')"
-            ondragleave="onDragLeave(event,'${sym.id}')"
-            ondrop="onDrop(event,'${sym.id}')">
-            <input type="file" accept="image/*" onchange="onFileSelect(event,'${sym.id}')">
-            <div class="chart-dropzone-icon">🖼</div>
-            <div class="chart-dropzone-text">คลิกเลือกรูป หรือลากมาวาง</div>
-            <div class="chart-dropzone-hint">รองรับ PNG, JPG — หรือ Ctrl+V วางจาก clipboard</div>
-          </div>
-
-          <!-- Image Preview (shown when image exists) -->
-          <div class="chart-img-wrap" id="imgwrap_${sym.id}">
-            <img id="chartimg_${sym.id}" src="" alt="Chart">
-            <div class="chart-img-actions">
-              <button class="chart-img-btn" onclick="openChartFullscreen('${sym.id}')">🔍 ดูเต็มจอ</button>
-              <button class="chart-img-btn danger" onclick="removeChartImage('${sym.id}')">🗑 ลบรูป</button>
-              <span class="chart-paste-hint">Ctrl+V แปะรูปใหม่</span>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span class="chart-section-label" style="margin-bottom:0">Daily Chart</span>
+              <div class="tf-selector" id="tfselector_${sym.id}">
+                ${['Week','Day','H4','H1','M30','M15'].map(tf =>
+                  `<button class="tf-pill" onclick="setTF('${sym.id}','${tf}',this)">${tf}</button>`
+                ).join('')}
+              </div>
+            </div>
+            <div class="day-tabs" id="daytabs_${sym.id}">
+              ${['MON','TUE','WED','THU','FRI'].map((d,i) =>
+                `<button class="day-tab${i===0?' day-active':''}" id="daytab_${sym.id}_${d}" onclick="switchDay('${sym.id}','${d}',this)">${d}</button>`
+              ).join('')}
             </div>
           </div>
+          ${['MON','TUE','WED','THU','FRI'].map((d,i) => `
+          <div class="day-content${i===0?' day-visible':''}" id="daycontent_${sym.id}_${d}" style="display:${i===0?'grid':'none'};grid-template-columns:1.8fr 1fr;gap:10px;align-items:start">
+            <div>
+              <div class="chart-dropzone" id="dropzone_${sym.id}_${d}"
+                ondragover="onDragOver(event,'${sym.id}','${d}')"
+                ondragleave="onDragLeave(event,'${sym.id}','${d}')"
+                ondrop="onDrop(event,'${sym.id}','${d}')">
+                <input type="file" accept="image/*" onchange="onFileSelect(event,'${sym.id}','${d}')">
+                <div class="chart-dropzone-icon">🖼</div>
+                <div class="chart-dropzone-text">คลิกเลือกรูป หรือลากมาวาง</div>
+                <div class="chart-dropzone-hint">Ctrl+V วาง Chart ได้ทันที</div>
+              </div>
+              <div class="chart-img-wrap" id="imgwrap_${sym.id}_${d}">
+                <img id="chartimg_${sym.id}_${d}" src="" alt="Chart ${d}">
+                <div class="chart-img-actions">
+                  <button class="chart-img-btn" onclick="openChartFullscreen('${sym.id}','${d}')">🔍 เต็มจอ</button>
+                  <button class="chart-img-btn danger" onclick="removeChartImage('${sym.id}','${d}')">🗑 ลบ</button>
+                  <span class="chart-paste-hint">Ctrl+V แปะใหม่</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="field-group" style="margin-bottom:0"><label>${d} — Note</label></div>
+              <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="Key level, Setup, สิ่งที่สังเกต..." oninput="autoSave()" style="min-height:160px;flex:1"></textarea>
+            </div>
+          </div>
+          `).join('')}
         </div>
 
         <div class="field-group">
@@ -545,17 +573,94 @@ function renderSymbols() {
 }
 
 // ============================================
+// CARD DRAG & DROP REORDER
+// ============================================
+let dragSrcId = null;
+
+function onCardDragStart(e, symId) {
+  dragSrcId = symId;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => document.getElementById(`card_${symId}`).classList.add('dragging'), 0);
+}
+
+function onCardDragOver(e, symId) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if (symId !== dragSrcId) {
+    document.querySelectorAll('.sym-card').forEach(c => c.classList.remove('drag-over'));
+    document.getElementById(`card_${symId}`).classList.add('drag-over');
+  }
+}
+
+function onCardDragLeave(e, symId) {
+  document.getElementById(`card_${symId}`).classList.remove('drag-over');
+}
+
+function onCardDrop(e, symId) {
+  e.preventDefault();
+  document.querySelectorAll('.sym-card').forEach(c => { c.classList.remove('dragging','drag-over'); });
+  if (!dragSrcId || dragSrcId === symId) { dragSrcId = null; return; }
+
+  const srcIdx = SYMBOLS.findIndex(s => s.id === dragSrcId);
+  const dstIdx = SYMBOLS.findIndex(s => s.id === symId);
+  if (srcIdx === -1 || dstIdx === -1) return;
+
+  // reorder SYMBOLS array
+  const [moved] = SYMBOLS.splice(srcIdx, 1);
+  SYMBOLS.splice(dstIdx, 0, moved);
+
+  // save order
+  localStorage.setItem('forex_sym_order', JSON.stringify(SYMBOLS.map(s => s.id)));
+
+  // re-render and reload
+  renderSymbols();
+  loadWeekData();
+  dragSrcId = null;
+}
+
+document.addEventListener('dragend', () => {
+  document.querySelectorAll('.sym-card').forEach(c => c.classList.remove('dragging','drag-over'));
+});
+
+// ============================================
+// DAY TABS
+// ============================================
+const DAYS = ['MON','TUE','WED','THU','FRI'];
+
+function switchDay(symId, day, btn) {
+  activeDayState[symId] = day;
+  document.querySelectorAll(`#daytabs_${symId} .day-tab`).forEach(b => b.classList.remove('day-active'));
+  btn.classList.add('day-active');
+  DAYS.forEach(d => {
+    const el = document.getElementById(`daycontent_${symId}_${d}`);
+    if (!el) return;
+    el.style.display = (d === day) ? 'grid' : 'none';
+  });
+}
+
+function updateDayTabDots(symId) {
+  const weekImgs = chartImages[currentWeek] || {};
+  DAYS.forEach(d => {
+    const key = `${symId}__${d}`;
+    const tab = document.getElementById(`daytab_${symId}_${d}`);
+    if (tab) tab.classList.toggle('has-img', !!weekImgs[key]);
+  });
+}
+
+// ============================================
 // CHART IMAGE HANDLING
 // ============================================
-
-// Track which card is "focused" for paste
 let focusedSymId = null;
+let focusedDay = 'MON';
 
 document.addEventListener('click', function(e) {
   const card = e.target.closest('.sym-card');
   if (card) {
     const m = card.id.match(/^card_(.+)$/);
-    if (m) focusedSymId = m[1];
+    if (m) {
+      focusedSymId = m[1];
+      focusedDay = activeDayState[m[1]] || 'MON';
+    }
   }
 });
 
@@ -565,88 +670,75 @@ function handleGlobalPaste(e) {
   for (let i = 0; i < items.length; i++) {
     if (items[i].type.indexOf('image') !== -1) {
       const file = items[i].getAsFile();
-      // ถ้า focus อยู่ที่ cal zone → ใส่ calendar
-      if (calFocused) {
-        readCalFile(file);
-        e.preventDefault();
-        return;
-      }
-      const targetId = focusedSymId;
-      if (!targetId) {
-        showToast('⚠️ คลิกที่การ์ดก่อน แล้ว Ctrl+V');
-        return;
-      }
-      readImageFile(file, targetId);
+      if (calFocused) { readCalFile(file); e.preventDefault(); return; }
+      if (!focusedSymId) { showToast('⚠️ คลิกที่การ์ดก่อน แล้ว Ctrl+V'); return; }
+      readImageFile(file, focusedSymId, focusedDay);
       e.preventDefault();
       return;
     }
   }
 }
 
-function onFileSelect(e, symId) {
+function onFileSelect(e, symId, day) {
   const file = e.target.files[0];
-  if (file) readImageFile(file, symId);
+  if (file) readImageFile(file, symId, day);
 }
-
-function onDragOver(e, symId) {
+function onDragOver(e, symId, day) {
   e.preventDefault();
-  document.getElementById(`dropzone_${symId}`).classList.add('dragover');
+  document.getElementById(`dropzone_${symId}_${day}`).classList.add('dragover');
 }
-function onDragLeave(e, symId) {
-  document.getElementById(`dropzone_${symId}`).classList.remove('dragover');
+function onDragLeave(e, symId, day) {
+  document.getElementById(`dropzone_${symId}_${day}`).classList.remove('dragover');
 }
-function onDrop(e, symId) {
+function onDrop(e, symId, day) {
   e.preventDefault();
-  document.getElementById(`dropzone_${symId}`).classList.remove('dragover');
+  document.getElementById(`dropzone_${symId}_${day}`).classList.remove('dragover');
   const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) readImageFile(file, symId);
+  if (file && file.type.startsWith('image/')) readImageFile(file, symId, day);
 }
 
-function readImageFile(file, symId) {
+function readImageFile(file, symId, day) {
   const reader = new FileReader();
   reader.onload = function(ev) {
-    const base64 = ev.target.result;
-    setChartImage(symId, base64);
+    setChartImage(symId, day, ev.target.result);
     autoSave();
     showToast('🖼 บันทึกรูปแล้ว');
   };
   reader.readAsDataURL(file);
 }
 
-function setChartImage(symId, base64) {
+function setChartImage(symId, day, base64) {
   if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
-  chartImages[currentWeek][symId] = base64;
+  const key = `${symId}__${day}`;
+  chartImages[currentWeek][key] = base64;
 
-  const img = document.getElementById(`chartimg_${symId}`);
-  const wrap = document.getElementById(`imgwrap_${symId}`);
-  const dropzone = document.getElementById(`dropzone_${symId}`);
+  document.getElementById(`chartimg_${symId}_${day}`).src = base64;
+  document.getElementById(`imgwrap_${symId}_${day}`).classList.add('show');
+  document.getElementById(`dropzone_${symId}_${day}`).style.display = 'none';
 
-  img.src = base64;
-  wrap.classList.add('show');
-  dropzone.style.display = 'none';
-
+  updateDayTabDots(symId);
   saveImages();
 }
 
-function removeChartImage(symId) {
+function removeChartImage(symId, day) {
   if (!confirm('ลบรูปนี้?')) return;
-  if (chartImages[currentWeek]) delete chartImages[currentWeek][symId];
+  const key = `${symId}__${day}`;
+  if (chartImages[currentWeek]) delete chartImages[currentWeek][key];
 
-  document.getElementById(`chartimg_${symId}`).src = '';
-  document.getElementById(`imgwrap_${symId}`).classList.remove('show');
-  document.getElementById(`dropzone_${symId}`).style.display = '';
+  document.getElementById(`chartimg_${symId}_${day}`).src = '';
+  document.getElementById(`imgwrap_${symId}_${day}`).classList.remove('show');
+  document.getElementById(`dropzone_${symId}_${day}`).style.display = '';
 
+  updateDayTabDots(symId);
   saveImages();
   showToast('🗑 ลบรูปแล้ว');
 }
 
-function openChartFullscreen(symId) {
-  const src = document.getElementById(`chartimg_${symId}`).src;
+function openChartFullscreen(symId, day) {
+  const src = document.getElementById(`chartimg_${symId}_${day}`).src;
   if (!src) return;
   const win = window.open('', '_blank');
-  win.document.write(`<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh">
-    <img src="${src}" style="max-width:100%;max-height:100vh;object-fit:contain">
-  </body></html>`);
+  win.document.write(`<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="${src}" style="max-width:100%;max-height:100vh;object-fit:contain"></body></html>`);
 }
 
 function saveImages() {
@@ -660,19 +752,24 @@ function saveImages() {
 function loadChartImages() {
   const weekImgs = chartImages[currentWeek] || {};
   SYMBOLS.forEach(sym => {
-    const base64 = weekImgs[sym.id];
-    const img = document.getElementById(`chartimg_${sym.id}`);
-    const wrap = document.getElementById(`imgwrap_${sym.id}`);
-    const dropzone = document.getElementById(`dropzone_${sym.id}`);
-    if (base64) {
-      img.src = base64;
-      wrap.classList.add('show');
-      dropzone.style.display = 'none';
-    } else {
-      img.src = '';
-      wrap.classList.remove('show');
-      dropzone.style.display = '';
-    }
+    DAYS.forEach(d => {
+      const key = `${sym.id}__${d}`;
+      const base64 = weekImgs[key];
+      const img = document.getElementById(`chartimg_${sym.id}_${d}`);
+      const wrap = document.getElementById(`imgwrap_${sym.id}_${d}`);
+      const dropzone = document.getElementById(`dropzone_${sym.id}_${d}`);
+      if (!img) return;
+      if (base64) {
+        img.src = base64;
+        wrap.classList.add('show');
+        dropzone.style.display = 'none';
+      } else {
+        img.src = '';
+        wrap.classList.remove('show');
+        dropzone.style.display = '';
+      }
+    });
+    updateDayTabDots(sym.id);
   });
 }
 
@@ -798,6 +895,7 @@ function restoreBias(id, bias) {
 function loadWeekData() {
   const data = allData[currentWeek] || {};
   biasState = {};
+  activeDayState = {};
 
   setVal('ov_week', data.ov_week || '');
   setVal('ov_risk', data.ov_risk || '');
@@ -814,6 +912,18 @@ function loadWeekData() {
     setVal(`${sym.id}_note`, d.note || '');
     if (d.bias) restoreBias(sym.id, d.bias);
     if (d.tf) restoreTF(sym.id, d.tf);
+    // restore day notes
+    DAYS.forEach(day => {
+      setVal(`daynote_${sym.id}_${day}`, (d.dayNotes && d.dayNotes[day]) || '');
+    });
+    // reset to MON tab
+    activeDayState[sym.id] = 'MON';
+    DAYS.forEach((day, i) => {
+      const tab = document.getElementById(`daytab_${sym.id}_${day}`);
+      const content = document.getElementById(`daycontent_${sym.id}_${day}`);
+      if (tab) tab.classList.toggle('day-active', i === 0);
+      if (content) content.style.display = (i === 0) ? 'grid' : 'none';
+    });
   });
 
   loadChartImages();
@@ -832,6 +942,7 @@ function clearAllFields() {
   document.getElementById('dxy_bias_display').innerHTML = '';
   biasState = {};
   tfState = {};
+  activeDayState = {};
 
   document.getElementById('cal_img').src = '';
   document.getElementById('cal_img_wrap').classList.remove('show');
@@ -842,9 +953,19 @@ function clearAllFields() {
     setVal(`${sym.id}_strategy`, '');
     setVal(`${sym.id}_risk`, '');
     setVal(`${sym.id}_note`, '');
-    document.getElementById(`chartimg_${sym.id}`).src = '';
-    document.getElementById(`imgwrap_${sym.id}`).classList.remove('show');
-    document.getElementById(`dropzone_${sym.id}`).style.display = '';
+    DAYS.forEach((day, i) => {
+      setVal(`daynote_${sym.id}_${day}`, '');
+      const img = document.getElementById(`chartimg_${sym.id}_${day}`);
+      const wrap = document.getElementById(`imgwrap_${sym.id}_${day}`);
+      const dropzone = document.getElementById(`dropzone_${sym.id}_${day}`);
+      if (img) img.src = '';
+      if (wrap) wrap.classList.remove('show');
+      if (dropzone) dropzone.style.display = '';
+      const tab = document.getElementById(`daytab_${sym.id}_${day}`);
+      const content = document.getElementById(`daycontent_${sym.id}_${day}`);
+      if (tab) { tab.classList.remove('day-active','has-img'); if(i===0) tab.classList.add('day-active'); }
+      if (content) content.style.display = (i === 0) ? 'grid' : 'none';
+    });
   });
   updateSummary();
 }
@@ -858,6 +979,8 @@ function collectData() {
     dxy_bias: biasState['dxy'] || '',
   };
   SYMBOLS.forEach(sym => {
+    const dayNotes = {};
+    DAYS.forEach(d => { dayNotes[d] = getVal(`daynote_${sym.id}_${d}`); });
     data[sym.id] = {
       pattern: getVal(`${sym.id}_pattern`),
       strategy: getVal(`${sym.id}_strategy`),
@@ -865,6 +988,7 @@ function collectData() {
       tf: tfState[sym.id] || '',
       risk: getVal(`${sym.id}_risk`),
       note: getVal(`${sym.id}_note`),
+      dayNotes,
     };
   });
   return data;
