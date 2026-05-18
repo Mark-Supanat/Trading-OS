@@ -126,7 +126,7 @@ textarea.field-input{min-height:80px;line-height:1.6}
 .sym-card:hover{border-color:var(--border2);box-shadow:0 4px 14px rgba(0,0,0,.08)}
 .sym-card.dragging{opacity:.45;transform:scale(.99);box-shadow:0 8px 24px rgba(0,0,0,.18)}
 .sym-card.drag-over{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
-.sym-header{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
+.sym-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3);gap:10px;flex-wrap:wrap}
 .sym-name{font-family:var(--font-display);font-size:22px;letter-spacing:.08em}
 .sym-tf{font-family:var(--font-mono);font-size:10px;color:var(--text3);background:var(--bg2);padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
 .sym-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
@@ -232,11 +232,13 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 [data-theme="dark"] .note-field{background:#0a0d14;border-color:#2a3348}
 
 /* DAY TABS */
-.day-tabs{display:flex;gap:3px;margin-bottom:8px}
-.day-tab{padding:3px 9px;border-radius:4px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;transition:all .15s;font-weight:500;position:relative}
+.day-tabs{display:flex;gap:3px;flex-wrap:wrap}
+.day-tab{padding:3px 9px;border-radius:4px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;transition:all .15s;font-weight:500;position:relative;white-space:nowrap}
 .day-tab:hover:not(.day-active){color:var(--text2);border-color:var(--text3)}
 .day-tab.day-active{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700}
 [data-theme="dark"] .day-tab.day-active{color:#000}
+.day-tab:first-child{border-color:var(--blue,#2563eb);color:var(--blue,#2563eb)}
+.day-tab:first-child.day-active{background:var(--blue,#2563eb);border-color:var(--blue,#2563eb);color:#fff}
 .day-tab.has-img::after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#10b981}
 .day-content{display:none}
 .day-content.day-visible{display:flex;flex-direction:column;gap:6px}
@@ -491,6 +493,11 @@ function renderSymbols() {
             ondragstart="onCardDragStart(event,'${sym.id}')">⠿</span>
           <span class="sym-name">${sym.name}</span>
         </div>
+        <div class="day-tabs" id="daytabs_${sym.id}" style="margin-bottom:0">
+          ${['PLAN','MON','TUE','WED','THU','FRI'].map((d,i) =>
+            `<button class="day-tab${i===0?' day-active':''}" id="daytab_${sym.id}_${d}" onclick="switchDay('${sym.id}','${d}',this)">${d}</button>`
+          ).join('')}
+        </div>
       </div>
       <div class="sym-body">
         <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr 1fr;gap:10px">
@@ -522,23 +529,16 @@ function renderSymbols() {
 
         <!-- DAILY CHART + NOTE SECTION -->
         <div class="chart-section" id="chart_section_${sym.id}">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span class="chart-section-label" style="margin-bottom:0">Daily Chart</span>
-              <div class="tf-selector" id="tfselector_${sym.id}">
-                ${['Week','Day','H4','H1','M30','M15'].map(tf =>
-                  `<button class="tf-pill" onclick="setTF('${sym.id}','${tf}',this)">${tf}</button>`
-                ).join('')}
-              </div>
-            </div>
-            <div class="day-tabs" id="daytabs_${sym.id}">
-              ${['MON','TUE','WED','THU','FRI'].map((d,i) =>
-                `<button class="day-tab${i===0?' day-active':''}" id="daytab_${sym.id}_${d}" onclick="switchDay('${sym.id}','${d}',this)">${d}</button>`
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+            <span class="chart-section-label" style="margin-bottom:0">Daily Chart</span>
+            <div class="tf-selector" id="tfselector_${sym.id}">
+              ${['Week','Day','H4','H1','M30','M15'].map(tf =>
+                `<button class="tf-pill" onclick="setTF('${sym.id}','${tf}',this)">${tf}</button>`
               ).join('')}
             </div>
           </div>
-          ${['MON','TUE','WED','THU','FRI'].map((d,i) => `
-          <div class="day-content${i===0?' day-visible':''}" id="daycontent_${sym.id}_${d}" style="display:${i===0?'grid':'none'};grid-template-columns:1.8fr 1fr;gap:10px;align-items:start">
+          ${['PLAN','MON','TUE','WED','THU','FRI'].map((d,i) => `
+          <div class="day-content" id="daycontent_${sym.id}_${d}" style="display:${i===0?'grid':'none'};grid-template-columns:1.8fr 1fr;gap:10px;align-items:start">
             <div>
               <div class="chart-dropzone" id="dropzone_${sym.id}_${d}"
                 ondragover="onDragOver(event,'${sym.id}','${d}')"
@@ -560,7 +560,7 @@ function renderSymbols() {
             </div>
             <div style="display:flex;flex-direction:column;gap:6px">
               <div class="field-group" style="margin-bottom:0"><label>${d} — Note</label></div>
-              <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="Key level, Setup, สิ่งที่สังเกต..." oninput="autoSave()" style="min-height:160px;flex:1"></textarea>
+              <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="${d==='PLAN'?'วางแผนประจำสัปดาห์ Key level, Setup ที่รอ...':'Key level, Setup, สิ่งที่สังเกต...'}" oninput="autoSave()" style="min-height:160px;flex:1"></textarea>
             </div>
           </div>
           `).join('')}
@@ -628,7 +628,7 @@ document.addEventListener('dragend', () => {
 // ============================================
 // DAY TABS
 // ============================================
-const DAYS = ['MON','TUE','WED','THU','FRI'];
+const DAYS = ['PLAN','MON','TUE','WED','THU','FRI'];
 
 function switchDay(symId, day, btn) {
   activeDayState[symId] = day;
