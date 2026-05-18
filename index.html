@@ -8,6 +8,31 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
+  --bg:#f0f2f7;
+  --bg2:#ffffff;
+  --bg3:#f5f7fb;
+  --bg4:#eaecf3;
+  --border:#d8dce8;
+  --border2:#b8bfd4;
+  --text:#1a2035;
+  --text2:#4a5578;
+  --text3:#8a95b0;
+  --gold:#c89a00;
+  --gold-bg:#fff8e0;
+  --gold-border:#e8d080;
+  --gold2:#f5c430;
+  --silver:#64748b;
+  --green:#059669;
+  --red:#dc2626;
+  --blue:#2563eb;
+  --purple:#7c3aed;
+  --orange:#ea580c;
+  --header-bg:rgba(255,255,255,.92);
+  --font-display:'Bebas Neue',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --font-body:'DM Sans',sans-serif;
+}
+[data-theme="dark"]{
   --bg:#080a0f;
   --bg2:#0e1117;
   --bg3:#13171f;
@@ -18,40 +43,34 @@
   --text2:#7b88a8;
   --text3:#3d4d6a;
   --gold:#f0b429;
+  --gold-bg:#1a1200;
+  --gold-border:#5a4200;
   --gold2:#ffd166;
-  --silver:#94a3b8;
-  --green:#10b981;
-  --red:#f43f5e;
-  --blue:#3b82f6;
-  --purple:#8b5cf6;
-  --orange:#f97316;
-  --font-display:'Bebas Neue',sans-serif;
-  --font-mono:'DM Mono',monospace;
-  --font-body:'DM Sans',sans-serif;
+  --header-bg:rgba(8,10,15,.92);
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh}
 
 /* BG TEXTURE */
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(59,130,246,.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(139,92,246,.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 10% 10%,rgba(37,99,235,.04) 0%,transparent 55%),radial-gradient(ellipse at 90% 90%,rgba(124,58,237,.04) 0%,transparent 55%);pointer-events:none;z-index:0}
 
 /* HEADER */
-.header{position:sticky;top:0;z-index:100;background:rgba(8,10,15,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.header{position:sticky;top:0;z-index:100;background:var(--header-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 6px rgba(0,0,0,.06)}
 .logo{font-family:var(--font-display);font-size:20px;letter-spacing:.12em;color:var(--text)}
 .logo span{color:var(--gold)}
 .week-badge{font-family:var(--font-mono);font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border2);padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .2s}
 .week-badge:hover{border-color:var(--gold);color:var(--gold)}
 .header-right{display:flex;gap:8px;align-items:center}
-.btn-save{padding:5px 14px;background:var(--gold);color:#000;font-size:11px;font-weight:600;font-family:var(--font-mono);border:none;border-radius:6px;cursor:pointer;letter-spacing:.06em;transition:all .2s}
-.btn-save:hover{background:var(--gold2)}
+.btn-save{padding:5px 14px;background:var(--gold);color:#fff;font-size:11px;font-weight:600;font-family:var(--font-mono);border:none;border-radius:6px;cursor:pointer;letter-spacing:.06em;transition:all .2s}
+.btn-save:hover{background:#b08800}
 .btn-new{padding:5px 14px;background:transparent;color:var(--text2);font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);border-radius:6px;cursor:pointer;transition:all .2s}
 .btn-new:hover{border-color:var(--text2);color:var(--text)}
 
 /* WEEK SELECTOR */
-.week-bar{padding:12px 24px;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;align-items:center}
+.week-bar{padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;align-items:center}
 .week-bar::-webkit-scrollbar{display:none}
 .week-pill{padding:4px 14px;border-radius:20px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .2s}
-.week-pill.active{background:var(--gold);color:#000;border-color:var(--gold);font-weight:600}
+.week-pill.active{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:600}
 .week-pill:hover:not(.active){border-color:var(--text3);color:var(--text2)}
 .week-bar label{font-size:10px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap;margin-right:4px}
 
@@ -59,108 +78,156 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .main{position:relative;z-index:1;padding:20px 24px;max-width:1400px;margin:0 auto}
 
 /* MARKET OVERVIEW CARD */
-.overview-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;position:relative;overflow:hidden}
-.overview-card::before{content:'OVERVIEW';position:absolute;right:20px;top:14px;font-family:var(--font-display);font-size:72px;color:rgba(255,255,255,.025);line-height:1;pointer-events:none}
+.overview-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.overview-card::before{content:'OVERVIEW';position:absolute;right:20px;top:14px;font-family:var(--font-display);font-size:72px;color:rgba(0,0,0,.04);line-height:1;pointer-events:none}
 .section-tag{font-family:var(--font-display);font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:10px}
 .overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.overview-field label{font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:.08em;display:block;margin-bottom:4px}
+.overview-field label{font-size:11px;color:var(--text);font-family:var(--font-mono);letter-spacing:.08em;font-weight:700;display:block;margin-bottom:5px}
 .field-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:13px;padding:8px 12px;border-radius:8px;outline:none;transition:border-color .2s;resize:none}
-.field-input:focus{border-color:var(--gold)}
+.field-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,154,0,.12)}
 .field-input::placeholder{color:var(--text3)}
 textarea.field-input{min-height:80px;line-height:1.6}
 
 /* DXY BIAS BAR */
 .dxy-bar{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 16px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)}
-.dxy-label{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.1em}
+.dxy-label{font-family:var(--font-mono);font-size:12px;color:var(--text);letter-spacing:.08em;font-weight:700}
 .bias-pills{display:flex;gap:6px}
-.bias-pill{padding:3px 12px;border-radius:4px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s}
-.bias-pill.selected-LONG{background:#052e16;color:#4ade80;border-color:#16a34a55}
-.bias-pill.selected-SHORT{background:#450a0a;color:#f87171;border-color:#b91c1c55}
-.bias-pill.selected-NEUTRAL{background:#1e1b4b;color:#818cf8;border-color:#4338ca55}
-.bias-pill.selected-WAIT{background:#1c1917;color:#a8a29e;border-color:#57534e55}
-.bias-pill:hover:not([class*="selected"]){color:var(--text2);border-color:var(--text3)}
+.bias-pill{padding:3px 12px;border-radius:4px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s;font-weight:500}
+.bias-pill.selected-LONG{background:#d1fae5;color:#065f46;border-color:#6ee7b7}
+.bias-pill.selected-SHORT{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+.bias-pill.selected-NEUTRAL{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd}
+.bias-pill.selected-WAIT{background:#f1f5f9;color:#475569;border-color:#94a3b8}
+.bias-pill:hover:not([class*="selected"]){color:var(--text);border-color:var(--text3)}
 
 /* SYMBOLS GRID */
 .symbols-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px}
 
 /* SYMBOL CARD */
-.sym-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s}
-.sym-card:hover{border-color:var(--border2)}
-.sym-header{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sym-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s, box-shadow .2s;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.sym-card:hover{border-color:var(--border2);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.sym-header{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
 .sym-name{font-family:var(--font-display);font-size:22px;letter-spacing:.08em}
-.sym-tf{font-family:var(--font-mono);font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
+.sym-tf{font-family:var(--font-mono);font-size:10px;color:var(--text3);background:var(--bg2);padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
 .sym-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.field-group label{font-size:9px;color:var(--text3);font-family:var(--font-mono);letter-spacing:.1em;display:block;margin-bottom:4px;text-transform:uppercase}
-.field-sm{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:12px;padding:6px 10px;border-radius:7px;outline:none;transition:border-color .2s}
-.field-sm:focus{border-color:var(--gold)}
+.field-group label{font-size:11px;color:var(--text);font-family:var(--font-mono);letter-spacing:.08em;font-weight:700;display:block;margin-bottom:5px;text-transform:uppercase}
+.field-sm{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:13px;padding:7px 10px;border-radius:7px;outline:none;transition:border-color .2s}
+.field-sm:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,154,0,.1)}
 .field-sm::placeholder{color:var(--text3);font-size:11px}
 select.field-sm{cursor:pointer}
-select.field-sm option{background:var(--bg2)}
+select.field-sm option{background:var(--bg2);color:var(--text)}
 
 /* BIAS DISPLAY */
-.bias-display{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:4px;font-family:var(--font-mono);font-size:11px;font-weight:500}
-.bias-LONG{background:#052e1644;color:#4ade80;border:1px solid #16a34a55}
-.bias-SHORT{background:#450a0a44;color:#f87171;border:1px solid #b91c1c55}
-.bias-NEUTRAL{background:#1e1b4b44;color:#818cf8;border:1px solid #4338ca55}
-.bias-WAIT{background:#1c191744;color:#a8a29e;border:1px solid #57534e55}
+.bias-display{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:4px;font-family:var(--font-mono);font-size:11px;font-weight:600}
+.bias-LONG{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+.bias-SHORT{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+.bias-NEUTRAL{background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd}
+.bias-WAIT{background:#f1f5f9;color:#475569;border:1px solid #94a3b8}
 
-/* STRATEGY BADGE */
-.strat-badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:4px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);color:var(--text2);background:var(--bg3)}
-
-/* CHART SECTION */
-.chart-section{background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border)}
-.chart-section label{font-size:9px;color:var(--text3);font-family:var(--font-mono);letter-spacing:.1em;display:block;margin-bottom:6px;text-transform:uppercase}
-.chart-url-row{display:flex;gap:6px;align-items:center}
-.chart-url-input{flex:1;background:transparent;border:none;color:var(--text3);font-size:10px;font-family:var(--font-mono);outline:none}
-.chart-url-input:focus{color:var(--text2)}
-.chart-url-input::placeholder{color:var(--text3)}
-.chart-view-btn{padding:3px 10px;background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:10px;font-family:var(--font-mono);border-radius:5px;cursor:pointer;white-space:nowrap;transition:all .15s}
-.chart-view-btn:hover{color:var(--gold);border-color:var(--gold)}
-.chart-preview{display:none;margin-top:8px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
-.chart-preview img{width:100%;display:block}
-.chart-preview.show{display:block}
-
-/* NOTE AREA */
-.note-field{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:12px;padding:8px 10px;border-radius:7px;outline:none;resize:none;min-height:60px;line-height:1.6;transition:border-color .2s}
-.note-field:focus{border-color:var(--gold)}
-.note-field::placeholder{color:var(--text3);font-size:11px}
+/* TF SELECTOR */
+.tf-selector{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+.tf-pill{padding:2px 8px;border-radius:4px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;transition:all .15s;font-weight:500;white-space:nowrap}
+.tf-pill:hover:not(.tf-active){color:var(--text2);border-color:var(--text3)}
+.tf-pill.tf-active{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700}
+[data-theme="dark"] .tf-pill.tf-active{color:#000}
 
 /* SYMBOL COLORS */
-.sym-xau .sym-name{color:#fbbf24}
-.sym-xag .sym-name{color:#94a3b8}
-.sym-btc .sym-name{color:#f97316}
-.sym-jpy .sym-name{color:#34d399}
-.sym-eur .sym-name{color:#60a5fa}
-.sym-gbp .sym-name{color:#c084fc}
-.sym-s50 .sym-name{color:#f472b6}
-.sym-oil .sym-name{color:#84cc16}
+.sym-xau .sym-name{color:#b45309}
+.sym-xag .sym-name{color:#475569}
+.sym-btc .sym-name{color:#c2410c}
+.sym-jpy .sym-name{color:#047857}
+.sym-eur .sym-name{color:#1d4ed8}
+.sym-gbp .sym-name{color:#6d28d9}
+.sym-s50 .sym-name{color:#be185d}
+.sym-oil .sym-name{color:#3f6212}
 
-.sym-xau{border-left:3px solid #fbbf24}
+.sym-xau{border-left:3px solid #f59e0b}
 .sym-xag{border-left:3px solid #94a3b8}
 .sym-btc{border-left:3px solid #f97316}
-.sym-jpy{border-left:3px solid #34d399}
-.sym-eur{border-left:3px solid #60a5fa}
-.sym-gbp{border-left:3px solid #c084fc}
-.sym-s50{border-left:3px solid #f472b6}
+.sym-jpy{border-left:3px solid #10b981}
+.sym-eur{border-left:3px solid #3b82f6}
+.sym-gbp{border-left:3px solid #8b5cf6}
+.sym-s50{border-left:3px solid #ec4899}
 .sym-oil{border-left:3px solid #84cc16}
 
+/* ============================================
+   CHART IMAGE UPLOAD (NEW)
+   ============================================ */
+.chart-section{background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--border)}
+.chart-section-label{font-size:11px;color:var(--text);font-family:var(--font-mono);letter-spacing:.08em;display:block;margin-bottom:7px;text-transform:uppercase;font-weight:700}
+
+/* ECONOMIC CALENDAR DROP ZONE */
+.cal-dropzone{position:relative;border:2px dashed var(--border2);border-radius:8px;background:var(--bg2);text-align:center;padding:14px 12px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.cal-dropzone:hover,.cal-dropzone.dragover{border-color:var(--gold);background:var(--gold-bg)}
+.cal-dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.cal-img-wrap{display:none;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-top:8px}
+.cal-img-wrap.show{display:block}
+.cal-img-wrap img{width:100%;display:block;object-fit:contain;background:#fff}
+
+/* Drop Zone */
+.chart-dropzone{position:relative;border:2px dashed var(--border2);border-radius:8px;background:var(--bg2);text-align:center;padding:16px 12px;cursor:pointer;transition:all .2s;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.chart-dropzone:hover,.chart-dropzone.dragover{border-color:var(--gold);background:var(--gold-bg)}
+.chart-dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.chart-dropzone-icon{font-size:20px;line-height:1}
+.chart-dropzone-text{font-size:11px;color:var(--text2);font-family:var(--font-mono)}
+.chart-dropzone-hint{font-size:10px;color:var(--text3);font-family:var(--font-mono)}
+
+/* Image Preview */
+.chart-img-wrap{display:none;position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-top:0}
+.chart-img-wrap.show{display:block}
+.chart-img-wrap img{width:100%;display:block;max-height:220px;object-fit:contain;background:#fff}
+.chart-img-actions{display:flex;gap:6px;padding:7px 8px;background:var(--bg3);border-top:1px solid var(--border);align-items:center}
+.chart-img-btn{padding:3px 10px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);font-size:10px;font-family:var(--font-mono);border-radius:5px;cursor:pointer;transition:all .15s}
+.chart-img-btn:hover{color:var(--text);border-color:var(--text3)}
+.chart-img-btn.danger:hover{color:var(--red);border-color:var(--red)}
+.chart-paste-hint{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-left:auto}
+
+/* Dark theme overrides for bias pills */
+[data-theme="dark"] .bias-pill.selected-LONG{background:#052e16;color:#4ade80;border-color:#16a34a55}
+[data-theme="dark"] .bias-pill.selected-SHORT{background:#450a0a;color:#f87171;border-color:#b91c1c55}
+[data-theme="dark"] .bias-pill.selected-NEUTRAL{background:#1e1b4b;color:#818cf8;border-color:#4338ca55}
+[data-theme="dark"] .bias-pill.selected-WAIT{background:#1c1917;color:#a8a29e;border-color:#57534e55}
+[data-theme="dark"] .bias-LONG{background:#052e1644;color:#4ade80;border:1px solid #16a34a55}
+[data-theme="dark"] .bias-SHORT{background:#450a0a44;color:#f87171;border:1px solid #b91c1c55}
+[data-theme="dark"] .bias-NEUTRAL{background:#1e1b4b44;color:#818cf8;border:1px solid #4338ca55}
+[data-theme="dark"] .bias-WAIT{background:#1c191744;color:#a8a29e;border:1px solid #57534e55}
+[data-theme="dark"] .toast{background:#14532d;color:#4ade80;border-color:#16a34a55}
+
+/* NDX SYMBOL COLORS */
+.sym-ndx .sym-name{color:#0e7490}
+.sym-ndx{border-left:3px solid #06b6d4}
+
+/* THEME TOGGLE BUTTON */
+.btn-theme{padding:5px 10px;background:transparent;color:var(--text2);font-size:14px;font-family:var(--font-mono);border:1px solid var(--border2);border-radius:6px;cursor:pointer;transition:all .2s;line-height:1}
+.btn-theme:hover{border-color:var(--gold);color:var(--gold)}
+.note-field{width:100%;background:var(--bg2);border:2px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:13.5px;padding:10px 12px;border-radius:8px;outline:none;resize:vertical;min-height:90px;line-height:1.75;transition:border-color .2s,box-shadow .2s;font-weight:400}
+.note-field:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,154,0,.15);background:var(--bg2)}
+.note-field::placeholder{color:var(--text3);font-size:12px;font-style:italic}
+[data-theme="dark"] .note-field{background:#0a0d14;border-color:#2a3348}
+
 /* SUMMARY CARD */
-.summary-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-top:20px}
+.summary-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-top:20px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
 .summary-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:4px}
 .summary-sym{font-family:var(--font-display);font-size:15px;letter-spacing:.08em}
 .summary-bias{font-family:var(--font-mono);font-size:11px}
-.summary-strat{font-size:10px;color:var(--text3);font-family:var(--font-mono)}
+.summary-strat{font-size:10px;color:var(--text2);font-family:var(--font-mono)}
 
 /* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:8px;font-size:12px;font-family:var(--font-mono);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;background:#14532d;color:#4ade80;border:1px solid #16a34a55}
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:8px;font-size:12px;font-family:var(--font-mono);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .toast.show{opacity:1}
 
 /* PRINT STYLES */
 @media print{
-  .header,.week-bar,.btn-save,.btn-new,.chart-url-row button{display:none!important}
+  .header,.week-bar,.btn-save,.btn-new,.chart-dropzone,.chart-img-actions{display:none!important}
   body{background:#fff;color:#000}
+  .overview-card,.sym-card,.summary-card{box-shadow:none;border:1px solid #ccc}
+}
+
+@media(max-width:600px){
+  .overview-grid,.field-row{grid-template-columns:1fr}
+  .symbols-grid{grid-template-columns:1fr}
+  .main{padding:14px}
 }
 </style>
 </head>
@@ -172,6 +239,7 @@ select.field-sm option{background:var(--bg2)}
 <div class="header">
   <div class="logo">ACTION <span>PLAN</span></div>
   <div class="header-right">
+    <button class="btn-theme" id="themeToggle" onclick="toggleTheme()" title="สลับธีม">🌙</button>
     <div class="week-badge" id="currentWeekLabel" onclick="promptNewWeek()">+ New Week</div>
     <button class="btn-new" onclick="exportData()">📋 Export</button>
     <button class="btn-save" onclick="saveData()">💾 SAVE</button>
@@ -200,6 +268,30 @@ select.field-sm option{background:var(--bg2)}
         <input class="field-input" id="ov_risk" placeholder="e.g. CPI, FED, NFP..." oninput="autoSave()">
       </div>
     </div>
+    <!-- ECONOMIC CALENDAR IMAGE -->
+    <div style="margin-top:12px">
+      <div class="overview-field">
+        <label>ECONOMIC CALENDAR THIS WEEK</label>
+        <div class="cal-dropzone" id="cal_dropzone"
+          ondragover="onCalDragOver(event)"
+          ondragleave="onCalDragLeave(event)"
+          ondrop="onCalDrop(event)">
+          <input type="file" accept="image/*" onchange="onCalFileSelect(event)">
+          <div class="chart-dropzone-icon">📅</div>
+          <div class="chart-dropzone-text">คลิกเลือกรูป Economic Calendar หรือลากมาวาง</div>
+          <div class="chart-dropzone-hint">Ctrl+V วางจาก screenshot ได้ทันที (คลิกที่นี่ก่อน)</div>
+        </div>
+        <div class="cal-img-wrap" id="cal_img_wrap">
+          <img id="cal_img" src="" alt="Economic Calendar">
+          <div class="chart-img-actions">
+            <button class="chart-img-btn" onclick="openCalFullscreen()">🔍 ดูเต็มจอ</button>
+            <button class="chart-img-btn danger" onclick="removeCalImage()">🗑 ลบรูป</button>
+            <span class="chart-paste-hint">Ctrl+V แปะรูปใหม่</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div style="margin-top:12px">
       <div class="overview-field">
         <label>MARKET ANALYSIS (DXY / OVERALL BIAS)</label>
@@ -227,7 +319,7 @@ select.field-sm option{background:var(--bg2)}
     <div class="summary-grid" id="summaryGrid"></div>
     <div style="margin-top:14px">
       <div class="overview-field">
-        <label style="font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:.08em;display:block;margin-bottom:6px">TRADE PLAN NOTE</label>
+        <label style="font-size:11px;color:var(--text);font-family:var(--font-mono);letter-spacing:.08em;font-weight:700;display:block;margin-bottom:6px">TRADE PLAN NOTE</label>
         <textarea class="field-input" id="ov_summary" placeholder="สรุปแผนการเทรด สัปดาห์นี้จะ Focus คู่ไหน Strategy อะไร..." rows="3" oninput="autoSave()"></textarea>
       </div>
     </div>
@@ -248,6 +340,7 @@ const SYMBOLS = [
   {id:'gbpusd', name:'GBPUSD', tf:'H4 — H1', cls:'sym-gbp'},
   {id:'s50', name:'S50', tf:'H1', cls:'sym-s50'},
   {id:'usoil', name:'USOIL', tf:'H4', cls:'sym-oil'},
+  {id:'ndx', name:'NDX', tf:'Day — H4', cls:'sym-ndx'},
 ];
 
 const PATTERNS = ['Uptrend','Downtrend','Sideway Up','Sideway Down','Sideway','Breakout','Reversal','Consolidation','Other'];
@@ -260,19 +353,25 @@ const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
 let currentWeek = '';
 let allData = {};
 let biasState = {};
+let tfState = {};  // tfState[symId] = 'H4' etc.
 let autoSaveTimer;
+// chartImages[week][symId] = base64 string
+let chartImages = {};
 
 // ============================================
 // INIT
 // ============================================
 window.onload = function() {
-  // โหลดข้อมูลจาก localStorage
   const saved = localStorage.getItem('forex_action_plan');
-  if (saved) {
-    allData = JSON.parse(saved);
-  }
+  if (saved) allData = JSON.parse(saved);
 
-  // หา week ล่าสุด หรือสร้างใหม่
+  const savedImgs = localStorage.getItem('forex_action_plan_imgs');
+  if (savedImgs) chartImages = JSON.parse(savedImgs);
+
+  // โหลด theme preference
+  const savedTheme = localStorage.getItem('forex_theme') || 'light';
+  applyTheme(savedTheme);
+
   const weeks = Object.keys(allData);
   if (weeks.length === 0) {
     currentWeek = getThisWeekLabel();
@@ -284,7 +383,26 @@ window.onload = function() {
   renderWeekPills();
   renderSymbols();
   loadWeekData();
+
+  // Global paste listener (Ctrl+V รูป)
+  document.addEventListener('paste', handleGlobalPaste);
 };
+
+// ============================================
+// THEME
+// ============================================
+let currentTheme = 'light';
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+  document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('forex_theme', theme);
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+}
 
 // ============================================
 // WEEK MANAGEMENT
@@ -338,7 +456,11 @@ function renderSymbols() {
     <div class="sym-card ${sym.cls}" id="card_${sym.id}">
       <div class="sym-header">
         <span class="sym-name">${sym.name}</span>
-        <span class="sym-tf">${sym.tf}</span>
+        <div class="tf-selector" id="tfselector_${sym.id}">
+          ${['Week','Day','H4','H1','M30','M15'].map(tf =>
+            `<button class="tf-pill" onclick="setTF('${sym.id}','${tf}',this)">${tf}</button>`
+          ).join('')}
+        </div>
       </div>
       <div class="sym-body">
         <div class="field-row">
@@ -369,17 +491,33 @@ function renderSymbols() {
             <input class="field-sm" id="${sym.id}_risk" placeholder="False Break, ข่าว..." oninput="autoSave()">
           </div>
         </div>
-        <div class="chart-section">
-          <label>Chart URL (TradingView)</label>
-          <div class="chart-url-row">
-            <input class="chart-url-input" id="${sym.id}_chart" placeholder="https://www.tradingview.com/x/..." oninput="autoSave();updateChartPreview('${sym.id}')">
-            <button class="chart-view-btn" onclick="openChart('${sym.id}')">↗ Open</button>
-            <button class="chart-view-btn" onclick="togglePreview('${sym.id}')">👁 Preview</button>
+
+        <!-- CHART IMAGE SECTION -->
+        <div class="chart-section" id="chart_section_${sym.id}">
+          <span class="chart-section-label">Chart Screenshot</span>
+
+          <!-- Drop Zone (shown when no image) -->
+          <div class="chart-dropzone" id="dropzone_${sym.id}"
+            ondragover="onDragOver(event,'${sym.id}')"
+            ondragleave="onDragLeave(event,'${sym.id}')"
+            ondrop="onDrop(event,'${sym.id}')">
+            <input type="file" accept="image/*" onchange="onFileSelect(event,'${sym.id}')">
+            <div class="chart-dropzone-icon">🖼</div>
+            <div class="chart-dropzone-text">คลิกเลือกรูป หรือลากมาวาง</div>
+            <div class="chart-dropzone-hint">รองรับ PNG, JPG — หรือ Ctrl+V วางจาก clipboard</div>
           </div>
-          <div class="chart-preview" id="${sym.id}_preview">
-            <img id="${sym.id}_previewImg" src="" alt="Chart" onerror="this.parentNode.classList.remove('show')">
+
+          <!-- Image Preview (shown when image exists) -->
+          <div class="chart-img-wrap" id="imgwrap_${sym.id}">
+            <img id="chartimg_${sym.id}" src="" alt="Chart">
+            <div class="chart-img-actions">
+              <button class="chart-img-btn" onclick="openChartFullscreen('${sym.id}')">🔍 ดูเต็มจอ</button>
+              <button class="chart-img-btn danger" onclick="removeChartImage('${sym.id}')">🗑 ลบรูป</button>
+              <span class="chart-paste-hint">Ctrl+V แปะรูปใหม่</span>
+            </div>
           </div>
         </div>
+
         <div class="field-group">
           <label>Analysis / Note</label>
           <textarea class="note-field" id="${sym.id}_note" placeholder="วิเคราะห์เพิ่มเติม Key Level, Setup ที่รอ..." oninput="autoSave()"></textarea>
@@ -390,20 +528,230 @@ function renderSymbols() {
 }
 
 // ============================================
+// CHART IMAGE HANDLING
+// ============================================
+
+// Track which card is "focused" for paste
+let focusedSymId = null;
+
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('.sym-card');
+  if (card) {
+    const m = card.id.match(/^card_(.+)$/);
+    if (m) focusedSymId = m[1];
+  }
+});
+
+function handleGlobalPaste(e) {
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      const file = items[i].getAsFile();
+      // ถ้า focus อยู่ที่ cal zone → ใส่ calendar
+      if (calFocused) {
+        readCalFile(file);
+        e.preventDefault();
+        return;
+      }
+      const targetId = focusedSymId;
+      if (!targetId) {
+        showToast('⚠️ คลิกที่การ์ดก่อน แล้ว Ctrl+V');
+        return;
+      }
+      readImageFile(file, targetId);
+      e.preventDefault();
+      return;
+    }
+  }
+}
+
+function onFileSelect(e, symId) {
+  const file = e.target.files[0];
+  if (file) readImageFile(file, symId);
+}
+
+function onDragOver(e, symId) {
+  e.preventDefault();
+  document.getElementById(`dropzone_${symId}`).classList.add('dragover');
+}
+function onDragLeave(e, symId) {
+  document.getElementById(`dropzone_${symId}`).classList.remove('dragover');
+}
+function onDrop(e, symId) {
+  e.preventDefault();
+  document.getElementById(`dropzone_${symId}`).classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) readImageFile(file, symId);
+}
+
+function readImageFile(file, symId) {
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const base64 = ev.target.result;
+    setChartImage(symId, base64);
+    autoSave();
+    showToast('🖼 บันทึกรูปแล้ว');
+  };
+  reader.readAsDataURL(file);
+}
+
+function setChartImage(symId, base64) {
+  if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
+  chartImages[currentWeek][symId] = base64;
+
+  const img = document.getElementById(`chartimg_${symId}`);
+  const wrap = document.getElementById(`imgwrap_${symId}`);
+  const dropzone = document.getElementById(`dropzone_${symId}`);
+
+  img.src = base64;
+  wrap.classList.add('show');
+  dropzone.style.display = 'none';
+
+  saveImages();
+}
+
+function removeChartImage(symId) {
+  if (!confirm('ลบรูปนี้?')) return;
+  if (chartImages[currentWeek]) delete chartImages[currentWeek][symId];
+
+  document.getElementById(`chartimg_${symId}`).src = '';
+  document.getElementById(`imgwrap_${symId}`).classList.remove('show');
+  document.getElementById(`dropzone_${symId}`).style.display = '';
+
+  saveImages();
+  showToast('🗑 ลบรูปแล้ว');
+}
+
+function openChartFullscreen(symId) {
+  const src = document.getElementById(`chartimg_${symId}`).src;
+  if (!src) return;
+  const win = window.open('', '_blank');
+  win.document.write(`<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh">
+    <img src="${src}" style="max-width:100%;max-height:100vh;object-fit:contain">
+  </body></html>`);
+}
+
+function saveImages() {
+  try {
+    localStorage.setItem('forex_action_plan_imgs', JSON.stringify(chartImages));
+  } catch(e) {
+    showToast('⚠️ พื้นที่เก็บข้อมูลเต็ม');
+  }
+}
+
+function loadChartImages() {
+  const weekImgs = chartImages[currentWeek] || {};
+  SYMBOLS.forEach(sym => {
+    const base64 = weekImgs[sym.id];
+    const img = document.getElementById(`chartimg_${sym.id}`);
+    const wrap = document.getElementById(`imgwrap_${sym.id}`);
+    const dropzone = document.getElementById(`dropzone_${sym.id}`);
+    if (base64) {
+      img.src = base64;
+      wrap.classList.add('show');
+      dropzone.style.display = 'none';
+    } else {
+      img.src = '';
+      wrap.classList.remove('show');
+      dropzone.style.display = '';
+    }
+  });
+}
+
+// ============================================
+// ECONOMIC CALENDAR IMAGE
+// ============================================
+let calFocused = false;
+
+document.addEventListener('click', function(e) {
+  calFocused = !!e.target.closest('#cal_dropzone, #cal_img_wrap');
+});
+
+function onCalDragOver(e) { e.preventDefault(); document.getElementById('cal_dropzone').classList.add('dragover'); }
+function onCalDragLeave(e) { document.getElementById('cal_dropzone').classList.remove('dragover'); }
+function onCalDrop(e) {
+  e.preventDefault();
+  document.getElementById('cal_dropzone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) readCalFile(file);
+}
+function onCalFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) readCalFile(file);
+}
+function readCalFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(ev) { setCalImage(ev.target.result); autoSave(); showToast('📅 บันทึก Calendar แล้ว'); };
+  reader.readAsDataURL(file);
+}
+function setCalImage(base64) {
+  if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
+  chartImages[currentWeek]['__cal__'] = base64;
+  document.getElementById('cal_img').src = base64;
+  document.getElementById('cal_img_wrap').classList.add('show');
+  document.getElementById('cal_dropzone').style.display = 'none';
+  saveImages();
+}
+function removeCalImage() {
+  if (!confirm('ลบรูป Calendar?')) return;
+  if (chartImages[currentWeek]) delete chartImages[currentWeek]['__cal__'];
+  document.getElementById('cal_img').src = '';
+  document.getElementById('cal_img_wrap').classList.remove('show');
+  document.getElementById('cal_dropzone').style.display = '';
+  saveImages();
+  showToast('🗑 ลบ Calendar แล้ว');
+}
+function openCalFullscreen() {
+  const src = document.getElementById('cal_img').src;
+  if (!src) return;
+  const win = window.open('', '_blank');
+  win.document.write(`<html><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="${src}" style="max-width:100%;max-height:100vh;object-fit:contain"></body></html>`);
+}
+function loadCalImage() {
+  const base64 = (chartImages[currentWeek] || {})['__cal__'];
+  if (base64) {
+    document.getElementById('cal_img').src = base64;
+    document.getElementById('cal_img_wrap').classList.add('show');
+    document.getElementById('cal_dropzone').style.display = 'none';
+  } else {
+    document.getElementById('cal_img').src = '';
+    document.getElementById('cal_img_wrap').classList.remove('show');
+    document.getElementById('cal_dropzone').style.display = '';
+  }
+}
+
+// ============================================
+// TIMEFRAME
+// ============================================
+function setTF(symId, tf, btn) {
+  const container = document.getElementById(`tfselector_${symId}`);
+  container.querySelectorAll('.tf-pill').forEach(b => b.classList.remove('tf-active'));
+  btn.classList.add('tf-active');
+  tfState[symId] = tf;
+  autoSave();
+}
+
+function restoreTF(symId, tf) {
+  if (!tf) return;
+  tfState[symId] = tf;
+  const container = document.getElementById(`tfselector_${symId}`);
+  if (!container) return;
+  container.querySelectorAll('.tf-pill').forEach(b => {
+    b.classList.toggle('tf-active', b.textContent === tf);
+  });
+}
+
+// ============================================
 // BIAS
 // ============================================
 function setBias(id, bias, btn) {
-  // remove selected from siblings
   const parent = btn.parentNode;
-  parent.querySelectorAll('.bias-pill').forEach(b => {
-    b.className = 'bias-pill';
-  });
+  parent.querySelectorAll('.bias-pill').forEach(b => { b.className = 'bias-pill'; });
   btn.className = `bias-pill selected-${bias}`;
   biasState[id] = bias;
   autoSave();
   updateSummary();
-
-  // update DXY display
   if (id === 'dxy') {
     const el = document.getElementById('dxy_bias_display');
     el.innerHTML = `<span class="bias-display bias-${bias}">${bias}</span>`;
@@ -413,11 +761,6 @@ function setBias(id, bias, btn) {
 function restoreBias(id, bias) {
   if (!bias) return;
   biasState[id] = bias;
-  const container = id === 'dxy'
-    ? document.querySelector('.dxy-bar .bias-pills')
-    : document.querySelector(`#card_${id} .bias-pills, #card_${id} [style*="flex"]`);
-
-  // find all bias pills for this id
   const allPills = document.querySelectorAll(`[onclick*="setBias('${id}'"]`);
   allPills.forEach(btn => {
     const b = btn.getAttribute('onclick').match(/,'(\w+)'/)?.[1];
@@ -433,66 +776,31 @@ function restoreBias(id, bias) {
 }
 
 // ============================================
-// CHART
-// ============================================
-function openChart(id) {
-  const url = document.getElementById(`${id}_chart`).value.trim();
-  if (url) window.open(url, '_blank');
-}
-
-function togglePreview(id) {
-  const preview = document.getElementById(`${id}_preview`);
-  const img = document.getElementById(`${id}_previewImg`);
-  const url = document.getElementById(`${id}_chart`).value.trim();
-  if (!url) return;
-  if (preview.classList.contains('show')) {
-    preview.classList.remove('show');
-    return;
-  }
-  const imgUrl = url.includes('tradingview.com/x/') ? url.replace(/\/$/, '') + '.png' : url;
-  img.src = imgUrl;
-  preview.classList.add('show');
-}
-
-function updateChartPreview(id) {
-  const preview = document.getElementById(`${id}_preview`);
-  if (preview.classList.contains('show')) {
-    togglePreview(id);
-    togglePreview(id);
-  }
-}
-
-// ============================================
 // LOAD / SAVE
 // ============================================
 function loadWeekData() {
   const data = allData[currentWeek] || {};
   biasState = {};
 
-  // overview
   setVal('ov_week', data.ov_week || '');
   setVal('ov_risk', data.ov_risk || '');
   setVal('ov_analysis', data.ov_analysis || '');
   setVal('ov_summary', data.ov_summary || '');
 
-  // dxy bias
   if (data.dxy_bias) restoreBias('dxy', data.dxy_bias);
 
-  // symbols
   SYMBOLS.forEach(sym => {
     const d = data[sym.id] || {};
     setVal(`${sym.id}_pattern`, d.pattern || '');
     setVal(`${sym.id}_strategy`, d.strategy || '');
     setVal(`${sym.id}_risk`, d.risk || '');
-    setVal(`${sym.id}_chart`, d.chart || '');
     setVal(`${sym.id}_note`, d.note || '');
     if (d.bias) restoreBias(sym.id, d.bias);
-
-    // hide preview
-    const preview = document.getElementById(`${sym.id}_preview`);
-    if (preview) preview.classList.remove('show');
+    if (d.tf) restoreTF(sym.id, d.tf);
   });
 
+  loadChartImages();
+  loadCalImage();
   updateSummary();
   renderWeekPills();
 }
@@ -503,19 +811,24 @@ function clearAllFields() {
   setVal('ov_analysis', '');
   setVal('ov_summary', '');
 
-  // clear all bias pills
   document.querySelectorAll('.bias-pill').forEach(b => b.className = 'bias-pill');
+  document.querySelectorAll('.tf-pill').forEach(b => b.classList.remove('tf-active'));
   document.getElementById('dxy_bias_display').innerHTML = '';
   biasState = {};
+  tfState = {};
+
+  document.getElementById('cal_img').src = '';
+  document.getElementById('cal_img_wrap').classList.remove('show');
+  document.getElementById('cal_dropzone').style.display = '';
 
   SYMBOLS.forEach(sym => {
     setVal(`${sym.id}_pattern`, '');
     setVal(`${sym.id}_strategy`, '');
     setVal(`${sym.id}_risk`, '');
-    setVal(`${sym.id}_chart`, '');
     setVal(`${sym.id}_note`, '');
-    const preview = document.getElementById(`${sym.id}_preview`);
-    if (preview) preview.classList.remove('show');
+    document.getElementById(`chartimg_${sym.id}`).src = '';
+    document.getElementById(`imgwrap_${sym.id}`).classList.remove('show');
+    document.getElementById(`dropzone_${sym.id}`).style.display = '';
   });
   updateSummary();
 }
@@ -533,8 +846,8 @@ function collectData() {
       pattern: getVal(`${sym.id}_pattern`),
       strategy: getVal(`${sym.id}_strategy`),
       bias: biasState[sym.id] || '',
+      tf: tfState[sym.id] || '',
       risk: getVal(`${sym.id}_risk`),
-      chart: getVal(`${sym.id}_chart`),
       note: getVal(`${sym.id}_note`),
     };
   });
@@ -566,8 +879,8 @@ function updateSummary() {
     const strategy = getVal(`${sym.id}_strategy`) || '—';
     const biasCls = bias !== '—' ? `bias-${bias}` : '';
     return `<div class="summary-item">
-      <span class="summary-sym ${sym.cls.replace('sym-card ','')}" style="font-family:var(--font-display);font-size:15px;letter-spacing:.06em;color:inherit">${sym.name}</span>
-      <span class="summary-bias ${biasCls}" style="font-family:var(--font-mono);font-size:11px;padding:1px 7px;border-radius:3px;width:fit-content">${bias}</span>
+      <span class="summary-sym ${sym.cls}" style="font-family:var(--font-display);font-size:15px;letter-spacing:.06em">${sym.name}</span>
+      <span class="summary-bias ${biasCls}" style="font-family:var(--font-mono);font-size:11px;padding:1px 7px;border-radius:3px;width:fit-content;font-weight:600">${bias}</span>
       <span class="summary-strat">${strategy}</span>
       <span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${pattern}</span>
     </div>`;
@@ -587,7 +900,8 @@ function exportData() {
   text += `ANALYSIS: ${data.ov_analysis}\n\n`;
   SYMBOLS.forEach(sym => {
     const d = data[sym.id] || {};
-    text += `${sym.name} (${sym.tf})\n`;
+    const hasImg = chartImages[currentWeek] && chartImages[currentWeek][sym.id] ? '[มีรูปกราฟ]' : '';
+    text += `${sym.name} (${sym.tf}) ${hasImg}\n`;
     text += `  Pattern: ${d.pattern} | Strategy: ${d.strategy} | Bias: ${d.bias}\n`;
     text += `  Risk: ${d.risk}\n`;
     text += `  Note: ${d.note}\n\n`;
