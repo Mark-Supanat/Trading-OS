@@ -150,7 +150,7 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 
 /* TF SELECTOR */
 .tf-selector{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}
-.tf-pill{padding:2px 8px;border-radius:4px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;transition:all .15s;font-weight:500;white-space:nowrap}
+.tf-pill{padding:2px 8px;border-radius:4px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s;font-weight:600;white-space:nowrap;letter-spacing:.04em}
 .tf-pill:hover:not(.tf-active){color:var(--text2);border-color:var(--text3)}
 .tf-pill.tf-active{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700}
 [data-theme="dark"] .tf-pill.tf-active{color:#000}
@@ -233,7 +233,7 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 
 /* DAY TABS */
 .day-tabs{display:flex;gap:3px;flex-wrap:wrap}
-.day-tab{padding:3px 9px;border-radius:4px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;transition:all .15s;font-weight:500;position:relative;white-space:nowrap}
+.day-tab{padding:3px 9px;border-radius:4px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s;font-weight:600;position:relative;white-space:nowrap;letter-spacing:.04em}
 .day-tab:hover:not(.day-active){color:var(--text2);border-color:var(--text3)}
 .day-tab.day-active{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700}
 [data-theme="dark"] .day-tab.day-active{color:#000}
@@ -242,9 +242,9 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 .day-tab.has-img::after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#10b981}
 .day-content{display:none}
 .day-content.day-visible{display:flex;flex-direction:column;gap:6px}
-.day-note{width:100%;background:var(--bg2);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:12px;padding:7px 10px;border-radius:7px;outline:none;resize:none;min-height:52px;line-height:1.65;transition:border-color .2s}
+.day-note{width:100%;background:var(--bg2);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:14px;padding:10px 12px;border-radius:7px;outline:none;resize:vertical;min-height:52px;line-height:1.8;transition:border-color .2s;font-weight:400}
 .day-note:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,154,0,.1)}
-.day-note::placeholder{color:var(--text3);font-size:11px;font-style:italic}
+.day-note::placeholder{color:var(--text3);font-size:13px;font-style:italic}
 [data-theme="dark"] .day-note{background:#0a0d14;border-color:#2a3348}
 
 /* SUMMARY CARD */
@@ -378,7 +378,7 @@ const SYMBOLS = [
   {id:'ndx', name:'NDX', tf:'Day — H4', cls:'sym-ndx'},
 ];
 
-const PATTERNS = ['Uptrend','Downtrend','Sideway Up','Sideway Down','Sideway','Breakout','Reversal','Consolidation','Other'];
+const PATTERNS = ['Uptrend','Downtrend','Sideway Up','Sideway Down','Sideway','Breakout','Reversal','Consolidation','Pullback','Throwback','RBS','SBR','Other'];
 const STRATEGIES = ['BUY The Dip','SELL The Rally','Aggressive','Defensive','Conservative','Wait and See','Breakout Play','Reversal Play','Follow Trend'];
 const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
 
@@ -503,14 +503,6 @@ function renderSymbols() {
 
         <!-- DAILY CHART + NOTE SECTION -->
         <div class="chart-section" id="chart_section_${sym.id}">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-            <span class="chart-section-label" style="margin-bottom:0">Daily Chart</span>
-            <div class="tf-selector" id="tfselector_${sym.id}">
-              ${['Week','Day','H4','H1','M30','M15'].map(tf =>
-                `<button class="tf-pill" onclick="setTF('${sym.id}','${tf}',this)">${tf}</button>`
-              ).join('')}
-            </div>
-          </div>
           ${['PLAN','MON','TUE','WED','THU','FRI'].map((d,i) => `
           <div class="day-content" id="daycontent_${sym.id}_${d}" style="display:${i===0?'flex':'none'};flex-direction:column;gap:10px">
             <!-- Per-day fields -->
@@ -540,9 +532,17 @@ function renderSymbols() {
                 <input class="field-sm" id="${sym.id}_${d}_risk" placeholder="False Break, ข่าว..." oninput="autoSave()">
               </div>
             </div>
-            <!-- Chart + Note -->
+            <!-- Chart + TF + Note -->
             <div style="display:grid;grid-template-columns:1.8fr 1fr;gap:10px;align-items:start">
               <div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                  <span class="chart-section-label" style="margin-bottom:0">Chart</span>
+                  <div class="tf-selector" id="tfselector_${sym.id}_${d}">
+                    ${['Week','Day','H4','H1','M30','M15'].map(tf =>
+                      `<button class="tf-pill" onclick="setTFDay('${sym.id}','${d}','${tf}',this)">${tf}</button>`
+                    ).join('')}
+                  </div>
+                </div>
                 <div class="chart-dropzone" id="dropzone_${sym.id}_${d}"
                   ondragover="onDragOver(event,'${sym.id}','${d}')"
                   ondragleave="onDragLeave(event,'${sym.id}','${d}')"
@@ -874,20 +874,20 @@ function loadCalImage() {
 }
 
 // ============================================
-// TIMEFRAME
+// TIMEFRAME (per-day)
 // ============================================
-function setTF(symId, tf, btn) {
-  const container = document.getElementById(`tfselector_${symId}`);
+function setTFDay(symId, day, tf, btn) {
+  const container = document.getElementById(`tfselector_${symId}_${day}`);
   container.querySelectorAll('.tf-pill').forEach(b => b.classList.remove('tf-active'));
   btn.classList.add('tf-active');
-  tfState[symId] = tf;
+  tfState[`${symId}__${day}`] = tf;
   autoSave();
 }
 
-function restoreTF(symId, tf) {
+function restoreTFDay(symId, day, tf) {
   if (!tf) return;
-  tfState[symId] = tf;
-  const container = document.getElementById(`tfselector_${symId}`);
+  tfState[`${symId}__${day}`] = tf;
+  const container = document.getElementById(`tfselector_${symId}_${day}`);
   if (!container) return;
   container.querySelectorAll('.tf-pill').forEach(b => {
     b.classList.toggle('tf-active', b.textContent === tf);
@@ -947,7 +947,6 @@ function loadWeekData() {
 
   SYMBOLS.forEach(sym => {
     const d = data[sym.id] || {};
-    if (d.tf) restoreTF(sym.id, d.tf);
 
     // restore per-day fields
     DAYS.forEach(day => {
@@ -957,6 +956,7 @@ function loadWeekData() {
       setVal(`${sym.id}_${day}_risk`, dd.risk || '');
       setVal(`daynote_${sym.id}_${day}`, dd.note || '');
       if (dd.bias) restoreBiasDay(sym.id, day, dd.bias);
+      if (dd.tf) restoreTFDay(sym.id, day, dd.tf);
     });
 
     // restore active tab (last used, default PLAN)
@@ -1000,6 +1000,8 @@ function clearAllFields() {
       setVal(`daynote_${sym.id}_${day}`, '');
       const bwrap = document.getElementById(`biaswrap_${sym.id}_${day}`);
       if (bwrap) bwrap.querySelectorAll('.bias-pill').forEach(b => b.className = 'bias-pill');
+      const tfselector = document.getElementById(`tfselector_${sym.id}_${day}`);
+      if (tfselector) tfselector.querySelectorAll('.tf-pill').forEach(b => b.classList.remove('tf-active'));
       const img = document.getElementById(`chartimg_${sym.id}_${day}`);
       const wrap = document.getElementById(`imgwrap_${sym.id}_${day}`);
       const dropzone = document.getElementById(`dropzone_${sym.id}_${day}`);
@@ -1033,13 +1035,10 @@ function collectData() {
         bias:     (biasState[sym.id] || {})[d] || '',
         risk:     getVal(`${sym.id}_${d}_risk`),
         note:     getVal(`daynote_${sym.id}_${d}`),
+        tf:       tfState[`${sym.id}__${d}`] || '',
       };
     });
-    data[sym.id] = {
-      tf: tfState[sym.id] || '',
-      note: getVal(`${sym.id}_note`),
-      days,
-    };
+    data[sym.id] = { days };
   });
   return data;
 }
