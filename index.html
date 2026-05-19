@@ -500,32 +500,6 @@ function renderSymbols() {
         </div>
       </div>
       <div class="sym-body">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr 1fr;gap:10px">
-          <div class="field-group">
-            <label>Pattern</label>
-            <select class="field-sm" id="${sym.id}_pattern" onchange="autoSave();updateSummary()">
-              <option value="">— เลือก —</option>
-              ${PATTERNS.map(p=>`<option value="${p}">${p}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field-group">
-            <label>Strategy</label>
-            <select class="field-sm" id="${sym.id}_strategy" onchange="autoSave();updateSummary()">
-              <option value="">— เลือก —</option>
-              ${STRATEGIES.map(s=>`<option value="${s}">${s}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field-group">
-            <label>Bias</label>
-            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px">
-              ${BIASES.map(b=>`<button class="bias-pill" onclick="setBias('${sym.id}','${b}',this)">${b}</button>`).join('')}
-            </div>
-          </div>
-          <div class="field-group">
-            <label>Risk / Note</label>
-            <input class="field-sm" id="${sym.id}_risk" placeholder="False Break, ข่าว..." oninput="autoSave()">
-          </div>
-        </div>
 
         <!-- DAILY CHART + NOTE SECTION -->
         <div class="chart-section" id="chart_section_${sym.id}">
@@ -538,29 +512,59 @@ function renderSymbols() {
             </div>
           </div>
           ${['PLAN','MON','TUE','WED','THU','FRI'].map((d,i) => `
-          <div class="day-content" id="daycontent_${sym.id}_${d}" style="display:${i===0?'grid':'none'};grid-template-columns:1.8fr 1fr;gap:10px;align-items:start">
-            <div>
-              <div class="chart-dropzone" id="dropzone_${sym.id}_${d}"
-                ondragover="onDragOver(event,'${sym.id}','${d}')"
-                ondragleave="onDragLeave(event,'${sym.id}','${d}')"
-                ondrop="onDrop(event,'${sym.id}','${d}')">
-                <input type="file" accept="image/*" onchange="onFileSelect(event,'${sym.id}','${d}')">
-                <div class="chart-dropzone-icon">🖼</div>
-                <div class="chart-dropzone-text">คลิกเลือกรูป หรือลากมาวาง</div>
-                <div class="chart-dropzone-hint">Ctrl+V วาง Chart ได้ทันที</div>
+          <div class="day-content" id="daycontent_${sym.id}_${d}" style="display:${i===0?'flex':'none'};flex-direction:column;gap:10px">
+            <!-- Per-day fields -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr 1fr;gap:10px">
+              <div class="field-group">
+                <label>Pattern</label>
+                <select class="field-sm" id="${sym.id}_${d}_pattern" onchange="autoSave();updateSummary()">
+                  <option value="">— เลือก —</option>
+                  ${PATTERNS.map(p=>`<option value="${p}">${p}</option>`).join('')}
+                </select>
               </div>
-              <div class="chart-img-wrap" id="imgwrap_${sym.id}_${d}">
-                <img id="chartimg_${sym.id}_${d}" src="" alt="Chart ${d}" onclick="openChartFullscreen('${sym.id}','${d}')" title="คลิกดูเต็มจอ">
-                <div class="chart-img-actions">
-                  <button class="chart-img-btn" onclick="openChartFullscreen('${sym.id}','${d}')">🔍 เต็มจอ</button>
-                  <button class="chart-img-btn danger" onclick="removeChartImage('${sym.id}','${d}')">🗑 ลบ</button>
-                  <span class="chart-paste-hint">Ctrl+V แปะใหม่</span>
+              <div class="field-group">
+                <label>Strategy</label>
+                <select class="field-sm" id="${sym.id}_${d}_strategy" onchange="autoSave();updateSummary()">
+                  <option value="">— เลือก —</option>
+                  ${STRATEGIES.map(s=>`<option value="${s}">${s}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Bias</label>
+                <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px" id="biaswrap_${sym.id}_${d}">
+                  ${BIASES.map(b=>`<button class="bias-pill" onclick="setBiasDay('${sym.id}','${d}','${b}',this)">${b}</button>`).join('')}
                 </div>
               </div>
+              <div class="field-group">
+                <label>Risk / Note</label>
+                <input class="field-sm" id="${sym.id}_${d}_risk" placeholder="False Break, ข่าว..." oninput="autoSave()">
+              </div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:6px">
-              <div class="field-group" style="margin-bottom:0"><label>${d} — Note</label></div>
-              <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="${d==='PLAN'?'วางแผนประจำสัปดาห์ Key level, Setup ที่รอ...':'Key level, Setup, สิ่งที่สังเกต...'}" oninput="autoSave()" style="min-height:160px;flex:1"></textarea>
+            <!-- Chart + Note -->
+            <div style="display:grid;grid-template-columns:1.8fr 1fr;gap:10px;align-items:start">
+              <div>
+                <div class="chart-dropzone" id="dropzone_${sym.id}_${d}"
+                  ondragover="onDragOver(event,'${sym.id}','${d}')"
+                  ondragleave="onDragLeave(event,'${sym.id}','${d}')"
+                  ondrop="onDrop(event,'${sym.id}','${d}')">
+                  <input type="file" accept="image/*" onchange="onFileSelect(event,'${sym.id}','${d}')">
+                  <div class="chart-dropzone-icon">🖼</div>
+                  <div class="chart-dropzone-text">คลิกเลือกรูป หรือลากมาวาง</div>
+                  <div class="chart-dropzone-hint">Ctrl+V วาง Chart ได้ทันที</div>
+                </div>
+                <div class="chart-img-wrap" id="imgwrap_${sym.id}_${d}">
+                  <img id="chartimg_${sym.id}_${d}" src="" alt="Chart ${d}" onclick="openChartFullscreen('${sym.id}','${d}')" title="คลิกดูเต็มจอ">
+                  <div class="chart-img-actions">
+                    <button class="chart-img-btn" onclick="openChartFullscreen('${sym.id}','${d}')">🔍 เต็มจอ</button>
+                    <button class="chart-img-btn danger" onclick="removeChartImage('${sym.id}','${d}')">🗑 ลบ</button>
+                    <span class="chart-paste-hint">Ctrl+V แปะใหม่</span>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div class="field-group" style="margin-bottom:0"><label>${d} — Note</label></div>
+                <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="${d==='PLAN'?'วางแผนประจำสัปดาห์ Key level, Setup ที่รอ...':'Key level, Setup, สิ่งที่สังเกต...'}" oninput="autoSave()" style="min-height:160px;flex:1"></textarea>
+              </div>
             </div>
           </div>
           `).join('')}
@@ -632,12 +636,43 @@ const DAYS = ['PLAN','MON','TUE','WED','THU','FRI'];
 
 function switchDay(symId, day, btn) {
   activeDayState[symId] = day;
+  // save to localStorage
+  const tabState = JSON.parse(localStorage.getItem('forex_active_tabs') || '{}');
+  tabState[symId] = day;
+  localStorage.setItem('forex_active_tabs', JSON.stringify(tabState));
+
   document.querySelectorAll(`#daytabs_${symId} .day-tab`).forEach(b => b.classList.remove('day-active'));
   btn.classList.add('day-active');
   DAYS.forEach(d => {
     const el = document.getElementById(`daycontent_${symId}_${d}`);
     if (!el) return;
-    el.style.display = (d === day) ? 'grid' : 'none';
+    el.style.display = (d === day) ? 'flex' : 'none';
+  });
+}
+
+// ============================================
+// PER-DAY BIAS
+// ============================================
+// biasState now: biasState[symId][day] = 'LONG'|...
+function setBiasDay(symId, day, bias, btn) {
+  if (!biasState[symId]) biasState[symId] = {};
+  biasState[symId][day] = bias;
+  const wrap = document.getElementById(`biaswrap_${symId}_${day}`);
+  wrap.querySelectorAll('.bias-pill').forEach(b => b.className = 'bias-pill');
+  btn.className = `bias-pill selected-${bias}`;
+  autoSave();
+  updateSummary();
+}
+
+function restoreBiasDay(symId, day, bias) {
+  if (!bias) return;
+  if (!biasState[symId]) biasState[symId] = {};
+  biasState[symId][day] = bias;
+  const wrap = document.getElementById(`biaswrap_${symId}_${day}`);
+  if (!wrap) return;
+  wrap.querySelectorAll('.bias-pill').forEach(btn => {
+    const b = btn.getAttribute('onclick').match(/'([^']+)',this\)/)?.[1];
+    btn.className = b === bias ? `bias-pill selected-${bias}` : 'bias-pill';
   });
 }
 
@@ -907,25 +942,31 @@ function loadWeekData() {
 
   if (data.dxy_bias) restoreBias('dxy', data.dxy_bias);
 
+  // restore saved active tabs
+  const savedTabs = JSON.parse(localStorage.getItem('forex_active_tabs') || '{}');
+
   SYMBOLS.forEach(sym => {
     const d = data[sym.id] || {};
-    setVal(`${sym.id}_pattern`, d.pattern || '');
-    setVal(`${sym.id}_strategy`, d.strategy || '');
-    setVal(`${sym.id}_risk`, d.risk || '');
-    setVal(`${sym.id}_note`, d.note || '');
-    if (d.bias) restoreBias(sym.id, d.bias);
     if (d.tf) restoreTF(sym.id, d.tf);
-    // restore day notes
+
+    // restore per-day fields
     DAYS.forEach(day => {
-      setVal(`daynote_${sym.id}_${day}`, (d.dayNotes && d.dayNotes[day]) || '');
+      const dd = (d.days || {})[day] || {};
+      setVal(`${sym.id}_${day}_pattern`, dd.pattern || '');
+      setVal(`${sym.id}_${day}_strategy`, dd.strategy || '');
+      setVal(`${sym.id}_${day}_risk`, dd.risk || '');
+      setVal(`daynote_${sym.id}_${day}`, dd.note || '');
+      if (dd.bias) restoreBiasDay(sym.id, day, dd.bias);
     });
-    // reset to MON tab
-    activeDayState[sym.id] = 'MON';
-    DAYS.forEach((day, i) => {
+
+    // restore active tab (last used, default PLAN)
+    const activeDay = savedTabs[sym.id] || 'PLAN';
+    activeDayState[sym.id] = activeDay;
+    DAYS.forEach(day => {
       const tab = document.getElementById(`daytab_${sym.id}_${day}`);
       const content = document.getElementById(`daycontent_${sym.id}_${day}`);
-      if (tab) tab.classList.toggle('day-active', i === 0);
-      if (content) content.style.display = (i === 0) ? 'grid' : 'none';
+      if (tab) tab.classList.toggle('day-active', day === activeDay);
+      if (content) content.style.display = (day === activeDay) ? 'flex' : 'none';
     });
   });
 
@@ -952,12 +993,13 @@ function clearAllFields() {
   document.getElementById('cal_dropzone').style.display = '';
 
   SYMBOLS.forEach(sym => {
-    setVal(`${sym.id}_pattern`, '');
-    setVal(`${sym.id}_strategy`, '');
-    setVal(`${sym.id}_risk`, '');
-    setVal(`${sym.id}_note`, '');
     DAYS.forEach((day, i) => {
+      setVal(`${sym.id}_${day}_pattern`, '');
+      setVal(`${sym.id}_${day}_strategy`, '');
+      setVal(`${sym.id}_${day}_risk`, '');
       setVal(`daynote_${sym.id}_${day}`, '');
+      const bwrap = document.getElementById(`biaswrap_${sym.id}_${day}`);
+      if (bwrap) bwrap.querySelectorAll('.bias-pill').forEach(b => b.className = 'bias-pill');
       const img = document.getElementById(`chartimg_${sym.id}_${day}`);
       const wrap = document.getElementById(`imgwrap_${sym.id}_${day}`);
       const dropzone = document.getElementById(`dropzone_${sym.id}_${day}`);
@@ -967,9 +1009,10 @@ function clearAllFields() {
       const tab = document.getElementById(`daytab_${sym.id}_${day}`);
       const content = document.getElementById(`daycontent_${sym.id}_${day}`);
       if (tab) { tab.classList.remove('day-active','has-img'); if(i===0) tab.classList.add('day-active'); }
-      if (content) content.style.display = (i === 0) ? 'grid' : 'none';
+      if (content) content.style.display = (i === 0) ? 'flex' : 'none';
     });
   });
+  localStorage.removeItem('forex_active_tabs');
   updateSummary();
 }
 
@@ -982,16 +1025,20 @@ function collectData() {
     dxy_bias: biasState['dxy'] || '',
   };
   SYMBOLS.forEach(sym => {
-    const dayNotes = {};
-    DAYS.forEach(d => { dayNotes[d] = getVal(`daynote_${sym.id}_${d}`); });
+    const days = {};
+    DAYS.forEach(d => {
+      days[d] = {
+        pattern:  getVal(`${sym.id}_${d}_pattern`),
+        strategy: getVal(`${sym.id}_${d}_strategy`),
+        bias:     (biasState[sym.id] || {})[d] || '',
+        risk:     getVal(`${sym.id}_${d}_risk`),
+        note:     getVal(`daynote_${sym.id}_${d}`),
+      };
+    });
     data[sym.id] = {
-      pattern: getVal(`${sym.id}_pattern`),
-      strategy: getVal(`${sym.id}_strategy`),
-      bias: biasState[sym.id] || '',
       tf: tfState[sym.id] || '',
-      risk: getVal(`${sym.id}_risk`),
       note: getVal(`${sym.id}_note`),
-      dayNotes,
+      days,
     };
   });
   return data;
@@ -1017,9 +1064,10 @@ function autoSave() {
 function updateSummary() {
   const grid = document.getElementById('summaryGrid');
   grid.innerHTML = SYMBOLS.map(sym => {
-    const bias = biasState[sym.id] || '—';
-    const pattern = getVal(`${sym.id}_pattern`) || '—';
-    const strategy = getVal(`${sym.id}_strategy`) || '—';
+    const activeDay = activeDayState[sym.id] || 'PLAN';
+    const bias = ((biasState[sym.id] || {})[activeDay]) || '—';
+    const pattern = getVal(`${sym.id}_${activeDay}_pattern`) || '—';
+    const strategy = getVal(`${sym.id}_${activeDay}_strategy`) || '—';
     const biasCls = bias !== '—' ? `bias-${bias}` : '';
     return `<div class="summary-item">
       <span class="summary-sym ${sym.cls}" style="font-family:var(--font-display);font-size:15px;letter-spacing:.06em">${sym.name}</span>
@@ -1042,15 +1090,19 @@ function exportData() {
   text += `DXY BIAS: ${data.dxy_bias}\n`;
   text += `ANALYSIS: ${data.ov_analysis}\n\n`;
   SYMBOLS.forEach(sym => {
-    const d = data[sym.id] || {};
-    const hasImg = chartImages[currentWeek] && chartImages[currentWeek][sym.id] ? '[มีรูปกราฟ]' : '';
-    text += `${sym.name} (${sym.tf}) ${hasImg}\n`;
-    text += `  Pattern: ${d.pattern} | Strategy: ${d.strategy} | Bias: ${d.bias}\n`;
-    text += `  Risk: ${d.risk}\n`;
-    text += `  Note: ${d.note}\n\n`;
+    text += `${sym.name}\n`;
+    DAYS.forEach(day => {
+      const d = (data[sym.id]?.days || {})[day] || {};
+      const hasImg = (chartImages[currentWeek] || {})[`${sym.id}__${day}`] ? '[📷]' : '';
+      if (d.pattern || d.strategy || d.bias || d.risk || d.note) {
+        text += `  [${day}] ${hasImg} Pattern: ${d.pattern||'—'} | Strategy: ${d.strategy||'—'} | Bias: ${d.bias||'—'}\n`;
+        if (d.risk) text += `         Risk: ${d.risk}\n`;
+        if (d.note) text += `         Note: ${d.note}\n`;
+      }
+    });
+    text += '\n';
   });
   text += `SUMMARY: ${data.ov_summary}`;
-
   const blob = new Blob([text], {type:'text/plain'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
