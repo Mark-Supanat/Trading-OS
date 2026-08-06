@@ -292,6 +292,39 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
   .overview-card,.sym-card,.summary-card{box-shadow:none;border:1px solid #ccc}
 }
 
+/* LAYOUT WITH SIDEBAR */
+.page-layout{display:grid;grid-template-columns:1fr 200px;gap:16px;align-items:start;position:relative}
+.main-content{min-width:0}
+.summary-sidebar{position:sticky;top:60px;height:fit-content}
+
+/* STICKY SUMMARY PANEL */
+.summary-panel{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.summary-panel-title{font-family:var(--font-display);font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:12px}
+.summary-sym-row{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;cursor:pointer;transition:all .15s}
+.summary-sym-row:hover{border-color:var(--border2);background:var(--bg3)}
+.summary-sym-row-name{font-family:var(--font-display);font-size:16px;letter-spacing:.06em}
+.summary-bias-tag{display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:800;padding:3px 10px;border-radius:5px;letter-spacing:.06em;width:fit-content}
+/* LONG */
+.bias-tag-LONG{background:#059669;color:#fff;box-shadow:0 2px 6px rgba(5,150,105,.4)}
+/* SHORT */
+.bias-tag-SHORT{background:#dc2626;color:#fff;box-shadow:0 2px 6px rgba(220,38,38,.4)}
+/* NEUTRAL */
+.bias-tag-NEUTRAL{background:#7c3aed;color:#fff;box-shadow:0 2px 6px rgba(124,58,237,.35)}
+/* WAIT */
+.bias-tag-WAIT{background:#ea580c;color:#fff;box-shadow:0 2px 6px rgba(234,88,12,.5);animation:pulse-wait 2s infinite}
+@keyframes pulse-wait{0%,100%{box-shadow:0 2px 6px rgba(234,88,12,.5)}50%{box-shadow:0 2px 12px rgba(234,88,12,.8)}}
+.bias-tag-none{background:var(--bg4);color:var(--text3);border:1px solid var(--border)}
+
+/* hide old summary card */
+.summary-card{display:none}
+
+/* MOBILE — hide sidebar, show old summary */
+@media(max-width:900px){
+  .page-layout{grid-template-columns:1fr}
+  .summary-sidebar{display:none}
+  .summary-card{display:block}
+}
+
 @media(max-width:600px){
   .overview-grid,.field-row{grid-template-columns:1fr}
   .main{padding:14px}
@@ -325,8 +358,8 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
   </div>
 </div>
 <div class="main">
-
-  <!-- MARKET OVERVIEW -->
+<div class="page-layout">
+<div class="main-content">
   <div class="overview-card">
     <div class="section-tag">MARKET OVERVIEW</div>
     <div class="overview-grid">
@@ -384,19 +417,34 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
   <!-- SYMBOLS GRID -->
   <div class="symbols-grid" id="symbolsGrid"></div>
 
-  <!-- SUMMARY -->
+  <!-- SUMMARY CARD (mobile fallback) -->
   <div class="summary-card">
     <div class="section-tag">WEEKLY SUMMARY</div>
-    <div class="summary-grid" id="summaryGrid"></div>
+    <div class="summary-grid" id="summaryGridMobile"></div>
     <div style="margin-top:14px">
       <div class="overview-field">
         <label style="font-size:11px;color:var(--text);font-family:var(--font-mono);letter-spacing:.08em;font-weight:700;display:block;margin-bottom:6px">TRADE PLAN NOTE</label>
-        <textarea class="field-input" id="ov_summary" placeholder="สรุปแผนการเทรด สัปดาห์นี้จะ Focus คู่ไหน Strategy อะไร..." rows="3" oninput="autoSave()"></textarea>
+        <textarea class="field-input" id="ov_summary_mobile" placeholder="สรุปแผนการเทรด..." rows="3" oninput="syncSummaryNote(this)"></textarea>
       </div>
     </div>
   </div>
 
+</div><!-- end main-content -->
+
+<!-- STICKY SIDEBAR -->
+<div class="summary-sidebar">
+  <div class="summary-panel">
+    <div class="summary-panel-title">BIAS SUMMARY</div>
+    <div id="summaryGrid"></div>
+    <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+      <label style="font-size:9px;color:var(--text2);font-family:var(--font-mono);font-weight:700;letter-spacing:.08em;display:block;margin-bottom:5px">TRADE PLAN NOTE</label>
+      <textarea class="field-input" id="ov_summary" placeholder="Focus คู่ไหน..." rows="4" oninput="autoSave()" style="font-size:11px;min-height:70px;resize:none"></textarea>
+    </div>
+  </div>
 </div>
+
+</div><!-- end page-layout -->
+</div><!-- end main -->
 
 <script>
 // ============================================
@@ -1473,19 +1521,35 @@ function autoSave() {
 // ============================================
 function updateSummary() {
   const grid = document.getElementById('summaryGrid');
+  if (!grid) return;
+
   grid.innerHTML = SYMBOLS.map(sym => {
     const activeDay = activeDayState[sym.id] || 'PLAN';
-    const bias = ((biasState[sym.id] || {})[activeDay]) || '—';
-    const pattern = getVal(`${sym.id}_${activeDay}_pattern`) || '—';
-    const strategy = getVal(`${sym.id}_${activeDay}_strategy`) || '—';
-    const biasCls = bias !== '—' ? `bias-${bias}` : '';
-    return `<div class="summary-item">
-      <span class="summary-sym ${sym.cls}" style="font-family:var(--font-display);font-size:15px;letter-spacing:.06em">${sym.name}</span>
-      <span class="summary-bias ${biasCls}" style="font-family:var(--font-mono);font-size:11px;padding:1px 7px;border-radius:3px;width:fit-content;font-weight:600">${bias}</span>
-      <span class="summary-strat">${strategy}</span>
-      <span style="font-size:10px;color:var(--text3);font-family:var(--font-mono)">${pattern}</span>
+    const bias = ((biasState[sym.id] || {})[activeDay]) || '';
+    const strategy = getVal(`${sym.id}_${activeDay}_strategy`) || '';
+    const biasTagClass = bias ? `bias-tag-${bias}` : 'bias-tag-none';
+    const biasLabel = bias || '—';
+    return `<div class="summary-sym-row ${sym.cls.replace('sym-','').split(' ').map(c=>'').join('')}" onclick="scrollToCard('${sym.id}')" title="ไปที่ ${sym.name}">
+      <span class="summary-sym-row-name ${sym.cls}" style="color:inherit">${sym.name}</span>
+      <span class="summary-bias-tag ${biasTagClass}">${biasLabel}</span>
+      ${strategy ? `<span style="font-size:9px;color:var(--text3);font-family:var(--font-mono)">${strategy}</span>` : ''}
     </div>`;
   }).join('');
+
+  // mobile grid sync
+  const mobileGrid = document.getElementById('summaryGridMobile');
+  if (mobileGrid) mobileGrid.innerHTML = grid.innerHTML;
+}
+
+function scrollToCard(symId) {
+  const card = document.getElementById(`card_${symId}`);
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function syncSummaryNote(el) {
+  const main = document.getElementById('ov_summary');
+  if (main) main.value = el.value;
+  autoSave();
 }
 
 // ============================================
