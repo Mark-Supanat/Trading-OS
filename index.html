@@ -63,6 +63,32 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .header-right{display:flex;gap:8px;align-items:center}
 .btn-save{padding:5px 14px;background:var(--gold);color:#fff;font-size:11px;font-weight:600;font-family:var(--font-mono);border:none;border-radius:6px;cursor:pointer;letter-spacing:.06em;transition:all .2s}
 .btn-save:hover{background:#b08800}
+.btn-archive{padding:5px 14px;background:transparent;color:#7c3aed;font-size:11px;font-family:var(--font-mono);border:1px solid #7c3aed40;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:600}
+.btn-archive:hover{background:#ede9fe;border-color:#7c3aed;color:#5b21b6}
+[data-theme="dark"] .btn-archive:hover{background:#1e1b4b;border-color:#818cf8;color:#818cf8}
+
+/* HISTORY PANEL */
+.history-week-item{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.history-week-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);cursor:pointer;transition:background .15s}
+.history-week-header:hover{background:var(--bg4)}
+.history-week-label{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--text)}
+.history-week-meta{font-family:var(--font-mono);font-size:10px;color:var(--text3)}
+.history-week-body{display:none;padding:14px;background:var(--bg2)}
+.history-week-body.open{display:block}
+.readonly-badge{display:inline-block;background:#fef3c7;color:#92400e;font-size:10px;font-family:var(--font-mono);padding:1px 8px;border-radius:10px;border:1px solid #fde68a;font-weight:600}
+[data-theme="dark"] .readonly-badge{background:#1a1200;color:#fbbf24;border-color:#92400e}
+.history-sym-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.history-sym-name{font-family:var(--font-display);font-size:20px;letter-spacing:.08em;margin-bottom:8px}
+.history-day-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.history-day-tab{padding:3px 10px;border-radius:4px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-weight:600;letter-spacing:.04em}
+.history-day-tab.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+[data-theme="dark"] .history-day-tab.active{color:#000}
+.history-field-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.history-field-label{font-size:9px;color:var(--text2);font-family:var(--font-mono);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.history-field-value{font-size:12px;color:var(--text);font-family:var(--font-body);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:5px 8px}
+.history-chart-img{width:100%;max-height:300px;object-fit:contain;border-radius:8px;border:1px solid var(--border);background:#111;cursor:zoom-in;display:block}
+.history-note-text{font-size:13px;color:var(--text);line-height:1.7;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;white-space:pre-wrap;min-height:60px}
+
 .btn-reset{padding:5px 14px;background:transparent;color:#dc2626;font-size:11px;font-family:var(--font-mono);border:1px solid #dc262640;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:600}
 .btn-reset:hover{background:#fee2e2;border-color:#dc2626;color:#991b1b}
 [data-theme="dark"] .btn-reset:hover{background:#450a0a;border-color:#f87171;color:#f87171}
@@ -281,13 +307,23 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
   <div class="logo">ACTION <span>PLAN</span></div>
   <div class="header-right">
     <button class="btn-theme" id="themeToggle" onclick="toggleTheme()" title="สลับธีม">🌙</button>
-    <button class="btn-reset" onclick="confirmReset()" title="ล้างข้อมูลทั้งหมด">🗑 Reset</button>
+    <button class="btn-archive" onclick="archiveWeek()" title="จบสัปดาห์นี้และเริ่มสัปดาห์ใหม่">📦 Archive Week</button>
     <button class="btn-new" onclick="exportData()">📋 Export</button>
     <button class="btn-save" onclick="saveData()">💾 SAVE</button>
   </div>
 </div>
 
-<!-- MAIN -->
+<!-- HISTORY PANEL -->
+<div id="historyPanel" style="display:none;background:var(--bg2);border-bottom:1px solid var(--border)">
+  <div style="max-width:1400px;margin:0 auto;padding:8px 24px">
+    <button onclick="toggleHistory()" id="historyToggleBtn"
+      style="width:100%;text-align:left;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:6px 0;color:var(--text2);font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.08em">
+      <span>📋 PREVIOUS WEEKS</span>
+      <span id="historyChevron">▼</span>
+    </button>
+    <div id="historyList" style="display:none;padding-bottom:10px"></div>
+  </div>
+</div>
 <div class="main">
 
   <!-- MARKET OVERVIEW -->
@@ -516,12 +552,13 @@ window.onload = async function() {
   const savedTheme = localStorage.getItem('forex_theme') || 'light';
   applyTheme(savedTheme);
 
-  const savedOrder = localStorage.getItem('forex_sym_order');
+  // โหลด symbol order — จาก cloud ก่อน, fallback localStorage
+  const cloudOrder = cloudData && cloudData['_symOrder'];
+  const savedOrder = cloudOrder || JSON.parse(localStorage.getItem('forex_sym_order') || 'null');
   if (savedOrder) {
     try {
-      const order = JSON.parse(savedOrder);
       SYMBOLS.sort((a, b) => {
-        const ai = order.indexOf(a.id), bi = order.indexOf(b.id);
+        const ai = savedOrder.indexOf(a.id), bi = savedOrder.indexOf(b.id);
         return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
       });
     } catch(e) {}
@@ -554,6 +591,7 @@ window.onload = async function() {
 
   renderSymbols();
   loadWeekData();
+  loadArchive(); // โหลด history
 
   // Global paste listener
   document.addEventListener('paste', handleGlobalPaste);
@@ -577,6 +615,194 @@ function toggleTheme() {
 
 // ============================================
 // RESET
+// ============================================
+// ============================================
+// ARCHIVE & HISTORY
+// ============================================
+let archiveData = { weeks: [] }; // max 3 weeks
+
+async function loadArchive() {
+  try {
+    const res = await fetch(`${SB_URL}/action_plan?id=eq.archive&select=data`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    const rows = await res.json();
+    if (rows && rows[0] && rows[0].data) {
+      archiveData = rows[0].data;
+    }
+  } catch(e) { console.warn('Archive load failed:', e); }
+  renderHistoryPanel();
+}
+
+async function saveArchive() {
+  try {
+    await fetch(`${SB_URL}/action_plan?id=eq.archive`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ id: 'archive', data: archiveData }),
+    });
+  } catch(e) { console.warn('Archive save failed:', e); }
+}
+
+async function archiveWeek() {
+  const label = getVal('ov_week') || currentWeek || getThisWeekLabel();
+  if (!confirm(`📦 Archive สัปดาห์ "${label}" ?\n\nข้อมูลจะถูกเก็บไว้ใน History และเริ่มสัปดาห์ใหม่ที่ว่างเปล่า`)) return;
+
+  // บันทึก current week ก่อน
+  allData[currentWeek] = collectData();
+  await saveData();
+
+  // สร้าง archive entry
+  const entry = {
+    label,
+    archivedAt: new Date().toISOString(),
+    weekKey: currentWeek,
+    data: JSON.parse(JSON.stringify(allData[currentWeek])),
+    images: JSON.parse(JSON.stringify(chartImages[currentWeek] || {})),
+  };
+
+  // เพิ่มเข้า archiveData และตัดเกิน 3
+  archiveData.weeks.unshift(entry);
+  if (archiveData.weeks.length > 3) archiveData.weeks = archiveData.weeks.slice(0, 3);
+  await saveArchive();
+
+  // เริ่ม current week ใหม่
+  currentWeek = getThisWeekLabel();
+  allData = { [currentWeek]: {} };
+  chartImages = {};
+  localStorage.setItem('forex_action_plan', JSON.stringify(allData));
+  localStorage.setItem('forex_action_plan_imgs', '{}');
+  localStorage.removeItem('forex_active_tabs');
+  await cloudSave(allData);
+
+  renderSymbols();
+  loadWeekData();
+  renderHistoryPanel();
+  showToast('📦 Archive สำเร็จ! เริ่มสัปดาห์ใหม่');
+}
+
+function toggleHistory() {
+  const list = document.getElementById('historyList');
+  const chevron = document.getElementById('historyChevron');
+  const open = list.style.display === 'none';
+  list.style.display = open ? 'block' : 'none';
+  chevron.textContent = open ? '▲' : '▼';
+}
+
+function renderHistoryPanel() {
+  const panel = document.getElementById('historyPanel');
+  const list = document.getElementById('historyList');
+  if (!archiveData.weeks || archiveData.weeks.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
+  list.innerHTML = archiveData.weeks.map((w, wi) => `
+    <div class="history-week-item">
+      <div class="history-week-header" onclick="toggleHistoryWeek(${wi})">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="history-week-label">📅 ${w.label}</span>
+          <span class="readonly-badge">READ ONLY</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="history-week-meta">${new Date(w.archivedAt).toLocaleDateString('th-TH')}</span>
+          <span id="hchevron_${wi}">▼</span>
+        </div>
+      </div>
+      <div class="history-week-body" id="hbody_${wi}">
+        ${renderHistoryWeekContent(w, wi)}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleHistoryWeek(wi) {
+  const body = document.getElementById(`hbody_${wi}`);
+  const chevron = document.getElementById(`hchevron_${wi}`);
+  const open = body.classList.toggle('open');
+  chevron.textContent = open ? '▲' : '▼';
+}
+
+function renderHistoryWeekContent(w, wi) {
+  const data = w.data || {};
+  const imgs = w.images || {};
+
+  // Overview section
+  let html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div><div class="history-field-label" style="color:#b45309">📅 Week Range</div><div class="history-field-value">${data.ov_week || '—'}</div></div>
+    <div><div class="history-field-label" style="color:#be123c">⚠️ Key Risk</div><div class="history-field-value">${data.ov_risk || '—'}</div></div>
+  </div>
+  <div style="margin-bottom:14px">
+    <div class="history-field-label" style="color:#1d4ed8">📊 DXY Bias: ${data.dxy_bias || '—'}</div>
+    <div class="history-note-text">${data.ov_analysis || '—'}</div>
+  </div>`;
+
+  // Symbol cards
+  const syms = data ? SYMBOLS : [];
+  html += syms.map(sym => {
+    const days = ['PLAN','MON','TUE','WED','THU','FRI'];
+    const symData = data[sym.id] || {};
+    const symDays = symData.days || {};
+
+    const tabsHtml = days.map((d,i) => {
+      const dd = symDays[d] || {};
+      const hasContent = dd.note || dd.pattern || imgs[`${sym.id}__${d}`];
+      return `<button class="history-day-tab${i===0?' active':''}" onclick="switchHistoryDay(${wi},'${sym.id}','${d}',this)" ${hasContent?'style="position:relative"':''}>${d}${hasContent?'<span style="position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#10b981;display:block"></span>':''}</button>`;
+    }).join('');
+
+    const contentHtml = days.map((d,i) => {
+      const dd = symDays[d] || {};
+      const imgUrl = imgs[`${sym.id}__${d}`];
+      const biasColor = dd.bias === 'LONG' ? '#065f46' : dd.bias === 'SHORT' ? '#991b1b' : dd.bias === 'NEUTRAL' ? '#5b21b6' : 'var(--text2)';
+      const biasBg = dd.bias === 'LONG' ? '#d1fae5' : dd.bias === 'SHORT' ? '#fee2e2' : dd.bias === 'NEUTRAL' ? '#ede9fe' : 'var(--bg3)';
+      return `<div id="hday_${wi}_${sym.id}_${d}" style="display:${i===0?'flex':'none'};flex-direction:column;gap:10px">
+        <div class="history-field-row">
+          <div><div class="history-field-label">Pattern</div><div class="history-field-value">${dd.pattern || '—'}</div></div>
+          <div><div class="history-field-label">Strategy</div><div class="history-field-value">${dd.strategy || '—'}</div></div>
+          <div><div class="history-field-label">Bias</div><div class="history-field-value" style="color:${biasColor};background:${biasBg};font-weight:700">${dd.bias || '—'}</div></div>
+          <div><div class="history-field-label">Risk</div><div class="history-field-value">${dd.risk || '—'}</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.8fr 1fr;gap:10px">
+          <div>${imgUrl ? `<img src="${imgUrl}" class="history-chart-img" onclick="window.open('${imgUrl}','_blank')" title="คลิกดูเต็มจอ">` : '<div style="border:2px dashed var(--border2);border-radius:8px;padding:20px;text-align:center;color:var(--text3);font-size:12px;font-family:var(--font-mono)">ไม่มีรูป</div>'}</div>
+          <div><div class="history-field-label">${d} — Note</div><div class="history-note-text" style="min-height:120px">${dd.note || '—'}</div></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="history-sym-card ${sym.cls}">
+      <div class="history-sym-name">${sym.name}</div>
+      <div class="history-day-tabs">${tabsHtml}</div>
+      ${contentHtml}
+    </div>`;
+  }).join('');
+
+  // Summary note
+  html += `<div style="margin-top:4px"><div class="history-field-label">📝 Trade Plan Note</div><div class="history-note-text">${data.ov_summary || '—'}</div></div>`;
+
+  return html;
+}
+
+function switchHistoryDay(wi, symId, day, btn) {
+  const days = ['PLAN','MON','TUE','WED','THU','FRI'];
+  // deactivate all tabs for this sym
+  btn.closest('.history-sym-card').querySelectorAll('.history-day-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // hide all day content for this sym
+  days.forEach(d => {
+    const el = document.getElementById(`hday_${wi}_${symId}_${d}`);
+    if (el) el.style.display = 'none';
+  });
+  const target = document.getElementById(`hday_${wi}_${symId}_${day}`);
+  if (target) target.style.display = 'flex';
+}
+
+// ============================================
+// RESET (keep for internal use)
 // ============================================
 async function confirmReset() {
   if (!confirm('⚠️ ล้างข้อมูลทั้งหมด รวมถึงรูปกราฟทุกอัน?\n\nกด OK เพื่อยืนยัน')) return;
@@ -742,8 +968,12 @@ function onCardDrop(e, symId) {
   const [moved] = SYMBOLS.splice(srcIdx, 1);
   SYMBOLS.splice(dstIdx, 0, moved);
 
-  // save order
-  localStorage.setItem('forex_sym_order', JSON.stringify(SYMBOLS.map(s => s.id)));
+  // save order locally and to cloud
+  const newOrder = SYMBOLS.map(s => s.id);
+  localStorage.setItem('forex_sym_order', JSON.stringify(newOrder));
+  // embed in allData for cloud sync
+  allData['_symOrder'] = newOrder;
+  cloudSave(allData);
 
   // re-render and reload
   renderSymbols();
