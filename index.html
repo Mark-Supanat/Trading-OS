@@ -242,7 +242,7 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 .day-tab.has-img::after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#10b981}
 .day-content{display:none}
 .day-content.day-visible{display:flex;flex-direction:column;gap:6px}
-.day-note{width:100%;background:var(--bg2);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:14px;padding:10px 12px;border-radius:7px;outline:none;resize:vertical;min-height:52px;line-height:1.8;transition:border-color .2s;font-weight:400}
+.day-note{width:100%;background:var(--bg2);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:14px;padding:10px 12px;border-radius:7px;outline:none;resize:none;min-height:200px;flex:1;line-height:1.8;transition:border-color .2s;font-weight:400}
 .day-note:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,154,0,.1)}
 .day-note::placeholder{color:var(--text3);font-size:13px;font-style:italic}
 [data-theme="dark"] .day-note{background:#0a0d14;border-color:#2a3348}
@@ -558,7 +558,7 @@ function renderSymbols() {
               </div>
             </div>
             <!-- Chart + TF + Note -->
-            <div style="display:grid;grid-template-columns:1.8fr 1fr;gap:10px;align-items:start">
+            <div style="display:grid;grid-template-columns:1.8fr 1fr;gap:10px;align-items:stretch">
               <div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
                   <span class="chart-section-label" style="margin-bottom:0">Chart</span>
@@ -586,7 +586,7 @@ function renderSymbols() {
                   </div>
                 </div>
               </div>
-              <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;flex-direction:column;gap:6px;height:100%">
                 <div class="field-group" style="margin-bottom:0"><label>${d} — Note</label></div>
                 <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="${d==='PLAN'?'วางแผนประจำสัปดาห์ Key level, Setup ที่รอ...':'Key level, Setup, สิ่งที่สังเกต...'}" oninput="autoSave()" style="min-height:160px;flex:1"></textarea>
               </div>
