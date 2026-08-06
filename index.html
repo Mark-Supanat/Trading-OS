@@ -408,6 +408,44 @@ const STRATEGIES = [
 ];const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
 
 // ============================================
+// SUPABASE CONFIG
+// ============================================
+const SB_URL = 'https://ufwqhvcddrullyixyfxm.supabase.co/rest/v1';
+const SB_KEY = 'sb_publishable_7cMhvTZAVTwEDhAHH8IP4A_mhFk4HlD';
+const SB_RECORD_ID = 'main'; // fixed id — single-user
+
+async function sbFetch(method, body) {
+  const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_RECORD_ID}`, {
+    method,
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'resolution=merge-duplicates' : 'return=minimal',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  return res;
+}
+
+async function cloudLoad() {
+  try {
+    const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_RECORD_ID}&select=data`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    const rows = await res.json();
+    if (rows && rows[0] && rows[0].data) return rows[0].data;
+  } catch(e) { console.warn('Cloud load failed:', e); }
+  return null;
+}
+
+async function cloudSave(payload) {
+  try {
+    await sbFetch('POST', { id: SB_RECORD_ID, data: payload });
+  } catch(e) { console.warn('Cloud save failed:', e); }
+}
+
+// ============================================
 // STATE
 // ============================================
 let currentWeek = '';
@@ -421,18 +459,11 @@ let chartImages = {};
 // ============================================
 // INIT
 // ============================================
-window.onload = function() {
-  const saved = localStorage.getItem('forex_action_plan');
-  if (saved) allData = JSON.parse(saved);
-
-  const savedImgs = localStorage.getItem('forex_action_plan_imgs');
-  if (savedImgs) chartImages = JSON.parse(savedImgs);
-
-  // โหลด theme preference
+window.onload = async function() {
+  // โหลด theme + order ก่อน (ไม่ต้องรอ cloud)
   const savedTheme = localStorage.getItem('forex_theme') || 'light';
   applyTheme(savedTheme);
 
-  // โหลด symbol order
   const savedOrder = localStorage.getItem('forex_sym_order');
   if (savedOrder) {
     try {
@@ -442,6 +473,23 @@ window.onload = function() {
         return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
       });
     } catch(e) {}
+  }
+
+  // โหลด images จาก localStorage (รูปเก็บ local เพราะใหญ่เกิน)
+  const savedImgs = localStorage.getItem('forex_action_plan_imgs');
+  if (savedImgs) chartImages = JSON.parse(savedImgs);
+
+  // Auto Load จาก Supabase ก่อน, fallback localStorage
+  showToast('☁ กำลังโหลดข้อมูล...');
+  const cloudData = await cloudLoad();
+  if (cloudData) {
+    allData = cloudData;
+    localStorage.setItem('forex_action_plan', JSON.stringify(allData));
+    showToast('☁ โหลดจาก Cloud สำเร็จ');
+  } else {
+    const saved = localStorage.getItem('forex_action_plan');
+    if (saved) allData = JSON.parse(saved);
+    if (!cloudData) showToast('⚠ ใช้ข้อมูล Local (offline)');
   }
 
   const weeks = Object.keys(allData);
@@ -455,7 +503,7 @@ window.onload = function() {
   renderSymbols();
   loadWeekData();
 
-  // Global paste listener (Ctrl+V รูป)
+  // Global paste listener
   document.addEventListener('paste', handleGlobalPaste);
 };
 
@@ -478,7 +526,7 @@ function toggleTheme() {
 // ============================================
 // RESET
 // ============================================
-function confirmReset() {
+async function confirmReset() {
   if (!confirm('⚠️ ล้างข้อมูลทั้งหมด รวมถึงรูปกราฟทุกอัน?\n\nกด OK เพื่อยืนยัน')) return;
   localStorage.removeItem('forex_action_plan');
   localStorage.removeItem('forex_action_plan_imgs');
@@ -486,6 +534,7 @@ function confirmReset() {
   chartImages = {};
   currentWeek = getThisWeekLabel();
   allData[currentWeek] = {};
+  await cloudSave(allData);
   clearAllFields();
   showToast('🗑 Reset เรียบร้อยแล้ว');
 }
@@ -1068,10 +1117,11 @@ function collectData() {
   return data;
 }
 
-function saveData() {
+async function saveData() {
   allData[currentWeek] = collectData();
   localStorage.setItem('forex_action_plan', JSON.stringify(allData));
-  showToast('💾 บันทึกแล้ว');
+  await cloudSave(allData);
+  showToast('💾 บันทึกแล้ว ☁');
 }
 
 function autoSave() {
@@ -1079,6 +1129,7 @@ function autoSave() {
   autoSaveTimer = setTimeout(() => {
     allData[currentWeek] = collectData();
     localStorage.setItem('forex_action_plan', JSON.stringify(allData));
+    cloudSave(allData); // push cloud ด้วย (no await — background)
   }, 800);
 }
 
