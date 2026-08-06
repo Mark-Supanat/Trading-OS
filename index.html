@@ -412,7 +412,50 @@ const STRATEGIES = [
 // ============================================
 const SB_URL = 'https://ufwqhvcddrullyixyfxm.supabase.co/rest/v1';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmd3FodmNkZHJ1bGx5aXh5ZnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5ODMxMjMsImV4cCI6MjEwMTU1OTEyM30.DD4yfSLFe86hQYR85oKSnbOjDn2fwYwB8_bgO8Mlxvk';
-const SB_RECORD_ID = 'main'; // fixed id — single-user
+const SB_STORAGE = 'https://ufwqhvcddrullyixyfxm.supabase.co/storage/v1/object';
+const SB_BUCKET = 'charts';
+const SB_RECORD_ID = 'main';
+
+// Upload รูปขึ้น Storage → return public URL
+async function uploadImage(file, path) {
+  try {
+    // ลบรูปเก่าก่อน (upsert)
+    await fetch(`${SB_STORAGE}/${SB_BUCKET}/${path}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    const res = await fetch(`${SB_STORAGE}/${SB_BUCKET}/${path}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type': file.type || 'image/png',
+        'x-upsert': 'true',
+      },
+      body: file,
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return `${SB_STORAGE}/public/${SB_BUCKET}/${path}?t=${Date.now()}`;
+  } catch(e) { console.warn('Upload failed:', e); return null; }
+}
+
+// Upload จาก base64 string
+async function uploadBase64(base64, path) {
+  try {
+    const blob = await fetch(base64).then(r => r.blob());
+    const file = new File([blob], path, { type: blob.type });
+    return await uploadImage(file, path);
+  } catch(e) { console.warn('Upload base64 failed:', e); return null; }
+}
+
+async function deleteImage(path) {
+  try {
+    await fetch(`${SB_STORAGE}/${SB_BUCKET}/${path}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+  } catch(e) {}
+}
 
 async function sbFetch(method, body) {
   const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_RECORD_ID}`, {
@@ -434,14 +477,23 @@ async function cloudLoad() {
       headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
     });
     const rows = await res.json();
-    if (rows && rows[0] && rows[0].data) return rows[0].data;
+    if (rows && rows[0] && rows[0].data) {
+      const d = rows[0].data;
+      // restore image URL map
+      if (d._imgs) {
+        chartImages = d._imgs;
+        localStorage.setItem('forex_action_plan_imgs', JSON.stringify(chartImages));
+        delete d._imgs;
+      }
+      return d;
+    }
   } catch(e) { console.warn('Cloud load failed:', e); }
   return null;
 }
 
 async function cloudSave(payload) {
   try {
-    await sbFetch('POST', { id: SB_RECORD_ID, data: payload });
+    await sbFetch('POST', { id: SB_RECORD_ID, data: { ...payload, _imgs: chartImages } });
   } catch(e) { console.warn('Cloud save failed:', e); }
 }
 
@@ -810,11 +862,36 @@ function onDrop(e, symId, day) {
 }
 
 function readImageFile(file, symId, day) {
+  // แสดง preview local ก่อน (เร็ว)
   const reader = new FileReader();
-  reader.onload = function(ev) {
-    setChartImage(symId, day, ev.target.result);
-    autoSave();
-    showToast('🖼 บันทึกรูปแล้ว');
+  reader.onload = async function(ev) {
+    const base64 = ev.target.result;
+    // แสดงรูป local ทันที
+    const imgEl = document.getElementById(`chartimg_${symId}_${day}`);
+    const wrap = document.getElementById(`imgwrap_${symId}_${day}`);
+    const dropzone = document.getElementById(`dropzone_${symId}_${day}`);
+    imgEl.src = base64;
+    wrap.classList.add('show');
+    dropzone.style.display = 'none';
+    updateDayTabDots(symId);
+
+    showToast('☁ กำลังอัปโหลดรูป...');
+    const path = `${currentWeek}/${symId}__${day}.png`.replace(/\s/g,'_');
+    const url = await uploadBase64(base64, path);
+    if (url) {
+      if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
+      chartImages[currentWeek][`${symId}__${day}`] = url;
+      imgEl.src = url;
+      saveImages();
+      autoSave();
+      showToast('🖼 อัปโหลดรูปสำเร็จ ☁');
+    } else {
+      // fallback เก็บ base64 local
+      if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
+      chartImages[currentWeek][`${symId}__${day}`] = base64;
+      saveImages();
+      showToast('⚠ บันทึกรูปเฉพาะ Local');
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -832,9 +909,10 @@ function setChartImage(symId, day, base64) {
   saveImages();
 }
 
-function removeChartImage(symId, day) {
+async function removeChartImage(symId, day) {
   if (!confirm('ลบรูปนี้?')) return;
   const key = `${symId}__${day}`;
+  const path = `${currentWeek}/${key}.png`.replace(/\s/g,'_');
   if (chartImages[currentWeek]) delete chartImages[currentWeek][key];
 
   document.getElementById(`chartimg_${symId}_${day}`).src = '';
@@ -843,6 +921,7 @@ function removeChartImage(symId, day) {
 
   updateDayTabDots(symId);
   saveImages();
+  await deleteImage(path);
   showToast('🗑 ลบรูปแล้ว');
 }
 
@@ -855,9 +934,10 @@ function openChartFullscreen(symId, day) {
 
 function saveImages() {
   try {
+    // เก็บแค่ URL (ไม่ใช่ base64) ทำให้ localStorage ไม่เต็ม
     localStorage.setItem('forex_action_plan_imgs', JSON.stringify(chartImages));
   } catch(e) {
-    showToast('⚠️ พื้นที่เก็บข้อมูลเต็ม');
+    console.warn('saveImages failed:', e);
   }
 }
 
@@ -866,13 +946,13 @@ function loadChartImages() {
   SYMBOLS.forEach(sym => {
     DAYS.forEach(d => {
       const key = `${sym.id}__${d}`;
-      const base64 = weekImgs[key];
+      const src = weekImgs[key]; // URL หรือ base64
       const img = document.getElementById(`chartimg_${sym.id}_${d}`);
       const wrap = document.getElementById(`imgwrap_${sym.id}_${d}`);
       const dropzone = document.getElementById(`dropzone_${sym.id}_${d}`);
       if (!img) return;
-      if (base64) {
-        img.src = base64;
+      if (src) {
+        img.src = src;
         wrap.classList.add('show');
         dropzone.style.display = 'none';
       } else {
@@ -908,7 +988,30 @@ function onCalFileSelect(e) {
 }
 function readCalFile(file) {
   const reader = new FileReader();
-  reader.onload = function(ev) { setCalImage(ev.target.result); autoSave(); showToast('📅 บันทึก Calendar แล้ว'); };
+  reader.onload = async function(ev) {
+    const base64 = ev.target.result;
+    // แสดง preview ทันที
+    document.getElementById('cal_img').src = base64;
+    document.getElementById('cal_img_wrap').classList.add('show');
+    document.getElementById('cal_dropzone').style.display = 'none';
+
+    showToast('☁ กำลังอัปโหลด Calendar...');
+    const path = `${currentWeek}/__cal__.png`.replace(/\s/g,'_');
+    const url = await uploadBase64(base64, path);
+    if (url) {
+      if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
+      chartImages[currentWeek]['__cal__'] = url;
+      document.getElementById('cal_img').src = url;
+      saveImages();
+      autoSave();
+      showToast('📅 อัปโหลด Calendar สำเร็จ ☁');
+    } else {
+      if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
+      chartImages[currentWeek]['__cal__'] = base64;
+      saveImages();
+      showToast('⚠ บันทึก Calendar เฉพาะ Local');
+    }
+  };
   reader.readAsDataURL(file);
 }
 function setCalImage(base64) {
@@ -919,13 +1022,15 @@ function setCalImage(base64) {
   document.getElementById('cal_dropzone').style.display = 'none';
   saveImages();
 }
-function removeCalImage() {
+async function removeCalImage() {
   if (!confirm('ลบรูป Calendar?')) return;
+  const path = `${currentWeek}/__cal__.png`.replace(/\s/g,'_');
   if (chartImages[currentWeek]) delete chartImages[currentWeek]['__cal__'];
   document.getElementById('cal_img').src = '';
   document.getElementById('cal_img_wrap').classList.remove('show');
   document.getElementById('cal_dropzone').style.display = '';
   saveImages();
+  await deleteImage(path);
   showToast('🗑 ลบ Calendar แล้ว');
 }
 function openCalFullscreen() {
@@ -1129,7 +1234,7 @@ function autoSave() {
   autoSaveTimer = setTimeout(() => {
     allData[currentWeek] = collectData();
     localStorage.setItem('forex_action_plan', JSON.stringify(allData));
-    cloudSave(allData); // push cloud ด้วย (no await — background)
+    cloudSave(allData);
   }, 800);
 }
 
