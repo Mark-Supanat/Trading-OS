@@ -378,9 +378,32 @@ const SYMBOLS = [
   {id:'ndx', name:'NDX', tf:'Day — H4', cls:'sym-ndx'},
 ];
 
-const PATTERNS = ['Uptrend','Downtrend','Sideway Up','Sideway Down','Sideway','Breakout','Reversal','Consolidation','Pullback','Throwback','RBS','SBR','Other'];
-const STRATEGIES = ['BUY The Dip','SELL The Rally','Aggressive','Defensive','Conservative','Wait and See','Breakout Play','Reversal Play','Follow Trend'];
-const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
+const PATTERNS = [
+  // Trend
+  'Uptrend','Downtrend','Uptrend Continuation','Downtrend Continuation',
+  // Reversal
+  'Reversal','Trend Change','Rebound','False Break',
+  // Structure
+  'RBS','SBR','Pullback','Throwback','Breakout',
+  // Range
+  'Sideway','Sideway Up','Sideway Down','Consolidation',
+  // Pattern
+  'Rising Wedge','Falling Wedge',
+  'Other'
+];
+
+const STRATEGIES = [
+  // Model
+  'Model 1','Model 2','Model 3','Model 4',
+  // Direction
+  'BUY The Dip','SELL The Rally',
+  // Style
+  'Follow Trend','Reversal Play','Breakout Play',
+  // Risk
+  'Aggressive','Conservative','Defensive',
+  // Wait
+  'Wait and See'
+];const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
 
 // ============================================
 // STATE
