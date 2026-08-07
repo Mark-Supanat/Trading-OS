@@ -360,6 +360,13 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 .day-note::placeholder{color:var(--text3);font-size:13px;font-style:italic}
 [data-theme="dark"] .day-note{background:#0a0d14;border-color:#2a3348}
 
+/* CONNECT THE DOTS */
+.btn-ctd{padding:4px 12px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;font-size:10px;font-family:var(--font-mono);border:none;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.btn-ctd:hover{background:linear-gradient(135deg,#6d28d9,#4c1d95);transform:translateY(-1px)}
+.btn-ctd:disabled{background:#4a4a6a;cursor:not-allowed;transform:none;opacity:.7}
+.btn-ctd.loading{animation:ctd-pulse 1.2s infinite}
+@keyframes ctd-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
 /* SUMMARY CARD */
 .summary-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-top:20px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
@@ -638,6 +645,92 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 </div><!-- end app-shell -->
 
 <script>
+// ============================================
+// CONNECT THE DOTS — Claude API
+// ============================================
+async function connectTheDots(symId) {
+  const btn = document.getElementById(`ctd_btn_${symId}`);
+  const noteField = document.getElementById(`${symId}_note`);
+  const sym = SYMBOLS.find(s => s.id === symId);
+  if (!sym) return;
+
+  // รวบรวม daily notes ของ symbol นี้
+  const dayNotes = [];
+  DAYS.forEach(day => {
+    const note = getVal(`daynote_${symId}_${day}`);
+    const pattern = getVal(`${symId}_${day}_pattern`);
+    const bias = (biasState[symId] || {})[day] || '';
+    const strategy = getVal(`${symId}_${day}_strategy`);
+    if (note || pattern || bias) {
+      dayNotes.push({ day, note, pattern, bias, strategy });
+    }
+  });
+
+  if (dayNotes.length === 0) {
+    showToast('⚠️ ยังไม่มีข้อมูลในช่อง Note แต่ละวัน');
+    return;
+  }
+
+  // Build prompt
+  const weekLabel = getVal('ov_week') || currentWeek;
+  const dxyBias = biasState['dxy'] || '—';
+  const marketAnalysis = getVal('ov_analysis') || '';
+
+  const daysText = dayNotes.map(d =>
+    `${d.day}: Pattern=${d.pattern||'—'} | Bias=${d.bias||'—'} | Strategy=${d.strategy||'—'}\nNote: ${d.note||'—'}`
+  ).join('\n\n');
+
+  const prompt = `คุณเป็น Forex Trading Analyst ช่วยสรุป Weekly Market Story สำหรับ ${sym.name} จากข้อมูลต่อไปนี้
+
+Week: ${weekLabel}
+DXY Bias: ${dxyBias}
+Market Overview: ${marketAnalysis}
+
+Daily Notes:
+${daysText}
+
+ให้สรุปเป็น Weekly Market Story ภาษาไทยผสมอังกฤษ แบบ Trading Journal กระชับ อ่านง่าย แสดงให้เห็น market story ที่เชื่อมโยงกันทั้งสัปดาห์ ไม่เกิน 8 บรรทัด ใช้รูปแบบ:
+- บรรยาย flow ของตลาดตั้งแต่ต้นถึงปลายสัปดาห์
+- ระบุว่า Scenario ที่วางแผนไว้เกิดขึ้นจริงหรือไม่
+- สรุป key takeaway สั้นๆ 1-2 บรรทัดท้าย`;
+
+  // Loading state
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Generating...';
+  showToast('🧩 กำลังสร้าง Market Story...');
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const story = data.content?.[0]?.text || '';
+
+    if (story) {
+      noteField.value = story;
+      autoSave();
+      showToast('🧩 Market Story สร้างสำเร็จ!');
+    } else {
+      showToast('⚠️ ไม่ได้รับข้อมูลจาก AI');
+    }
+  } catch(e) {
+    console.error('Connect The Dots error:', e);
+    showToast('⚠️ เชื่อม API ไม่ได้ ลองใหม่อีกครั้ง');
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = '🧩 Generate Story';
+  }
+}
+
 // ============================================
 // NAVIGATION
 // ============================================
@@ -1268,8 +1361,13 @@ function renderSymbols() {
         </div>
 
         <div class="field-group">
-          <label>Analysis / Note</label>
-          <textarea class="note-field" id="${sym.id}_note" placeholder="วิเคราะห์เพิ่มเติม Key Level, Setup ที่รอ..." oninput="autoSave()"></textarea>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <label style="margin-bottom:0">🧩 CONNECT THE DOTS</label>
+            <button class="btn-ctd" onclick="connectTheDots('${sym.id}')" id="ctd_btn_${sym.id}">
+              🧩 Generate Story
+            </button>
+          </div>
+          <textarea class="note-field" id="${sym.id}_note" placeholder="เขียน Market View ของวันนี้&#10;เช่น: Asia sideway หลังขึ้นแรง รอ London ย่อ ถ้ายืนได้ US มีโอกาส Breakout..." oninput="autoSave()"></textarea>
         </div>
       </div>
     </div>
