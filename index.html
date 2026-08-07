@@ -648,13 +648,22 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 // ============================================
 // CONNECT THE DOTS — Claude API
 // ============================================
+const ctdCache = {}; // cache[symId] = { hash, story }
+
+function hashNotes(symId) {
+  // สร้าง hash จาก daily notes ปัจจุบัน เพื่อเช็คว่ามีอะไรเปลี่ยนมั้ย
+  return DAYS.map(d =>
+    `${d}:${getVal(`daynote_${symId}_${d}`)}|${getVal(`${symId}_${d}_pattern`)}|${(biasState[symId]||{})[d]||''}`
+  ).join('||');
+}
+
 async function connectTheDots(symId) {
   const btn = document.getElementById(`ctd_btn_${symId}`);
   const noteField = document.getElementById(`${symId}_note`);
   const sym = SYMBOLS.find(s => s.id === symId);
   if (!sym) return;
 
-  // รวบรวม daily notes ของ symbol นี้
+  // รวบรวม daily notes
   const dayNotes = [];
   DAYS.forEach(day => {
     const note = getVal(`daynote_${symId}_${day}`);
@@ -671,30 +680,30 @@ async function connectTheDots(symId) {
     return;
   }
 
-  // Build prompt
+  // ✅ เช็ค cache — ถ้าข้อมูลไม่เปลี่ยน ใช้ผลเดิมเลย ไม่เรียก API
+  const currentHash = hashNotes(symId);
+  if (ctdCache[symId] && ctdCache[symId].hash === currentHash) {
+    noteField.value = ctdCache[symId].story;
+    autoSave();
+    showToast('🧩 ใช้ Story เดิม (ไม่มีข้อมูลใหม่)');
+    return;
+  }
+
   const weekLabel = getVal('ov_week') || currentWeek;
   const dxyBias = biasState['dxy'] || '—';
   const marketAnalysis = getVal('ov_analysis') || '';
 
   const daysText = dayNotes.map(d =>
-    `${d.day}: Pattern=${d.pattern||'—'} | Bias=${d.bias||'—'} | Strategy=${d.strategy||'—'}\nNote: ${d.note||'—'}`
+    `${d.day}: ${d.pattern||'—'} | ${d.bias||'—'} | ${d.strategy||'—'}\n${d.note||'—'}`
   ).join('\n\n');
 
-  const prompt = `คุณเป็น Forex Trading Analyst ช่วยสรุป Weekly Market Story สำหรับ ${sym.name} จากข้อมูลต่อไปนี้
+  const prompt = `Forex Analyst: สรุป Weekly Market Story ของ ${sym.name} (Week: ${weekLabel}, DXY: ${dxyBias})
 
-Week: ${weekLabel}
-DXY Bias: ${dxyBias}
-Market Overview: ${marketAnalysis}
-
-Daily Notes:
+${marketAnalysis ? `Market Overview: ${marketAnalysis}\n` : ''}Daily Notes:
 ${daysText}
 
-ให้สรุปเป็น Weekly Market Story ภาษาไทยผสมอังกฤษ แบบ Trading Journal กระชับ อ่านง่าย แสดงให้เห็น market story ที่เชื่อมโยงกันทั้งสัปดาห์ ไม่เกิน 8 บรรทัด ใช้รูปแบบ:
-- บรรยาย flow ของตลาดตั้งแต่ต้นถึงปลายสัปดาห์
-- ระบุว่า Scenario ที่วางแผนไว้เกิดขึ้นจริงหรือไม่
-- สรุป key takeaway สั้นๆ 1-2 บรรทัดท้าย`;
+สรุปเป็น Market Story ภาษาไทยผสมอังกฤษ กระชับ ไม่เกิน 6 บรรทัด เชื่อมโยง flow ทั้งสัปดาห์ และ key takeaway สั้นๆ ท้าย`;
 
-  // Loading state
   btn.disabled = true;
   btn.classList.add('loading');
   btn.textContent = '⏳ Generating...';
@@ -708,8 +717,8 @@ ${daysText}
         'Authorization': `Bearer ${SB_KEY}`,
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
+        model: 'claude-haiku-4-5',   // ✅ Haiku — ถูกกว่า Sonnet ~20x
+        max_tokens: 400,              // ✅ ลดจาก 1000 → 400 ประหยัด 60%
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -718,6 +727,8 @@ ${daysText}
     const story = data.content?.[0]?.text || '';
 
     if (story) {
+      // บันทึก cache
+      ctdCache[symId] = { hash: currentHash, story };
       noteField.value = story;
       autoSave();
       showToast('🧩 Market Story สร้างสำเร็จ!');
