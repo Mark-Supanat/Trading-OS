@@ -28,31 +28,118 @@
   --purple:#7c3aed;
   --orange:#ea580c;
   --header-bg:rgba(255,255,255,.92);
+  --sidebar-w:220px;
+  --sidebar-bg:#ffffff;
+  --sidebar-border:#e8eaf3;
+  --card-radius:16px;
+  --card-shadow:0 2px 12px rgba(0,0,0,.06);
   --font-display:'Bebas Neue',sans-serif;
   --font-mono:'DM Mono',monospace;
   --font-body:'DM Sans',sans-serif;
 }
 [data-theme="dark"]{
-  --bg:#080a0f;
-  --bg2:#0e1117;
-  --bg3:#13171f;
-  --bg4:#1a1f2b;
-  --border:#1e2535;
-  --border2:#2a3348;
-  --text:#dde3f0;
-  --text2:#7b88a8;
-  --text3:#3d4d6a;
+  --bg:#060810;
+  --bg2:#0d1117;
+  --bg3:#111520;
+  --bg4:#161b28;
+  --border:#1a2236;
+  --border2:#243048;
+  --text:#e2e8f5;
+  --text2:#6b7a9e;
+  --text3:#334060;
   --gold:#f0b429;
   --gold-bg:#1a1200;
   --gold-border:#5a4200;
   --gold2:#ffd166;
-  --header-bg:rgba(8,10,15,.92);
+  --header-bg:rgba(6,8,16,.92);
+  --sidebar-bg:#0d1117;
+  --sidebar-border:#1a2236;
 }
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex}
+
+/* ============================================
+   APP SHELL
+   ============================================ */
+.app-shell{display:flex;width:100%;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--sidebar-bg);border-right:1px solid var(--sidebar-border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;transition:transform .25s}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--sidebar-border)}
+.sidebar-logo-text{font-family:var(--font-display);font-size:22px;letter-spacing:.12em;color:var(--text);line-height:1}
+.sidebar-logo-text span{color:var(--gold)}
+.sidebar-logo-sub{font-family:var(--font-mono);font-size:9px;color:var(--text3);letter-spacing:.16em;margin-top:2px}
+.sidebar-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;transition:all .15s;color:var(--text2);font-size:13px;font-weight:500;text-decoration:none;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:linear-gradient(135deg,rgba(200,154,0,.15),rgba(200,154,0,.08));color:var(--gold);font-weight:600}
+.nav-item.active .nav-icon{color:var(--gold)}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-label{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em}
+.nav-badge{margin-left:auto;background:var(--gold);color:#000;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;font-family:var(--font-mono)}
+.sidebar-footer{padding:14px 10px;border-top:1px solid var(--sidebar-border)}
+.sidebar-theme-btn{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer;color:var(--text2);font-size:13px;background:none;border:none;width:100%;transition:all .15s}
+.sidebar-theme-btn:hover{background:var(--bg3);color:var(--text)}
+.nav-section-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;color:var(--text3);padding:8px 12px 4px;text-transform:uppercase}
+
+/* MAIN AREA */
+.app-main{margin-left:var(--sidebar-w);flex:1;min-width:0;display:flex;flex-direction:column;min-height:100vh}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:var(--header-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 0 var(--border)}
+.topbar-title{font-family:var(--font-display);font-size:16px;letter-spacing:.1em;color:var(--text)}
+.topbar-right{display:flex;gap:8px;align-items:center}
+
+/* PAGE CONTENT */
+.page{display:none;flex:1}
+.page.active{display:block}
+.page-inner{padding:20px 24px;max-width:1400px;margin:0 auto}
+
+/* HISTORY PANEL */
+.history-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px}
+.history-bar-inner{max-width:1400px;margin:0 auto}
 
 /* BG TEXTURE */
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 10% 10%,rgba(37,99,235,.04) 0%,transparent 55%),radial-gradient(ellipse at 90% 90%,rgba(124,58,237,.04) 0%,transparent 55%);pointer-events:none;z-index:0}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 10% 10%,rgba(37,99,235,.03) 0%,transparent 55%),radial-gradient(ellipse at 90% 90%,rgba(124,58,237,.03) 0%,transparent 55%);pointer-events:none;z-index:0}
+
+/* PREMIUM CARD STYLE */
+.overview-card,.sym-card,.summary-card,.summary-panel{border-radius:var(--card-radius) !important;box-shadow:var(--card-shadow) !important}
+.sym-card{border-radius:var(--card-radius) !important;transition:box-shadow .2s,border-color .2s,transform .15s !important}
+.sym-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.1) !important;transform:translateY(-1px)}
+
+/* DASHBOARD PAGE */
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.dash-widget{background:var(--bg2);border:1px solid var(--border);border-radius:var(--card-radius);padding:20px;box-shadow:var(--card-shadow)}
+.dash-widget-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.dash-widget-value{font-family:var(--font-display);font-size:28px;letter-spacing:.06em;color:var(--text);line-height:1}
+.dash-widget-sub{font-size:12px;color:var(--text2);margin-top:6px;font-family:var(--font-mono)}
+.dash-coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;color:var(--text3);font-family:var(--font-mono);font-size:13px;gap:8px}
+
+/* PLACEHOLDER PAGE */
+.placeholder-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;color:var(--text3)}
+.placeholder-icon{font-size:48px;opacity:.4}
+.placeholder-title{font-family:var(--font-display);font-size:24px;letter-spacing:.1em;color:var(--text2)}
+.placeholder-sub{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em}
+
+/* MOBILE SIDEBAR */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
+.mobile-menu-btn{display:none;background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;padding:4px}
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.open{display:block}
+  .app-main{margin-left:0}
+  .mobile-menu-btn{display:flex}
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .page-layout{grid-template-columns:1fr}
+  .summary-sidebar{display:none}
+  .summary-card{display:block}
+}
+@media(max-width:600px){
+  .dash-grid{grid-template-columns:1fr}
+  .overview-grid,.field-row{grid-template-columns:1fr}
+  .page-inner{padding:14px}
+}
 
 /* HEADER */
 .header{position:sticky;top:0;z-index:100;background:var(--header-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 6px rgba(0,0,0,.06)}
@@ -334,32 +421,110 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 <body>
 
 <div class="toast" id="toast"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">ACTION <span>PLAN</span></div>
-  <div class="header-right">
-    <button class="btn-theme" id="themeToggle" onclick="toggleTheme()" title="สลับธีม">🌙</button>
-    <button class="btn-archive" onclick="archiveWeek()" title="จบสัปดาห์นี้และเริ่มสัปดาห์ใหม่">📦 Archive Week</button>
-    <button class="btn-new" onclick="exportData()">📋 Export</button>
-    <button class="btn-save" onclick="saveData()">💾 SAVE</button>
+<div class="app-shell">
+
+<!-- ============ SIDEBAR ============ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-text">TRADING <span>OS</span></div>
+    <div class="sidebar-logo-sub">FOREX ACTION PLAN</div>
   </div>
-</div>
-
-<!-- HISTORY PANEL -->
-<div id="historyPanel" style="display:none;background:var(--bg2);border-bottom:1px solid var(--border)">
-  <div style="max-width:1400px;margin:0 auto;padding:8px 24px">
-    <button onclick="toggleHistory()" id="historyToggleBtn"
-      style="width:100%;text-align:left;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:6px 0;color:var(--text2);font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.08em">
-      <span>📋 PREVIOUS WEEKS</span>
-      <span id="historyChevron">▼</span>
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <button class="nav-item active" id="nav-dashboard" onclick="switchPage('dashboard')">
+      <span class="nav-icon">⬡</span><span class="nav-label">DASHBOARD</span>
     </button>
-    <div id="historyList" style="display:none;padding-bottom:10px"></div>
+    <button class="nav-item" id="nav-action-plan" onclick="switchPage('action-plan')">
+      <span class="nav-icon">📋</span><span class="nav-label">ACTION PLAN</span>
+    </button>
+    <div class="nav-section-label" style="margin-top:8px">Tools</div>
+    <button class="nav-item" id="nav-journal" onclick="openJournal()">
+      <span class="nav-icon">📓</span><span class="nav-label">TRADE JOURNAL</span>
+      <span style="margin-left:auto;font-size:9px;color:var(--text3)">↗</span>
+    </button>
+    <button class="nav-item" id="nav-analytics" onclick="switchPage('analytics')">
+      <span class="nav-icon">📊</span><span class="nav-label">ANALYTICS</span>
+    </button>
+    <div class="nav-section-label" style="margin-top:8px">System</div>
+    <button class="nav-item" id="nav-settings" onclick="switchPage('settings')">
+      <span class="nav-icon">⚙</span><span class="nav-label">SETTINGS</span>
+    </button>
   </div>
-</div>
-<div class="main">
-<div class="page-layout">
-<div class="main-content">
+  <div class="sidebar-footer">
+    <button class="sidebar-theme-btn" onclick="toggleTheme()">
+      <span id="themeIcon">🌙</span>
+      <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.04em" id="themeLabel">DARK MODE</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ============ MAIN AREA ============ -->
+<div class="app-main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
+      <span class="topbar-title" id="topbarTitle">DASHBOARD</span>
+    </div>
+    <div class="topbar-right" id="topbarActions"></div>
+  </div>
+
+  <!-- ===== PAGE: DASHBOARD ===== -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-inner">
+      <div class="dash-grid">
+        <div class="dash-widget">
+          <div class="dash-widget-title">Today's Date</div>
+          <div class="dash-widget-value" id="dashDate" style="font-size:20px">—</div>
+          <div class="dash-widget-sub" id="dashDay">—</div>
+        </div>
+        <div class="dash-widget">
+          <div class="dash-widget-title">Current Week</div>
+          <div class="dash-widget-value" id="dashWeek" style="font-size:16px;margin-top:4px">—</div>
+          <div class="dash-widget-sub" id="dashDXY">DXY Bias: —</div>
+        </div>
+        <div class="dash-widget">
+          <div class="dash-widget-title">Market Session</div>
+          <div class="dash-widget-value" id="dashSession" style="font-size:16px;margin-top:4px">—</div>
+          <div class="dash-widget-sub" id="dashSessionTime">—</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="dash-widget">
+          <div class="dash-widget-title">Today's Bias</div>
+          <div id="dashBiasSummary" style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+            <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">เปิด Action Plan ก่อนครับ</div>
+          </div>
+        </div>
+        <div class="dash-widget">
+          <div class="dash-widget-title">Quick Note</div>
+          <textarea id="dashNote" placeholder="จดไว้ก่อน..." style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;resize:none;min-height:90px;line-height:1.7" oninput="saveDashNote()"></textarea>
+        </div>
+      </div>
+      <div class="dash-widget">
+        <div class="dash-widget-title">Economic Calendar This Week</div>
+        <div id="dashCalendar" style="margin-top:8px;color:var(--text3);font-family:var(--font-mono);font-size:11px">แปะรูป Economic Calendar ใน Action Plan ก่อนครับ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: ACTION PLAN ===== -->
+  <div class="page" id="page-action-plan">
+    <div class="history-bar" id="historyPanel" style="display:none">
+      <div class="history-bar-inner">
+        <button onclick="toggleHistory()" id="historyToggleBtn"
+          style="width:100%;text-align:left;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:8px 0;color:var(--text2);font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.08em">
+          <span>📋 PREVIOUS WEEKS</span><span id="historyChevron">▼</span>
+        </button>
+        <div id="historyList" style="display:none;padding-bottom:12px"></div>
+      </div>
+    </div>
+    <div style="padding:20px 24px;max-width:1400px;margin:0 auto">
+    <div class="page-layout">
+    <div class="main-content">
   <div class="overview-card">
     <div class="section-tag">MARKET OVERVIEW</div>
     <div class="overview-grid">
@@ -444,9 +609,134 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
 </div>
 
 </div><!-- end page-layout -->
-</div><!-- end main -->
+</div><!-- end action-plan inner -->
+  </div><!-- end page-action-plan -->
+
+  <!-- ===== PAGE: ANALYTICS ===== -->
+  <div class="page" id="page-analytics">
+    <div class="page-inner">
+      <div class="placeholder-page">
+        <div class="placeholder-icon">📊</div>
+        <div class="placeholder-title">ANALYTICS</div>
+        <div class="placeholder-sub">Coming Soon — จะดึงข้อมูลจาก Trade Journal</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: SETTINGS ===== -->
+  <div class="page" id="page-settings">
+    <div class="page-inner">
+      <div class="placeholder-page">
+        <div class="placeholder-icon">⚙</div>
+        <div class="placeholder-title">SETTINGS</div>
+        <div class="placeholder-sub">Coming Soon</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end app-main -->
+</div><!-- end app-shell -->
 
 <script>
+// ============================================
+// NAVIGATION
+// ============================================
+const PAGE_TITLES = {
+  'dashboard': 'DASHBOARD',
+  'action-plan': 'ACTION PLAN',
+  'analytics': 'ANALYTICS',
+  'settings': 'SETTINGS',
+};
+const ACTION_PLAN_ACTIONS = `
+  <button class="btn-archive" onclick="archiveWeek()">📦 Archive Week</button>
+  <button class="btn-new" onclick="exportData()">📋 Export</button>
+  <button class="btn-save" onclick="saveData()">💾 SAVE</button>
+`;
+
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById(`page-${pageId}`);
+  if (page) page.classList.add('active');
+  const nav = document.getElementById(`nav-${pageId}`);
+  if (nav) nav.classList.add('active');
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[pageId] || pageId.toUpperCase();
+  document.getElementById('topbarActions').innerHTML = pageId === 'action-plan' ? ACTION_PLAN_ACTIONS : '';
+  if (pageId === 'dashboard') updateDashboard();
+  closeSidebar();
+  localStorage.setItem('forex_active_page', pageId);
+}
+
+function openJournal() {
+  window.open('https://mark-supanat.github.io/forex-journal-2026/', '_blank');
+}
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ============================================
+// DASHBOARD
+// ============================================
+function updateDashboard() {
+  // Date & Day
+  const now = new Date();
+  const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  document.getElementById('dashDate').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()+543}`;
+  document.getElementById('dashDay').textContent = `วัน${days[now.getDay()]}`;
+
+  // Week & DXY
+  document.getElementById('dashWeek').textContent = getVal('ov_week') || currentWeek || '—';
+  const dxyBias = biasState['dxy'] || '—';
+  const dxyColor = dxyBias === 'LONG' ? '#059669' : dxyBias === 'SHORT' ? '#dc2626' : dxyBias === 'NEUTRAL' ? '#7c3aed' : dxyBias === 'WAIT' ? '#ea580c' : 'var(--text2)';
+  document.getElementById('dashDXY').innerHTML = `DXY Bias: <span style="color:${dxyColor};font-weight:700">${dxyBias}</span>`;
+
+  // Market Session (Thailand time UTC+7)
+  const h = now.getHours();
+  let session = '—', sessionTime = '';
+  if (h >= 4 && h < 11) { session = '🌏 ASIA'; sessionTime = '04:00 – 11:00'; }
+  else if (h >= 14 && h < 20) { session = '🌍 LONDON'; sessionTime = '14:00 – 20:00'; }
+  else if (h >= 20 || h < 1) { session = '🌎 NEW YORK'; sessionTime = '20:00 – 01:00'; }
+  else { session = 'ตลาดปิด'; sessionTime = 'Between Sessions'; }
+  document.getElementById('dashSession').textContent = session;
+  document.getElementById('dashSessionTime').textContent = sessionTime;
+
+  // Bias Summary
+  const today = ['SUN','MON','TUE','WED','THU','FRI','SAT'][now.getDay()];
+  const activeDay = ['PLAN','MON','TUE','WED','THU','FRI'].includes(today) ? today : 'PLAN';
+  const biasHtml = SYMBOLS.map(sym => {
+    const bias = ((biasState[sym.id] || {})[activeDay]) || '';
+    const color = bias === 'LONG' ? '#059669' : bias === 'SHORT' ? '#dc2626' : bias === 'NEUTRAL' ? '#7c3aed' : bias === 'WAIT' ? '#ea580c' : 'var(--text3)';
+    const bg = bias === 'LONG' ? '#d1fae5' : bias === 'SHORT' ? '#fee2e2' : bias === 'NEUTRAL' ? '#ede9fe' : bias === 'WAIT' ? '#ffedd5' : 'var(--bg3)';
+    return bias ? `<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0">
+      <span style="font-family:var(--font-display);font-size:13px;letter-spacing:.06em">${sym.name}</span>
+      <span style="background:${bg};color:${color};font-family:var(--font-mono);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px">${bias}</span>
+    </div>` : '';
+  }).filter(Boolean).join('') || '<div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">ยังไม่มีข้อมูล</div>';
+  document.getElementById('dashBiasSummary').innerHTML = biasHtml;
+
+  // Economic Calendar image
+  const calImg = (chartImages[currentWeek] || {})['__cal__'];
+  const calEl = document.getElementById('dashCalendar');
+  if (calImg) {
+    calEl.innerHTML = `<img src="${calImg}" style="width:100%;max-height:240px;object-fit:contain;border-radius:8px;cursor:zoom-in" onclick="window.open('${calImg}','_blank')">`;
+  }
+
+  // Quick note
+  const note = localStorage.getItem('forex_dash_note') || '';
+  document.getElementById('dashNote').value = note;
+}
+
+function saveDashNote() {
+  localStorage.setItem('forex_dash_note', document.getElementById('dashNote').value);
+}
+
 // ============================================
 // SYMBOLS CONFIG
 // ============================================
@@ -639,7 +929,11 @@ window.onload = async function() {
 
   renderSymbols();
   loadWeekData();
-  loadArchive(); // โหลด history
+  loadArchive();
+
+  // restore last active page
+  const lastPage = localStorage.getItem('forex_active_page') || 'action-plan';
+  switchPage(lastPage);
 
   // Global paste listener
   document.addEventListener('paste', handleGlobalPaste);
@@ -653,7 +947,10 @@ let currentTheme = 'light';
 function applyTheme(theme) {
   currentTheme = theme;
   document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
-  document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+  if (label) label.textContent = theme === 'dark' ? 'LIGHT MODE' : 'DARK MODE';
   localStorage.setItem('forex_theme', theme);
 }
 
