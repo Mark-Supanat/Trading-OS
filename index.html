@@ -1825,7 +1825,8 @@ function loadWeekData() {
       if (dd.tf) restoreTFDay(sym.id, day, dd.tf);
     });
 
-    // restore active tab (last used, default PLAN)
+    // restore Connect The Dots note
+    setVal(`${sym.id}_note`, d.ctdNote || '');
     const activeDay = savedTabs[sym.id] || 'PLAN';
     activeDayState[sym.id] = activeDay;
     DAYS.forEach(day => {
@@ -1860,7 +1861,7 @@ function clearAllFields() {
 
   SYMBOLS.forEach(sym => {
     DAYS.forEach((day, i) => {
-      setVal(`${sym.id}_${day}_pattern`, '');
+      setVal(`${sym.id}_note`, '');
       setVal(`${sym.id}_${day}_strategy`, '');
       setVal(`${sym.id}_${day}_risk`, '');
       setVal(`daynote_${sym.id}_${day}`, '');
@@ -1904,7 +1905,10 @@ function collectData() {
         tf:       tfState[`${sym.id}__${d}`] || '',
       };
     });
-    data[sym.id] = { days };
+    data[sym.id] = {
+      days,
+      ctdNote: getVal(`${sym.id}_note`),
+    };
   });
   return data;
 }
