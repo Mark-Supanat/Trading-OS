@@ -693,16 +693,25 @@ async function connectTheDots(symId) {
   const dxyBias = biasState['dxy'] || '—';
   const marketAnalysis = getVal('ov_analysis') || '';
 
-  const daysText = dayNotes.map(d =>
-    `${d.day}: ${d.pattern||'—'} | ${d.bias||'—'} | ${d.strategy||'—'}\n${d.note||'—'}`
-  ).join('\n\n');
+  const daysText = dayNotes.map((d, i) => {
+    const prev = i > 0 ? dayNotes[i-1] : null;
+    return `[${d.day}] Pattern: ${d.pattern||'—'} | Bias: ${d.bias||'—'} | Strategy: ${d.strategy||'—'}
+Note: ${d.note||'—'}${prev ? ` (ก่อนหน้า ${prev.day}: ${prev.bias||'—'} / ${prev.note ? prev.note.slice(0,60)+'...' : '—'})` : ''}`;
+  }).join('\n\n');
 
-  const prompt = `Forex Analyst: สรุป Weekly Market Story ของ ${sym.name} (Week: ${weekLabel}, DXY: ${dxyBias})
+  const prompt = `คุณคือ Trading Analyst ที่วิเคราะห์แบบเดียวกับ Mark (เจ้าของ Journal) — ใช้ภาษาเดียวกับที่ Mark พิมพ์ใน Note ไทยผสมอังกฤษ ตรงๆ ไม่ formal
 
-${marketAnalysis ? `Market Overview: ${marketAnalysis}\n` : ''}Daily Notes:
+ข้อมูลของสัปดาห์นี้ (${sym.name} | Week: ${weekLabel} | DXY: ${dxyBias}):
+${marketAnalysis ? `Market Context: ${marketAnalysis}\n` : ''}
 ${daysText}
 
-สรุปเป็น Market Story ภาษาไทยผสมอังกฤษ กระชับ ไม่เกิน 6 บรรทัด เชื่อมโยง flow ทั้งสัปดาห์ และ key takeaway สั้นๆ ท้าย`;
+วิเคราะห์แบบนี้:
+1. **เชื่อม Dots วันต่อวัน** — PLAN วางไว้ว่าอะไร → แต่ละวัน market เดินตาม หรือ diverge ยังไง
+2. **Setup ที่ควรจับ** — ถ้าเห็น pattern นี้ต่อเนื่อง 2-3 วัน ควรทำอะไร รอ confirm 100% หรือลองเข้าได้เลย
+3. **Risk ที่ต้องระวัง** — อะไรที่อาจทำให้ thesis พัง
+4. **Takeaway** — ถ้าเป็น Mark อีกคนจะบอกตัวเองว่าอะไร
+
+ห้ามสรุปซ้ำสิ่งที่พิมพ์ไปแล้ว — ให้วิเคราะห์และเพิ่ม insight ที่ Mark อาจยังไม่เห็น ไม่เกิน 8 บรรทัด`;
 
   btn.disabled = true;
   btn.classList.add('loading');
