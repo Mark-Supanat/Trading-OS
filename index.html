@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Action Plan — Weekly Forex</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -114,6 +115,20 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .dash-widget-value{font-family:var(--font-display);font-size:28px;letter-spacing:.06em;color:var(--text);line-height:1}
 .dash-widget-sub{font-size:12px;color:var(--text2);margin-top:6px;font-family:var(--font-mono)}
 .dash-coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;color:var(--text3);font-family:var(--font-mono);font-size:13px;gap:8px}
+
+/* ANALYTICS */
+.an-tab{padding:5px 14px;border-radius:6px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-weight:600;letter-spacing:.04em}
+.an-tab.active{background:var(--gold);color:#000;border-color:var(--gold)}
+.an-tab:hover:not(.active){border-color:var(--text2);color:var(--text)}
+.an-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.an-kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.an-kpi-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
+.an-kpi-value{font-family:var(--font-display);font-size:26px;letter-spacing:.04em;line-height:1}
+.an-kpi-sub{font-size:11px;color:var(--text2);font-family:var(--font-mono);margin-top:4px}
+.an-positive{color:#059669}
+.an-negative{color:#dc2626}
+.an-neutral{color:var(--text2)}
+@media(max-width:900px){.an-kpi-grid{grid-template-columns:repeat(2,1fr)}}
 
 /* PLACEHOLDER PAGE */
 .placeholder-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;color:var(--text3)}
@@ -622,11 +637,71 @@ select.field-sm option{background:var(--bg2);color:var(--text)}
   <!-- ===== PAGE: ANALYTICS ===== -->
   <div class="page" id="page-analytics">
     <div class="page-inner">
-      <div class="placeholder-page">
-        <div class="placeholder-icon">📊</div>
-        <div class="placeholder-title">ANALYTICS</div>
-        <div class="placeholder-sub">Coming Soon — จะดึงข้อมูลจาก Trade Journal</div>
+
+      <!-- CONTROLS -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="an-tab active" id="an-tab-all" onclick="setAnQuarter('all',this)">ทั้งหมด</button>
+          <button class="an-tab" id="an-tab-q1" onclick="setAnQuarter('q1',this)">Q1</button>
+          <button class="an-tab" id="an-tab-q2" onclick="setAnQuarter('q2',this)">Q2</button>
+          <button class="an-tab" id="an-tab-q3" onclick="setAnQuarter('q3',this)">Q3</button>
+        </div>
+        <button class="btn-save" id="anRefreshBtn" onclick="loadAnalytics()" style="font-size:11px;padding:5px 14px">🔄 Refresh</button>
       </div>
+
+      <!-- KPI CARDS -->
+      <div class="an-kpi-grid" id="anKpiGrid">
+        <div class="an-kpi-card"><div class="an-kpi-label">กำลังโหลด...</div></div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+        <div class="dash-widget">
+          <div class="dash-widget-title">Win Rate by Symbol</div>
+          <canvas id="chartSymbol" height="220"></canvas>
+        </div>
+        <div class="dash-widget">
+          <div class="dash-widget-title">Win Rate by Session</div>
+          <canvas id="chartSession" height="220"></canvas>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+        <div class="dash-widget">
+          <div class="dash-widget-title">Grade Distribution</div>
+          <canvas id="chartGrade" height="220"></canvas>
+        </div>
+        <div class="dash-widget">
+          <div class="dash-widget-title">Monthly P&L (%)</div>
+          <canvas id="chartMonthly" height="220"></canvas>
+        </div>
+      </div>
+
+      <!-- TRADE TABLE -->
+      <div class="dash-widget" style="margin-top:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="dash-widget-title" style="margin-bottom:0">Recent Trades</div>
+          <input id="anSearch" placeholder="ค้นหา Symbol..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:11px;padding:4px 10px;border-radius:6px;outline:none;width:160px" oninput="renderTradeTable()">
+        </div>
+        <div style="overflow-x:auto">
+          <table id="anTradeTable" style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--font-mono)">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);color:var(--text3)">
+                <th style="padding:6px 8px;text-align:left">Date</th>
+                <th style="padding:6px 8px;text-align:left">Symbol</th>
+                <th style="padding:6px 8px;text-align:left">Pos</th>
+                <th style="padding:6px 8px;text-align:left">Session</th>
+                <th style="padding:6px 8px;text-align:left">Setup</th>
+                <th style="padding:6px 8px;text-align:left">Grade</th>
+                <th style="padding:6px 8px;text-align:right">P&L%</th>
+                <th style="padding:6px 8px;text-align:left">W/L</th>
+              </tr>
+            </thead>
+            <tbody id="anTradeBody"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -755,6 +830,221 @@ ${daysText}
 }
 
 // ============================================
+// ANALYTICS
+// ============================================
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzYwOsDnkgo06tl2QYerpfaQNgR5q47C1ybXDqQJIKiO-k-y-Q7Xgfz-kt9rJMjXLPl/exec';
+let anAllTrades = [];
+let anQuarter = 'all';
+let anCharts = {};
+
+async function loadAnalytics() {
+  const btn = document.getElementById('anRefreshBtn');
+  if (btn) { btn.textContent = '⏳ Loading...'; btn.disabled = true; }
+  document.getElementById('anKpiGrid').innerHTML = '<div class="an-kpi-card"><div class="an-kpi-label">กำลังโหลดข้อมูล...</div></div>';
+
+  try {
+    const quarters = ['q1','q2','q3'];
+    const results = await Promise.all(quarters.map(q =>
+      fetch(`${GS_URL}?action=getTrades&quarter=${q}`)
+        .then(r => r.json())
+        .then(d => (d.trades || []).map(t => ({ ...t, _quarter: q })))
+        .catch(() => [])
+    ));
+    anAllTrades = results.flat();
+    renderAnalytics();
+  } catch(e) {
+    document.getElementById('anKpiGrid').innerHTML = '<div class="an-kpi-card"><div class="an-kpi-label" style="color:#dc2626">โหลดข้อมูลไม่ได้</div></div>';
+  } finally {
+    if (btn) { btn.textContent = '🔄 Refresh'; btn.disabled = false; }
+  }
+}
+
+function getFilteredTrades() {
+  if (anQuarter === 'all') return anAllTrades;
+  return anAllTrades.filter(t => t._quarter === anQuarter);
+}
+
+function setAnQuarter(q, btn) {
+  anQuarter = q;
+  document.querySelectorAll('.an-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAnalytics();
+}
+
+function renderAnalytics() {
+  const trades = getFilteredTrades();
+  if (!trades.length) {
+    document.getElementById('anKpiGrid').innerHTML = '<div class="an-kpi-card"><div class="an-kpi-label">ไม่มีข้อมูล</div></div>';
+    return;
+  }
+  renderKPIs(trades);
+  renderSymbolChart(trades);
+  renderSessionChart(trades);
+  renderGradeChart(trades);
+  renderMonthlyChart(trades);
+  renderTradeTable();
+}
+
+function calcWinRate(trades) {
+  if (!trades.length) return 0;
+  const wins = trades.filter(t => t.wl === 'W').length;
+  return (wins / trades.length * 100).toFixed(1);
+}
+
+function calcPF(trades) {
+  let gross = 0, loss = 0;
+  trades.forEach(t => {
+    const p = parseFloat(t.pnlPct) || 0;
+    if (p > 0) gross += p;
+    else loss += Math.abs(p);
+  });
+  return loss === 0 ? '∞' : (gross / loss).toFixed(2);
+}
+
+function renderKPIs(trades) {
+  const wins = trades.filter(t => t.wl === 'W').length;
+  const wr = calcWinRate(trades);
+  const pf = calcPF(trades);
+  const totalPnl = trades.reduce((s,t) => s + (parseFloat(t.pnlPct)||0), 0);
+  const avgPnl = trades.length ? (totalPnl/trades.length).toFixed(2) : 0;
+  const bestTrade = trades.reduce((b,t) => (parseFloat(t.pnlPct)||0) > (parseFloat(b.pnlPct)||0) ? t : b, trades[0]);
+  const worstTrade = trades.reduce((b,t) => (parseFloat(t.pnlPct)||0) < (parseFloat(b.pnlPct)||0) ? t : b, trades[0]);
+
+  document.getElementById('anKpiGrid').innerHTML = `
+    <div class="an-kpi-card">
+      <div class="an-kpi-label">Total Trades</div>
+      <div class="an-kpi-value">${trades.length}</div>
+      <div class="an-kpi-sub">${wins}W / ${trades.length-wins}L</div>
+    </div>
+    <div class="an-kpi-card">
+      <div class="an-kpi-label">Win Rate</div>
+      <div class="an-kpi-value ${parseFloat(wr)>=50?'an-positive':'an-negative'}">${wr}%</div>
+      <div class="an-kpi-sub">${wins} wins</div>
+    </div>
+    <div class="an-kpi-card">
+      <div class="an-kpi-label">Profit Factor</div>
+      <div class="an-kpi-value ${parseFloat(pf)>=1?'an-positive':'an-negative'}">${pf}</div>
+      <div class="an-kpi-sub">Gross/Loss ratio</div>
+    </div>
+    <div class="an-kpi-card">
+      <div class="an-kpi-label">Total P&L</div>
+      <div class="an-kpi-value ${totalPnl>=0?'an-positive':'an-negative'}">${totalPnl>=0?'+':''}${totalPnl.toFixed(1)}%</div>
+      <div class="an-kpi-sub">Avg ${avgPnl>0?'+':''}${avgPnl}% / trade</div>
+    </div>
+    <div class="an-kpi-card">
+      <div class="an-kpi-label">Best / Worst</div>
+      <div class="an-kpi-value" style="font-size:16px">
+        <span class="an-positive">+${parseFloat(bestTrade?.pnlPct||0).toFixed(1)}%</span>
+        <span style="color:var(--text3);font-size:12px"> / </span>
+        <span class="an-negative">${parseFloat(worstTrade?.pnlPct||0).toFixed(1)}%</span>
+      </div>
+      <div class="an-kpi-sub">${bestTrade?.sym||'—'} / ${worstTrade?.sym||'—'}</div>
+    </div>`;
+}
+
+function destroyChart(id) {
+  if (anCharts[id]) { anCharts[id].destroy(); delete anCharts[id]; }
+}
+
+function getChartColors(n) {
+  const palette = ['#f0b429','#059669','#3b82f6','#7c3aed','#ea580c','#dc2626','#06b6d4','#84cc16','#ec4899','#f97316'];
+  return Array.from({length:n},(_,i) => palette[i % palette.length]);
+}
+
+function renderSymbolChart(trades) {
+  destroyChart('chartSymbol');
+  const syms = [...new Set(trades.map(t=>t.sym))].sort();
+  const data = syms.map(s => {
+    const st = trades.filter(t=>t.sym===s);
+    return parseFloat(calcWinRate(st));
+  });
+  const ctx = document.getElementById('chartSymbol');
+  if (!ctx) return;
+  anCharts['chartSymbol'] = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:syms, datasets:[{ data, backgroundColor:getChartColors(syms.length), borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } } }
+  });
+}
+
+function renderSessionChart(trades) {
+  destroyChart('chartSession');
+  const sessions = ['ASIA','LONDON','US'];
+  const data = sessions.map(s => {
+    const st = trades.filter(t=>t.session===s||t.session?.includes(s));
+    return st.length ? parseFloat(calcWinRate(st)) : 0;
+  });
+  const ctx = document.getElementById('chartSession');
+  if (!ctx) return;
+  anCharts['chartSession'] = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:sessions, datasets:[{ data, backgroundColor:['#3b82f6','#f0b429','#ea580c'], borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } } }
+  });
+}
+
+function renderGradeChart(trades) {
+  destroyChart('chartGrade');
+  const grades = ['A','B','C'];
+  const data = grades.map(g => trades.filter(t=>t.gradeFinal===g||t.grade===g).length);
+  const ctx = document.getElementById('chartGrade');
+  if (!ctx) return;
+  anCharts['chartGrade'] = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels:grades, datasets:[{ data, backgroundColor:['#059669','#f0b429','#dc2626'], borderWidth:0 }] },
+    options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{ color:'#6b7a9e', padding:12 } } } }
+  });
+}
+
+function renderMonthlyChart(trades) {
+  destroyChart('chartMonthly');
+  const monthly = {};
+  trades.forEach(t => {
+    const d = new Date(t.dateOpen);
+    if (isNaN(d)) return;
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if (!monthly[key]) monthly[key] = 0;
+    monthly[key] += parseFloat(t.pnlPct) || 0;
+  });
+  const labels = Object.keys(monthly).sort();
+  const data = labels.map(k => parseFloat(monthly[k].toFixed(2)));
+  const ctx = document.getElementById('chartMonthly');
+  if (!ctx) return;
+  anCharts['chartMonthly'] = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ data, backgroundColor: data.map(v => v>=0 ? '#059669' : '#dc2626'), borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{ ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e',maxRotation:45}, grid:{display:false} } } }
+  });
+}
+
+function renderTradeTable() {
+  const search = (document.getElementById('anSearch')?.value||'').toLowerCase();
+  let trades = getFilteredTrades();
+  if (search) trades = trades.filter(t => (t.sym||'').toLowerCase().includes(search) || (t.setup||'').toLowerCase().includes(search));
+  trades = [...trades].sort((a,b) => new Date(b.dateOpen)-new Date(a.dateOpen)).slice(0,50);
+
+  const tbody = document.getElementById('anTradeBody');
+  if (!tbody) return;
+  tbody.innerHTML = trades.map(t => {
+    const pnl = parseFloat(t.pnlPct)||0;
+    const pnlColor = pnl>0?'#059669':pnl<0?'#dc2626':'var(--text2)';
+    const wlColor = t.wl==='W'?'#059669':t.wl==='L'?'#dc2626':'var(--text2)';
+    const gradeColor = t.gradeFinal==='A'?'#059669':t.gradeFinal==='B'?'#f0b429':'#dc2626';
+    const dateStr = t.dateOpen ? new Date(t.dateOpen).toLocaleDateString('th-TH',{day:'2-digit',month:'short'}) : '—';
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:6px 8px;color:var(--text2)">${dateStr}</td>
+      <td style="padding:6px 8px;font-weight:700;color:var(--text)">${t.sym||'—'}</td>
+      <td style="padding:6px 8px;color:${t.pos==='BUY'?'#059669':'#dc2626'}">${t.pos||'—'}</td>
+      <td style="padding:6px 8px;color:var(--text2)">${t.session||'—'}</td>
+      <td style="padding:6px 8px;color:var(--text2);font-size:11px">${(t.setup||'—').slice(0,30)}</td>
+      <td style="padding:6px 8px;font-weight:700;color:${gradeColor}">${t.gradeFinal||t.grade||'—'}</td>
+      <td style="padding:6px 8px;text-align:right;font-weight:700;color:${pnlColor}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</td>
+      <td style="padding:6px 8px;font-weight:700;color:${wlColor}">${t.wl||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================
 // NAVIGATION
 // ============================================
 const PAGE_TITLES = {
@@ -779,6 +1069,7 @@ function switchPage(pageId) {
   document.getElementById('topbarTitle').textContent = PAGE_TITLES[pageId] || pageId.toUpperCase();
   document.getElementById('topbarActions').innerHTML = pageId === 'action-plan' ? ACTION_PLAN_ACTIONS : '';
   if (pageId === 'dashboard') updateDashboard();
+  if (pageId === 'analytics' && anAllTrades.length === 0) loadAnalytics();
   closeSidebar();
   localStorage.setItem('forex_active_page', pageId);
 }
