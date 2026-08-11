@@ -6,6 +6,7 @@
 <title>Action Plan — Weekly Forex</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -198,11 +199,32 @@ body::before{
   transform:translateY(-2px);border-color:rgba(59,130,246,.3) !important;
 }
 
-/* DASHBOARD */
-.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
-.dash-widget-title{font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;color:var(--text3);text-transform:uppercase;margin-bottom:12px;font-weight:600}
-.dash-widget-value{font-family:var(--font-display);font-size:28px;letter-spacing:.06em;color:var(--text);line-height:1}
-.dash-widget-sub{font-size:11px;color:var(--text2);margin-top:6px;font-family:var(--font-mono)}
+/* DASHBOARD SYMBOL CARDS */
+.dash-sym-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.dash-sym-card:hover{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.06);transform:translateY(-2px)}
+.dash-sym-name{font-family:var(--font-display);font-size:16px;letter-spacing:.08em;color:var(--text2);margin-bottom:4px}
+.dash-sym-price{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--text);line-height:1}
+.dash-sym-change{font-family:var(--font-mono);font-size:11px;font-weight:700;margin-left:6px}
+.dash-sym-change.up{color:#10b981}
+.dash-sym-change.down{color:#f43f5e}
+.dash-sym-sparkline{margin:8px 0 6px;height:36px;width:100%}
+.dash-sym-bias{display:inline-flex;align-items:center;justify-content:center;padding:3px 12px;border-radius:6px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.06em;width:100%;margin-top:2px}
+
+/* WEEK DAY DOTS */
+.dash-day-dot{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .3s}
+.dash-day-dot.done{background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.5);color:#10b981}
+.dash-day-dot.today{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.5);border-width:2px}
+
+/* MARKET PULSE BULLETS */
+.pulse-bullet{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2);line-height:1.5}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0;margin-top:6px}
+
+[data-theme="light"] .dash-sym-card{background:#f5f7ff;border-color:#dde3f5}
+[data-theme="light"] .dash-day-dot{background:#f0f4ff;border-color:#c4cde8}
+[data-theme="light"] .dash-day-dot.done{background:#d1fae5;border-color:#6ee7b7;color:#059669}
+
+/* DASHBOARD GRID */
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
 
 /* ANALYTICS */
 .an-tab{padding:5px 14px;border-radius:20px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-weight:600;letter-spacing:.06em}
@@ -518,6 +540,38 @@ select.field-sm option{background:#111827;color:var(--text)}
 @media(max-width:600px){
   .overview-grid,.field-row{grid-template-columns:1fr}
 }
+/* ============================================
+   LOGIN GATE
+   ============================================ */
+#loginGate{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.login-card{
+  width:100%;max-width:340px;
+  background:rgba(17,24,39,.7);border:1px solid var(--border);
+  border-radius:var(--card-radius);
+  box-shadow:var(--card-shadow),var(--card-glow);
+  backdrop-filter:blur(12px);
+  padding:36px 28px;text-align:center;
+}
+[data-theme="light"] .login-card{background:rgba(255,255,255,.9)}
+.login-logo{font-family:var(--font-display);font-size:26px;letter-spacing:.14em;color:var(--text);margin-bottom:2px}
+.login-logo span{background:linear-gradient(135deg,#f0b429,#ffd166);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.login-sub{font-family:var(--font-mono);font-size:9px;color:var(--text3);letter-spacing:.18em;text-transform:uppercase;margin-bottom:32px}
+.login-icon{width:44px;height:44px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:18px}
+.login-msg{font-family:var(--font-body);font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:28px}
+.login-google-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:11px 16px;background:var(--text);color:var(--bg);border:none;border-radius:10px;
+  font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s;
+}
+.login-google-btn:hover{opacity:.88}
+.login-note{font-family:var(--font-mono);font-size:9px;color:var(--text3);margin-top:24px;letter-spacing:.05em}
+.login-denied{color:var(--red);font-size:12px;font-family:var(--font-mono);margin-top:16px;display:none}
+.login-loading{color:var(--text3);font-size:12px;font-family:var(--font-mono)}
 </style>
 </head>
 <body>
@@ -525,7 +579,23 @@ select.field-sm option{background:#111827;color:var(--text)}
 <div class="toast" id="toast"></div>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<div class="app-shell">
+<!-- ============ LOGIN GATE ============ -->
+<div id="loginGate">
+  <div class="login-card">
+    <div class="login-logo">TRADING <span>OS</span></div>
+    <div class="login-sub">FOREX ACTION PLAN</div>
+    <div class="login-icon">🔒</div>
+    <div class="login-msg" id="loginMsg">พื้นที่ส่วนตัว<br>เข้าสู่ระบบด้วยบัญชี Google ของคุณ</div>
+    <button class="login-google-btn" id="loginBtn" onclick="signInWithGoogle()">
+      <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h11.8c-.5 2.7-2.1 5-4.4 6.6v5.5h7.1c4.1-3.8 6.6-9.4 6.6-16.6z"/><path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.7-3.9-12.4-9.1H4.3v5.7C7.9 41 15.3 46 24 46z"/><path fill="#FBBC05" d="M11.6 27.9c-.4-1.3-.7-2.6-.7-4s.3-2.7.7-4v-5.7H4.3C2.8 17.1 2 20.5 2 24s.8 6.9 2.3 9.7l7.3-5.8z"/><path fill="#EA4335" d="M24 10.9c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C34.9 4.2 30 2 24 2 15.3 2 7.9 7 4.3 14.3l7.3 5.7c1.7-5.2 6.6-9.1 12.4-9.1z"/></svg>
+      เข้าสู่ระบบด้วย Google
+    </button>
+    <div class="login-denied" id="loginDenied">⛔ บัญชีนี้ไม่มีสิทธิ์เข้าถึง</div>
+    <div class="login-note">RESTRICTED ACCESS · AUTHORIZED USER ONLY</div>
+  </div>
+</div>
+
+<div class="app-shell" id="appShell" style="display:none">
 
 <!-- ============ SIDEBAR ============ -->
 <nav class="sidebar" id="sidebar">
@@ -562,6 +632,10 @@ select.field-sm option{background:#111827;color:var(--text)}
       <span id="themeIcon">🌙</span>
       <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.04em" id="themeLabel">DARK MODE</span>
     </button>
+    <button class="sidebar-theme-btn" onclick="signOut()">
+      <span>🚪</span>
+      <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.04em">LOGOUT</span>
+    </button>
   </div>
 </nav>
 
@@ -580,39 +654,81 @@ select.field-sm option{background:#111827;color:var(--text)}
   <!-- ===== PAGE: DASHBOARD ===== -->
   <div class="page active" id="page-dashboard">
     <div class="page-inner">
-      <div class="dash-grid">
-        <div class="dash-widget">
-          <div class="dash-widget-title">Today's Date</div>
-          <div class="dash-widget-value" id="dashDate" style="font-size:20px">—</div>
+
+      <!-- ROW 1: Date / Week / Session -->
+      <div class="dash-grid" style="margin-bottom:14px">
+        <div class="dash-widget" style="position:relative">
+          <div style="position:absolute;top:16px;right:16px;color:var(--text3);font-size:18px">📅</div>
+          <div class="dash-widget-title">TODAY'S DATE</div>
+          <div class="dash-widget-value" id="dashDate" style="font-size:28px">—</div>
           <div class="dash-widget-sub" id="dashDay">—</div>
         </div>
-        <div class="dash-widget">
-          <div class="dash-widget-title">Current Week</div>
-          <div class="dash-widget-value" id="dashWeek" style="font-size:16px;margin-top:4px">—</div>
+        <div class="dash-widget" style="position:relative">
+          <div style="position:absolute;top:16px;right:16px;color:var(--text3);font-size:18px">📆</div>
+          <div class="dash-widget-title">CURRENT WEEK</div>
+          <div class="dash-widget-value" id="dashWeek" style="font-size:22px;margin-top:4px">—</div>
           <div class="dash-widget-sub" id="dashDXY">DXY Bias: —</div>
         </div>
-        <div class="dash-widget">
-          <div class="dash-widget-title">Market Session</div>
-          <div class="dash-widget-value" id="dashSession" style="font-size:16px;margin-top:4px">—</div>
+        <div class="dash-widget" style="position:relative">
+          <div style="position:absolute;top:16px;right:16px;color:var(--text3);font-size:18px">🕐</div>
+          <div class="dash-widget-title">MARKET SESSION</div>
+          <div class="dash-widget-value" id="dashSession" style="font-size:22px;margin-top:4px">—</div>
           <div class="dash-widget-sub" id="dashSessionTime">—</div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+      <!-- ROW 2: Symbol Bias Cards -->
+      <div id="dashSymbolCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px"></div>
+
+      <!-- ROW 3: Market Pulse / This Week / Economic Calendar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
+
+        <!-- Market Pulse -->
         <div class="dash-widget">
-          <div class="dash-widget-title">Today's Bias</div>
-          <div id="dashBiasSummary" style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
-            <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">เปิด Action Plan ก่อนครับ</div>
+          <div class="dash-widget-title">MARKET PULSE</div>
+          <div id="dashPulse" style="margin-top:4px;display:flex;flex-direction:column;gap:8px;min-height:80px">
+            <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">เขียน Market Analysis ใน Action Plan ก่อน</div>
+          </div>
+          <div id="dashPulseTime" style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--text3)"></div>
+        </div>
+
+        <!-- This Week Tracker -->
+        <div class="dash-widget">
+          <div class="dash-widget-title">THIS WEEK</div>
+          <div style="display:flex;justify-content:space-between;margin-top:12px;margin-bottom:12px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">จันทร์</div><div id="weekday_0" class="dash-day-dot"></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">อังคาร</div><div id="weekday_1" class="dash-day-dot"></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">พุธ</div><div id="weekday_2" class="dash-day-dot"></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">พฤหัส</div><div id="weekday_3" class="dash-day-dot"></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">ศุกร์</div><div id="weekday_4" class="dash-day-dot"></div></div>
+          </div>
+          <div style="background:rgba(255,255,255,.06);border-radius:4px;height:4px;overflow:hidden">
+            <div id="weekProgress" style="height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:4px;transition:width .5s;width:0%"></div>
+          </div>
+          <div id="weekProgressLabel" style="margin-top:6px;font-family:var(--font-mono);font-size:10px;color:var(--text3)">0 / 5 วัน</div>
+        </div>
+
+        <!-- Economic Calendar -->
+        <div class="dash-widget">
+          <div class="dash-widget-title">ECONOMIC CALENDAR THIS WEEK</div>
+          <div id="dashCalendar" style="margin-top:8px">
+            <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">แปะรูป Calendar ใน Action Plan ก่อนครับ</div>
           </div>
         </div>
-        <div class="dash-widget">
-          <div class="dash-widget-title">Quick Note</div>
-          <textarea id="dashNote" placeholder="จดไว้ก่อน..." style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;resize:none;min-height:90px;line-height:1.7" oninput="saveDashNote()"></textarea>
-        </div>
       </div>
-      <div class="dash-widget">
-        <div class="dash-widget-title">Economic Calendar This Week</div>
-        <div id="dashCalendar" style="margin-top:8px;color:var(--text3);font-family:var(--font-mono);font-size:11px">แปะรูป Economic Calendar ใน Action Plan ก่อนครับ</div>
+
+      <!-- Quick Note -->
+      <div class="dash-widget" style="margin-bottom:14px">
+        <div class="dash-widget-title">QUICK NOTE</div>
+        <textarea id="dashNote" placeholder="จดไว้ก่อน — Key level วันนี้, สิ่งที่ต้องระวัง..." style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;resize:none;min-height:60px;line-height:1.7;margin-top:4px" oninput="saveDashNote()"></textarea>
       </div>
+
+      <!-- Quote -->
+      <div style="text-align:center;padding:20px;color:var(--text3)">
+        <div style="font-size:18px;color:var(--text2);font-style:italic;margin-bottom:6px">" Discipline today, freedom tomorrow. "</div>
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.1em">— Trading is a game of patience —</div>
+      </div>
+
     </div>
   </div>
 
@@ -1214,54 +1330,158 @@ function closeSidebar() {
 // ============================================
 // DASHBOARD
 // ============================================
+let dashPrices = {};
+
 function updateDashboard() {
-  // Date & Day
   const now = new Date();
-  const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
   const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  document.getElementById('dashDate').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()+543}`;
-  document.getElementById('dashDay').textContent = `วัน${days[now.getDay()]}`;
+  const days = ['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัส','วันศุกร์','วันเสาร์'];
+
+  // Date
+  const el = document.getElementById('dashDate');
+  if (el) el.textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()+543}`;
+  const elDay = document.getElementById('dashDay');
+  if (elDay) elDay.textContent = days[now.getDay()];
 
   // Week & DXY
-  document.getElementById('dashWeek').textContent = getVal('ov_week') || currentWeek || '—';
+  const weekEl = document.getElementById('dashWeek');
+  if (weekEl) weekEl.textContent = getVal('ov_week') || currentWeek || '—';
   const dxyBias = biasState['dxy'] || '—';
-  const dxyColor = dxyBias === 'LONG' ? '#059669' : dxyBias === 'SHORT' ? '#dc2626' : dxyBias === 'NEUTRAL' ? '#7c3aed' : dxyBias === 'WAIT' ? '#ea580c' : 'var(--text2)';
-  document.getElementById('dashDXY').innerHTML = `DXY Bias: <span style="color:${dxyColor};font-weight:700">${dxyBias}</span>`;
+  const dxyColors = {LONG:'#10b981',SHORT:'#f43f5e',NEUTRAL:'#a5b4fc',WAIT:'#fb923c'};
+  const dxyEl = document.getElementById('dashDXY');
+  if (dxyEl) dxyEl.innerHTML = `DXY Bias: <span style="color:${dxyColors[dxyBias]||'var(--text2)'};font-weight:700">${dxyBias}</span>`;
 
-  // Market Session (Thailand time UTC+7)
+  // Session
   const h = now.getHours();
-  let session = '—', sessionTime = '';
-  if (h >= 4 && h < 11) { session = '🌏 ASIA'; sessionTime = '04:00 – 11:00'; }
-  else if (h >= 14 && h < 20) { session = '🌍 LONDON'; sessionTime = '14:00 – 20:00'; }
-  else if (h >= 20 || h < 1) { session = '🌎 NEW YORK'; sessionTime = '20:00 – 01:00'; }
-  else { session = 'ตลาดปิด'; sessionTime = 'Between Sessions'; }
-  document.getElementById('dashSession').textContent = session;
-  document.getElementById('dashSessionTime').textContent = sessionTime;
+  let session = 'ตลาดปิด', sessionTime = 'Between Sessions';
+  if (h >= 4 && h < 11) { session = '🌏 ASIA'; sessionTime = '04:00 – 11:00 น.'; }
+  else if (h >= 14 && h < 20) { session = '🌍 LONDON'; sessionTime = '14:00 – 20:00 น.'; }
+  else if (h >= 20 || h < 1) { session = '🌎 NEW YORK'; sessionTime = '20:00 – 01:00 น.'; }
+  const sessEl = document.getElementById('dashSession');
+  if (sessEl) sessEl.textContent = session;
+  const sessTimeEl = document.getElementById('dashSessionTime');
+  if (sessTimeEl) sessTimeEl.textContent = sessionTime;
 
-  // Bias Summary
-  const today = ['SUN','MON','TUE','WED','THU','FRI','SAT'][now.getDay()];
-  const activeDay = ['PLAN','MON','TUE','WED','THU','FRI'].includes(today) ? today : 'PLAN';
-  const biasHtml = SYMBOLS.map(sym => {
-    const bias = ((biasState[sym.id] || {})[activeDay]) || '';
-    const color = bias === 'LONG' ? '#059669' : bias === 'SHORT' ? '#dc2626' : bias === 'NEUTRAL' ? '#7c3aed' : bias === 'WAIT' ? '#ea580c' : 'var(--text3)';
-    const bg = bias === 'LONG' ? '#d1fae5' : bias === 'SHORT' ? '#fee2e2' : bias === 'NEUTRAL' ? '#ede9fe' : bias === 'WAIT' ? '#ffedd5' : 'var(--bg3)';
-    return bias ? `<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0">
-      <span style="font-family:var(--font-display);font-size:13px;letter-spacing:.06em">${sym.name}</span>
-      <span style="background:${bg};color:${color};font-family:var(--font-mono);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px">${bias}</span>
-    </div>` : '';
-  }).filter(Boolean).join('') || '<div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">ยังไม่มีข้อมูล</div>';
-  document.getElementById('dashBiasSummary').innerHTML = biasHtml;
+  // Week Tracker
+  const dow = now.getDay();
+  const doneCount = dow === 0 ? 0 : dow === 6 ? 5 : dow - 1;
+  const todayIdx = (dow >= 1 && dow <= 5) ? dow - 1 : -1;
+  for (let i = 0; i < 5; i++) {
+    const dot = document.getElementById(`weekday_${i}`);
+    if (!dot) continue;
+    dot.className = 'dash-day-dot';
+    dot.innerHTML = '';
+    if (i < doneCount) { dot.classList.add('done'); dot.innerHTML = '✓'; }
+    else if (i === todayIdx) dot.classList.add('today');
+  }
+  const prog = document.getElementById('weekProgress');
+  if (prog) prog.style.width = Math.min(100,(doneCount/5)*100) + '%';
+  const progLabel = document.getElementById('weekProgressLabel');
+  if (progLabel) progLabel.textContent = `${doneCount} / 5 วัน`;
 
-  // Economic Calendar image
-  const calImg = (chartImages[currentWeek] || {})['__cal__'];
-  const calEl = document.getElementById('dashCalendar');
-  if (calImg) {
-    calEl.innerHTML = `<img src="${calImg}" style="width:100%;max-height:240px;object-fit:contain;border-radius:8px;cursor:zoom-in" onclick="window.open('${calImg}','_blank')">`;
+  // Market Pulse
+  const analysis = getVal('ov_analysis') || '';
+  const pulseEl = document.getElementById('dashPulse');
+  if (pulseEl) {
+    if (analysis) {
+      const bullets = analysis.split('\n').filter(l=>l.trim()).slice(0,5);
+      pulseEl.innerHTML = bullets.map(b=>`<div class="pulse-bullet"><div class="pulse-dot"></div><span>${b.replace(/^[-•*]\s*/,'')}</span></div>`).join('');
+      const timeEl = document.getElementById('dashPulseTime');
+      if (timeEl) timeEl.textContent = `อัปเดตล่าสุด ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} น.`;
+    } else {
+      pulseEl.innerHTML = '<div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">เขียน Market Analysis ใน Action Plan ก่อนครับ</div>';
+    }
   }
 
+  // Economic Calendar
+  const calImg = (chartImages[currentWeek] || {})['__cal__'];
+  const calEl = document.getElementById('dashCalendar');
+  if (calEl) calEl.innerHTML = calImg
+    ? `<img src="${calImg}" style="width:100%;max-height:200px;object-fit:contain;border-radius:8px;cursor:zoom-in;background:#060810" onclick="window.open('${calImg}','_blank')">`
+    : '<div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">แปะรูป Calendar ใน Action Plan ก่อนครับ</div>';
+
   // Quick note
-  const note = localStorage.getItem('forex_dash_note') || '';
-  document.getElementById('dashNote').value = note;
+  const noteEl = document.getElementById('dashNote');
+  if (noteEl) noteEl.value = localStorage.getItem('forex_dash_note') || '';
+
+  // Symbol cards + fetch prices
+  renderDashSymbolCards();
+  fetchYahooPrices();
+}
+
+// Yahoo Finance via allorigins proxy
+const YAHOO_SYMBOLS = {
+  'XAUUSD':'GC=F','XAGUSD':'SI=F','BTCUSDT':'BTC-USD',
+  'USDJPY':'JPY=X','EURUSD':'EURUSD=X','GBPUSD':'GBPUSD=X',
+  'USOIL':'CL=F','S50':'^SET','NDX':'NQ=F',
+};
+
+async function fetchYahooPrices() {
+  for (const sym of SYMBOLS) {
+    const ticker = YAHOO_SYMBOLS[sym.name];
+    if (!ticker) continue;
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=5d`;
+      const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxy);
+      const data = await res.json();
+      const result = data?.chart?.result?.[0];
+      if (!result) continue;
+      const meta = result.meta;
+      const price = meta.regularMarketPrice || meta.previousClose;
+      const prevClose = meta.previousClose || meta.chartPreviousClose;
+      const change = (price && prevClose) ? ((price-prevClose)/prevClose*100) : 0;
+      const closes = result.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
+      dashPrices[sym.name] = { price, change, closes };
+    } catch(e) {}
+  }
+  renderDashSymbolCards();
+}
+
+function renderDashSymbolCards() {
+  const container = document.getElementById('dashSymbolCards');
+  if (!container) return;
+  const today = ['SUN','MON','TUE','WED','THU','FRI','SAT'][new Date().getDay()];
+  const activeDay = DAYS.includes(today) ? today : 'PLAN';
+
+  container.innerHTML = SYMBOLS.map(sym => {
+    const bias = ((biasState[sym.id]||{})[activeDay]) || '';
+    const p = dashPrices[sym.name];
+    const biasBg = {LONG:'rgba(16,185,129,.2)',SHORT:'rgba(244,63,94,.2)',NEUTRAL:'rgba(129,140,248,.2)',WAIT:'rgba(251,146,60,.2)'}[bias] || 'rgba(255,255,255,.05)';
+    const biasColor = {LONG:'#10b981',SHORT:'#f43f5e',NEUTRAL:'#a5b4fc',WAIT:'#fb923c'}[bias] || 'var(--text3)';
+
+    // sparkline
+    let sparkline = `<div style="height:36px;display:flex;align-items:center"><span style="color:var(--text3);font-size:10px;font-family:var(--font-mono)">—</span></div>`;
+    if (p?.closes?.length > 1) {
+      const vals = p.closes;
+      const min = Math.min(...vals), max = Math.max(...vals), range = max-min||1;
+      const w=140, h=36;
+      const pts = vals.map((v,i)=>`${(i/(vals.length-1))*w},${h-((v-min)/range)*h}`).join(' ');
+      const lc = p.change>=0?'#10b981':'#f43f5e';
+      sparkline = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="overflow:visible;margin:8px 0 6px"><polyline fill="none" stroke="${lc}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="${pts}"/></svg>`;
+    }
+
+    const priceStr = p ? formatDashPrice(sym.name, p.price) : '—';
+    const changeStr = p ? `${p.change>=0?'+':''}${p.change.toFixed(2)}%` : '';
+    const changeCls = p ? (p.change>=0?'up':'down') : '';
+
+    return `<div class="dash-sym-card ${sym.cls}" onclick="switchPage('action-plan');setTimeout(()=>scrollToCard('${sym.id}'),300)">
+      <div class="dash-sym-name">${sym.name}</div>
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <span class="dash-sym-price">${priceStr}</span>
+        <span class="dash-sym-change ${changeCls}">${changeStr}</span>
+      </div>
+      ${sparkline}
+      <div class="dash-sym-bias" style="background:${biasBg};color:${biasColor}">${bias||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function formatDashPrice(sym, price) {
+  if (!price) return '—';
+  if (sym==='BTCUSDT') return price.toLocaleString('en',{maximumFractionDigits:0});
+  if (['XAUUSD','S50','NDX','USOIL'].includes(sym)) return price.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return price.toFixed(4);
 }
 
 function saveDashNote() {
@@ -1320,6 +1540,63 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const SB_STORAGE = 'https://ufwqhvcddrullyixyfxm.supabase.co/storage/v1/object';
 const SB_BUCKET = 'charts';
 const SB_RECORD_ID = 'main';
+
+// ============================================
+// AUTH (Google Sign-in via Supabase Auth)
+// ============================================
+const SB_PROJECT_URL = 'https://ufwqhvcddrullyixyfxm.supabase.co';
+const ALLOWED_EMAIL = 'm4l2k191@gmail.com';
+const sbAuth = supabase.createClient(SB_PROJECT_URL, SB_KEY);
+
+async function signInWithGoogle() {
+  await sbAuth.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href.split('#')[0] }
+  });
+}
+
+async function signOut() {
+  await sbAuth.auth.signOut();
+  window.location.reload();
+}
+
+function showLoginGate(deniedEmail) {
+  document.getElementById('loginGate').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+  const denied = document.getElementById('loginDenied');
+  const btn = document.getElementById('loginBtn');
+  const msg = document.getElementById('loginMsg');
+  if (deniedEmail) {
+    denied.style.display = 'block';
+    denied.textContent = `⛔ ${deniedEmail} ไม่มีสิทธิ์เข้าถึง`;
+    msg.style.display = 'none';
+    btn.style.display = 'none';
+  }
+}
+
+function showApp() {
+  document.getElementById('loginGate').style.display = 'none';
+  document.getElementById('appShell').style.display = 'flex';
+}
+
+async function checkAuthAndInit() {
+  const { data: { session } } = await sbAuth.auth.getSession();
+  if (session && session.user && session.user.email === ALLOWED_EMAIL) {
+    showApp();
+    initApp();
+  } else if (session && session.user) {
+    // logged in with Google, but wrong account
+    await sbAuth.auth.signOut();
+    showLoginGate(session.user.email);
+  } else {
+    showLoginGate();
+  }
+}
+
+sbAuth.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN') checkAuthAndInit();
+  if (event === 'SIGNED_OUT') showLoginGate();
+});
 
 // Upload รูปขึ้น Storage → return public URL
 async function uploadImage(file, path) {
@@ -1417,10 +1694,15 @@ let chartImages = {};
 // INIT
 // ============================================
 window.onload = async function() {
-  // โหลด theme ก่อน
+  // โหลด theme ก่อน (ใช้ได้ทั้งหน้า login และหน้าแอปหลัก)
   const savedTheme = localStorage.getItem('forex_theme') || 'dark';
   applyTheme(savedTheme);
 
+  // เช็ค auth ก่อนโหลดข้อมูลใดๆ — ถ้าไม่ผ่าน จะค้างที่หน้า login เท่านั้น
+  await checkAuthAndInit();
+};
+
+async function initApp() {
   // โหลด images จาก localStorage
   const savedImgs = localStorage.getItem('forex_action_plan_imgs');
   if (savedImgs) chartImages = JSON.parse(savedImgs);
@@ -1468,7 +1750,7 @@ window.onload = async function() {
 
   // Global paste listener
   document.addEventListener('paste', handleGlobalPaste);
-};
+}
 
 // ============================================
 // THEME
