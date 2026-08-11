@@ -239,13 +239,37 @@ body::before{
 .an-sym-pill.active{background:linear-gradient(135deg,#3b82f6,#818cf8);color:#fff;border-color:transparent;box-shadow:0 2px 10px rgba(59,130,246,.35)}
 .an-sym-pill:hover:not(.active){border-color:var(--text2);color:var(--text)}
 .an-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.an-kpi-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
-.an-kpi-value{font-family:var(--font-display);font-size:26px;letter-spacing:.04em;line-height:1}
-.an-kpi-sub{font-size:11px;color:var(--text2);font-family:var(--font-mono);margin-top:4px}
+.an-kpi-card{position:relative;padding:16px 16px 14px;overflow:hidden}
+.an-kpi-accent{position:absolute;top:0;left:0;right:0;height:3px}
+.an-kpi-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.an-kpi-icon{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.an-kpi-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
+.an-kpi-value{font-family:var(--font-display);font-size:28px;letter-spacing:.04em;line-height:1}
+.an-kpi-sub{font-size:11px;color:var(--text2);font-family:var(--font-mono);margin-top:5px}
 .an-positive{color:#10b981}
 .an-negative{color:#f43f5e}
 .an-neutral{color:var(--text2)}
 @media(max-width:900px){.an-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ANALYTICS CHART WIDGETS */
+.an-chart-widget .dash-widget-title{display:flex;align-items:center;gap:7px}
+.an-chart-icon{font-size:13px;opacity:.85}
+
+/* ANALYTICS TABLE */
+.an-table-wrap{overflow-x:auto;border-radius:10px}
+#anTradeTable thead th{position:sticky;top:0;background:var(--bg2);z-index:1}
+#anTradeTable tbody tr{transition:background .12s}
+#anTradeTable tbody tr:nth-child(even){background:rgba(255,255,255,.02)}
+#anTradeTable tbody tr:hover{background:rgba(59,130,246,.06)}
+.an-pill{display:inline-flex;align-items:center;justify-content:center;min-width:22px;padding:2px 7px;border-radius:6px;font-weight:700;font-size:11px}
+.an-pill-win{background:rgba(16,185,129,.15);color:#10b981}
+.an-pill-loss{background:rgba(244,63,94,.15);color:#f43f5e}
+.an-pill-grade-a{background:rgba(16,185,129,.15);color:#10b981}
+.an-pill-grade-b{background:rgba(240,180,41,.15);color:#f0b429}
+.an-pill-grade-c{background:rgba(244,63,94,.15);color:#f43f5e}
+.an-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--text3);gap:8px;grid-column:1/-1}
+.an-empty-state .an-empty-icon{font-size:32px;opacity:.4}
+.an-empty-state .an-empty-text{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em}
 
 /* PLACEHOLDER */
 .placeholder-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;color:var(--text3)}
@@ -890,23 +914,23 @@ select.field-sm option{background:#111827;color:var(--text)}
 
       <!-- CHARTS ROW -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
-        <div class="dash-widget">
-          <div class="dash-widget-title">Win Rate by Symbol</div>
+        <div class="dash-widget an-chart-widget">
+          <div class="dash-widget-title"><span class="an-chart-icon">🎯</span>Win Rate by Symbol</div>
           <canvas id="chartSymbol" height="220"></canvas>
         </div>
-        <div class="dash-widget">
-          <div class="dash-widget-title">Win Rate by Session</div>
+        <div class="dash-widget an-chart-widget">
+          <div class="dash-widget-title"><span class="an-chart-icon">🕒</span>Win Rate by Session</div>
           <canvas id="chartSession" height="220"></canvas>
         </div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
-        <div class="dash-widget">
-          <div class="dash-widget-title">Grade Distribution</div>
+        <div class="dash-widget an-chart-widget">
+          <div class="dash-widget-title"><span class="an-chart-icon">🏅</span>Grade Distribution</div>
           <canvas id="chartGrade" height="220"></canvas>
         </div>
-        <div class="dash-widget">
-          <div class="dash-widget-title">Monthly P&L (%)</div>
+        <div class="dash-widget an-chart-widget">
+          <div class="dash-widget-title"><span class="an-chart-icon">📈</span>Monthly P&L (%)</div>
           <canvas id="chartMonthly" height="220"></canvas>
         </div>
       </div>
@@ -917,18 +941,18 @@ select.field-sm option{background:#111827;color:var(--text)}
           <div class="dash-widget-title" style="margin-bottom:0">Recent Trades</div>
           <input id="anSearch" placeholder="ค้นหา Symbol..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:11px;padding:4px 10px;border-radius:6px;outline:none;width:160px" oninput="renderTradeTable()">
         </div>
-        <div style="overflow-x:auto">
+        <div class="an-table-wrap" style="max-height:420px;overflow-y:auto">
           <table id="anTradeTable" style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--font-mono)">
             <thead>
               <tr style="border-bottom:1px solid var(--border);color:var(--text3)">
-                <th style="padding:6px 8px;text-align:left">Date</th>
-                <th style="padding:6px 8px;text-align:left">Symbol</th>
-                <th style="padding:6px 8px;text-align:left">Pos</th>
-                <th style="padding:6px 8px;text-align:left">Session</th>
-                <th style="padding:6px 8px;text-align:left">Setup</th>
-                <th style="padding:6px 8px;text-align:left">Grade</th>
-                <th style="padding:6px 8px;text-align:right">P&L%</th>
-                <th style="padding:6px 8px;text-align:left">W/L</th>
+                <th style="padding:8px">Date</th>
+                <th style="padding:8px">Symbol</th>
+                <th style="padding:8px">Pos</th>
+                <th style="padding:8px">Session</th>
+                <th style="padding:8px">Setup</th>
+                <th style="padding:8px">Grade</th>
+                <th style="padding:8px;text-align:right">P&L%</th>
+                <th style="padding:8px">W/L</th>
               </tr>
             </thead>
             <tbody id="anTradeBody"></tbody>
@@ -1160,29 +1184,53 @@ function renderKPIs(trades) {
   const bestTrade = trades.reduce((b,t) => (parseFloat(t.pnlPct)||0) > (parseFloat(b.pnlPct)||0) ? t : b, trades[0]);
   const worstTrade = trades.reduce((b,t) => (parseFloat(t.pnlPct)||0) < (parseFloat(b.pnlPct)||0) ? t : b, trades[0]);
 
+  const wrGood = parseFloat(wr) >= 50;
+  const pfGood = parseFloat(pf) >= 1 || pf === '∞';
+  const pnlGood = totalPnl >= 0;
+
   document.getElementById('anKpiGrid').innerHTML = `
     <div class="an-kpi-card">
-      <div class="an-kpi-label">Total Trades</div>
+      <div class="an-kpi-accent" style="background:linear-gradient(90deg,#3b82f6,#818cf8)"></div>
+      <div class="an-kpi-top">
+        <div class="an-kpi-icon" style="background:rgba(59,130,246,.15)">📊</div>
+        <div class="an-kpi-label">Total Trades</div>
+      </div>
       <div class="an-kpi-value">${trades.length}</div>
       <div class="an-kpi-sub">${wins}W / ${trades.length-wins}L</div>
     </div>
     <div class="an-kpi-card">
-      <div class="an-kpi-label">Win Rate</div>
-      <div class="an-kpi-value ${parseFloat(wr)>=50?'an-positive':'an-negative'}">${wr}%</div>
+      <div class="an-kpi-accent" style="background:${wrGood?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#f43f5e,#fb7185)'}"></div>
+      <div class="an-kpi-top">
+        <div class="an-kpi-icon" style="background:${wrGood?'rgba(16,185,129,.15)':'rgba(244,63,94,.15)'}">🎯</div>
+        <div class="an-kpi-label">Win Rate</div>
+      </div>
+      <div class="an-kpi-value ${wrGood?'an-positive':'an-negative'}">${wr}%</div>
       <div class="an-kpi-sub">${wins} wins</div>
     </div>
     <div class="an-kpi-card">
-      <div class="an-kpi-label">Profit Factor</div>
-      <div class="an-kpi-value ${parseFloat(pf)>=1?'an-positive':'an-negative'}">${pf}</div>
+      <div class="an-kpi-accent" style="background:${pfGood?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#f43f5e,#fb7185)'}"></div>
+      <div class="an-kpi-top">
+        <div class="an-kpi-icon" style="background:${pfGood?'rgba(16,185,129,.15)':'rgba(244,63,94,.15)'}">⚖️</div>
+        <div class="an-kpi-label">Profit Factor</div>
+      </div>
+      <div class="an-kpi-value ${pfGood?'an-positive':'an-negative'}">${pf}</div>
       <div class="an-kpi-sub">Gross/Loss ratio</div>
     </div>
     <div class="an-kpi-card">
-      <div class="an-kpi-label">Total P&L</div>
-      <div class="an-kpi-value ${totalPnl>=0?'an-positive':'an-negative'}">${totalPnl>=0?'+':''}${totalPnl.toFixed(1)}%</div>
+      <div class="an-kpi-accent" style="background:${pnlGood?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#f43f5e,#fb7185)'}"></div>
+      <div class="an-kpi-top">
+        <div class="an-kpi-icon" style="background:${pnlGood?'rgba(16,185,129,.15)':'rgba(244,63,94,.15)'}">💰</div>
+        <div class="an-kpi-label">Total P&L</div>
+      </div>
+      <div class="an-kpi-value ${pnlGood?'an-positive':'an-negative'}">${totalPnl>=0?'+':''}${totalPnl.toFixed(1)}%</div>
       <div class="an-kpi-sub">Avg ${avgPnl>0?'+':''}${avgPnl}% / trade</div>
     </div>
     <div class="an-kpi-card">
-      <div class="an-kpi-label">Best / Worst</div>
+      <div class="an-kpi-accent" style="background:linear-gradient(90deg,#f0b429,#fb923c)"></div>
+      <div class="an-kpi-top">
+        <div class="an-kpi-icon" style="background:rgba(240,180,41,.15)">🏆</div>
+        <div class="an-kpi-label">Best / Worst</div>
+      </div>
       <div class="an-kpi-value" style="font-size:16px">
         <span class="an-positive">+${parseFloat(bestTrade?.pnlPct||0).toFixed(1)}%</span>
         <span style="color:var(--text3);font-size:12px"> / </span>
@@ -1201,6 +1249,12 @@ function getChartColors(n) {
   return Array.from({length:n},(_,i) => palette[i % palette.length]);
 }
 
+function getPerfColor(winRate) {
+  if (winRate >= 60) return '#10b981';
+  if (winRate >= 40) return '#f0b429';
+  return '#f43f5e';
+}
+
 function renderSymbolChart(trades) {
   destroyChart('chartSymbol');
   const syms = [...new Set(trades.map(t=>t.sym))].sort();
@@ -1212,8 +1266,8 @@ function renderSymbolChart(trades) {
   if (!ctx) return;
   anCharts['chartSymbol'] = new Chart(ctx, {
     type:'bar',
-    data:{ labels:syms, datasets:[{ data, backgroundColor:getChartColors(syms.length), borderRadius:6 }] },
-    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } } }
+    data:{ labels:syms, datasets:[{ data, backgroundColor:data.map(getPerfColor), borderRadius:6, maxBarThickness:44 }] },
+    options:{ responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Win Rate: ${c.raw}%`}}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } } }
   });
 }
 
@@ -1228,8 +1282,8 @@ function renderSessionChart(trades) {
   if (!ctx) return;
   anCharts['chartSession'] = new Chart(ctx, {
     type:'bar',
-    data:{ labels:sessions, datasets:[{ data, backgroundColor:['#3b82f6','#f0b429','#ea580c'], borderRadius:6 }] },
-    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } } }
+    data:{ labels:sessions, datasets:[{ data, backgroundColor:data.map(getPerfColor), borderRadius:6, maxBarThickness:60 }] },
+    options:{ responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Win Rate: ${c.raw}%`}}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } } }
   });
 }
 
@@ -1241,8 +1295,8 @@ function renderGradeChart(trades) {
   if (!ctx) return;
   anCharts['chartGrade'] = new Chart(ctx, {
     type:'doughnut',
-    data:{ labels:grades, datasets:[{ data, backgroundColor:['#059669','#f0b429','#dc2626'], borderWidth:0 }] },
-    options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{ color:'#6b7a9e', padding:12 } } } }
+    data:{ labels:grades, datasets:[{ data, backgroundColor:['#10b981','#f0b429','#f43f5e'], borderWidth:0 }] },
+    options:{ responsive:true, cutout:'62%', plugins:{ legend:{ position:'bottom', labels:{ color:'#6b7a9e', padding:12 } } } }
   });
 }
 
@@ -1262,7 +1316,7 @@ function renderMonthlyChart(trades) {
   if (!ctx) return;
   anCharts['chartMonthly'] = new Chart(ctx, {
     type:'bar',
-    data:{ labels, datasets:[{ data, backgroundColor: data.map(v => v>=0 ? '#059669' : '#dc2626'), borderRadius:6 }] },
+    data:{ labels, datasets:[{ data, backgroundColor: data.map(v => v>=0 ? '#10b981' : '#f43f5e'), borderRadius:6, maxBarThickness:44 }] },
     options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{ ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e',maxRotation:45}, grid:{display:false} } } }
   });
 }
@@ -1275,21 +1329,28 @@ function renderTradeTable() {
 
   const tbody = document.getElementById('anTradeBody');
   if (!tbody) return;
+
+  if (trades.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="an-empty-state"><div class="an-empty-icon">📭</div><div class="an-empty-text">ไม่พบข้อมูลเทรด</div></div></td></tr>`;
+    return;
+  }
+
   tbody.innerHTML = trades.map(t => {
     const pnl = parseFloat(t.pnlPct)||0;
-    const pnlColor = pnl>0?'#059669':pnl<0?'#dc2626':'var(--text2)';
-    const wlColor = t.wl==='W'?'#059669':t.wl==='L'?'#dc2626':'var(--text2)';
-    const gradeColor = t.gradeFinal==='A'?'#059669':t.gradeFinal==='B'?'#f0b429':'#dc2626';
+    const pnlColor = pnl>0?'#10b981':pnl<0?'#f43f5e':'var(--text2)';
+    const grade = t.gradeFinal||t.grade||'—';
+    const gradeClass = grade==='A'?'an-pill-grade-a':grade==='B'?'an-pill-grade-b':grade==='C'?'an-pill-grade-c':'';
+    const wlClass = t.wl==='W'?'an-pill-win':t.wl==='L'?'an-pill-loss':'';
     const dateStr = t.dateOpen ? new Date(t.dateOpen).toLocaleDateString('th-TH',{day:'2-digit',month:'short'}) : '—';
-    return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:6px 8px;color:var(--text2)">${dateStr}</td>
-      <td style="padding:6px 8px;font-weight:700;color:var(--text)">${t.sym||'—'}</td>
-      <td style="padding:6px 8px;color:${t.pos==='BUY'?'#059669':'#dc2626'}">${t.pos||'—'}</td>
-      <td style="padding:6px 8px;color:var(--text2)">${t.session||'—'}</td>
-      <td style="padding:6px 8px;color:var(--text2);font-size:11px">${(t.setup||'—').slice(0,30)}</td>
-      <td style="padding:6px 8px;font-weight:700;color:${gradeColor}">${t.gradeFinal||t.grade||'—'}</td>
-      <td style="padding:6px 8px;text-align:right;font-weight:700;color:${pnlColor}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</td>
-      <td style="padding:6px 8px;font-weight:700;color:${wlColor}">${t.wl||'—'}</td>
+    return `<tr>
+      <td style="padding:8px;color:var(--text2)">${dateStr}</td>
+      <td style="padding:8px;font-weight:700;color:var(--text)">${t.sym||'—'}</td>
+      <td style="padding:8px;color:${t.pos==='BUY'?'#10b981':'#f43f5e'};font-weight:600">${t.pos||'—'}</td>
+      <td style="padding:8px;color:var(--text2)">${t.session||'—'}</td>
+      <td style="padding:8px;color:var(--text2);font-size:11px">${(t.setup||'—').slice(0,30)}</td>
+      <td style="padding:8px"><span class="an-pill ${gradeClass}">${grade}</span></td>
+      <td style="padding:8px;text-align:right;font-weight:700;color:${pnlColor}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</td>
+      <td style="padding:8px"><span class="an-pill ${wlClass}">${t.wl||'—'}</span></td>
     </tr>`;
   }).join('');
 }
