@@ -208,7 +208,7 @@ body::before{
 .dash-sym-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
 .dash-sym-card:hover{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.06);transform:translateY(-2px)}
 .dash-sym-name{font-family:var(--font-display);font-size:16px;letter-spacing:.08em;color:var(--text2);margin-bottom:4px}
-.sym-icon-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.08);font-size:11px;margin-right:6px;flex-shrink:0;vertical-align:middle}
+.sym-icon-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:10px;font-weight:800;margin-right:7px;flex-shrink:0;vertical-align:middle;font-family:var(--font-mono);letter-spacing:0}
 .dash-sym-price{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--text);line-height:1}
 .dash-sym-change{font-family:var(--font-mono);font-size:11px;font-weight:700;margin-left:6px}
 .dash-sym-change.up{color:#10b981}
@@ -1540,7 +1540,7 @@ function renderDashSymbolCards() {
     const changeCls = p ? (p.change>=0?'up':'down') : '';
 
     return `<div class="dash-sym-card ${sym.cls}" onclick="switchPage('action-plan');setTimeout(()=>scrollToCard('${sym.id}'),300)">
-      <div class="dash-sym-name"><span class="sym-icon-badge">${sym.icon||''}</span>${sym.name}</div>
+      <div class="dash-sym-name"><span class="sym-icon-badge" style="background:${sym.iconBg||'rgba(255,255,255,.08)'};color:${sym.iconColor||'inherit'}">${sym.icon||''}</span>${sym.name}</div>
       <div style="display:flex;align-items:baseline;gap:4px">
         <span class="dash-sym-price">${priceStr}</span>
         <span class="dash-sym-change ${changeCls}">${changeStr}</span>
@@ -1565,16 +1565,19 @@ function saveDashNote() {
 // ============================================
 // SYMBOLS CONFIG
 // ============================================
+const GOLD_BAR_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 8h14l2 10H3l2-10z" fill="#fff8dc" stroke="#8a6d00" stroke-width="1"/><path d="M5 8h14l1 4H4l1-4z" fill="#fffbe8"/></svg>`;
+const SILVER_BAR_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 8h14l2 10H3l2-10z" fill="#e8edf2" stroke="#5b6b7a" stroke-width="1"/><path d="M5 8h14l1 4H4l1-4z" fill="#f5f8fb"/></svg>`;
+
 const SYMBOLS = [
-  {id:'xagusd', name:'XAGUSD', tf:'H4 — H1', cls:'sym-xag', icon:'🥈'},
-  {id:'xauusd', name:'XAUUSD', tf:'H4 — H1', cls:'sym-xau', icon:'🥇'},
-  {id:'btcusdt', name:'BTCUSDT', tf:'Day — H4', cls:'sym-btc', icon:'₿'},
-  {id:'usdjpy', name:'USDJPY', tf:'Day — H4', cls:'sym-jpy', icon:'🇯🇵'},
-  {id:'eurusd', name:'EURUSD', tf:'Day — H4', cls:'sym-eur', icon:'🇪🇺'},
-  {id:'gbpusd', name:'GBPUSD', tf:'H4 — H1', cls:'sym-gbp', icon:'🇬🇧'},
-  {id:'s50', name:'S50', tf:'H1', cls:'sym-s50', icon:'🇹🇭'},
-  {id:'usoil', name:'USOIL', tf:'H4', cls:'sym-oil', icon:'🛢️'},
-  {id:'ndx', name:'NDX', tf:'Day — H4', cls:'sym-ndx', icon:'🇺🇸'},
+  {id:'xagusd', name:'XAGUSD', tf:'H4 — H1', cls:'sym-xag', icon:SILVER_BAR_SVG, iconBg:'#94a3b8', iconColor:'#1e293b'},
+  {id:'xauusd', name:'XAUUSD', tf:'H4 — H1', cls:'sym-xau', icon:GOLD_BAR_SVG, iconBg:'#f0b429', iconColor:'#1e1400'},
+  {id:'btcusdt', name:'BTCUSDT', tf:'Day — H4', cls:'sym-btc', icon:'₿', iconBg:'#f7931a', iconColor:'#fff'},
+  {id:'usdjpy', name:'USDJPY', tf:'Day — H4', cls:'sym-jpy', icon:'🇯🇵', iconBg:'#1f2937', iconColor:'#fff'},
+  {id:'eurusd', name:'EURUSD', tf:'Day — H4', cls:'sym-eur', icon:'🇪🇺', iconBg:'#1f2937', iconColor:'#fff'},
+  {id:'gbpusd', name:'GBPUSD', tf:'H4 — H1', cls:'sym-gbp', icon:'🇬🇧', iconBg:'#1f2937', iconColor:'#fff'},
+  {id:'s50', name:'S50', tf:'H1', cls:'sym-s50', icon:'🇹🇭', iconBg:'#1f2937', iconColor:'#fff'},
+  {id:'usoil', name:'USOIL', tf:'H4', cls:'sym-oil', icon:'🛢️', iconBg:'#292524', iconColor:'#fff'},
+  {id:'ndx', name:'NDX', tf:'Day — H4', cls:'sym-ndx', icon:'100', iconBg:'#3b82f6', iconColor:'#fff'},
 ];
 
 const PATTERNS = [
@@ -2050,7 +2053,7 @@ function renderHistoryWeekContent(w, wi) {
     }).join('');
 
     return `<div class="history-sym-card ${sym.cls}">
-      <div class="history-sym-name"><span class="sym-icon-badge">${sym.icon||''}</span>${sym.name}</div>
+      <div class="history-sym-name"><span class="sym-icon-badge" style="background:${sym.iconBg||'rgba(255,255,255,.08)'};color:${sym.iconColor||'inherit'}">${sym.icon||''}</span>${sym.name}</div>
       <div class="history-day-tabs">${tabsHtml}</div>
       ${contentHtml}
     </div>`;
@@ -2118,7 +2121,7 @@ function renderSymbols() {
           <span class="drag-handle" title="ลากเพื่อเรียงลำดับ"
             draggable="true"
             ondragstart="onCardDragStart(event,'${sym.id}')">⠿</span>
-          <span class="sym-name"><span class="sym-icon-badge">${sym.icon||''}</span>${sym.name}</span>
+          <span class="sym-name"><span class="sym-icon-badge" style="background:${sym.iconBg||'rgba(255,255,255,.08)'};color:${sym.iconColor||'inherit'}">${sym.icon||''}</span>${sym.name}</span>
         </div>
         <div class="day-tabs" id="daytabs_${sym.id}" style="margin-bottom:0">
           ${['PLAN','MON','TUE','WED','THU','FRI'].map((d,i) =>
@@ -2766,7 +2769,7 @@ function updateSummary() {
     const biasTagClass = bias ? `bias-tag-${bias}` : 'bias-tag-none';
     const biasLabel = bias || '—';
     return `<div class="summary-sym-row ${sym.cls.replace('sym-','').split(' ').map(c=>'').join('')}" onclick="scrollToCard('${sym.id}')" title="ไปที่ ${sym.name}">
-      <span class="summary-sym-row-name ${sym.cls}" style="color:inherit"><span class="sym-icon-badge">${sym.icon||''}</span>${sym.name}</span>
+      <span class="summary-sym-row-name ${sym.cls}" style="color:inherit"><span class="sym-icon-badge" style="background:${sym.iconBg||'rgba(255,255,255,.08)'};color:${sym.iconColor||'inherit'}">${sym.icon||''}</span>${sym.name}</span>
       <span class="summary-bias-tag ${biasTagClass}">${biasLabel}</span>
       ${strategy ? `<span style="font-size:9px;color:var(--text3);font-family:var(--font-mono)">${strategy}</span>` : ''}
     </div>`;
