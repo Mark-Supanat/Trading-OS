@@ -1624,6 +1624,7 @@ const SB_RECORD_ID = 'main';
 const SB_PROJECT_URL = 'https://ufwqhvcddrullyixyfxm.supabase.co';
 const ALLOWED_EMAIL = 'm4l2k191@gmail.com';
 const sbAuth = supabase.createClient(SB_PROJECT_URL, SB_KEY);
+let currentAccessToken = null;
 
 async function signInWithGoogle() {
   await sbAuth.auth.signInWithOAuth({
@@ -1669,6 +1670,7 @@ function renderProfile(user) {
 async function checkAuthAndInit() {
   const { data: { session } } = await sbAuth.auth.getSession();
   if (session && session.user && session.user.email === ALLOWED_EMAIL) {
+    currentAccessToken = session.access_token;
     renderProfile(session.user);
     showApp();
     initApp();
@@ -1683,7 +1685,8 @@ async function checkAuthAndInit() {
 
 sbAuth.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN') checkAuthAndInit();
-  if (event === 'SIGNED_OUT') showLoginGate();
+  if (event === 'TOKEN_REFRESHED' && session) currentAccessToken = session.access_token;
+  if (event === 'SIGNED_OUT') { currentAccessToken = null; showLoginGate(); }
 });
 
 // Upload รูปขึ้น Storage → return public URL
@@ -1692,13 +1695,13 @@ async function uploadImage(file, path) {
     // ลบรูปเก่าก่อน (upsert)
     await fetch(`${SB_STORAGE}/${SB_BUCKET}/${path}`, {
       method: 'DELETE',
-      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
     });
     const res = await fetch(`${SB_STORAGE}/${SB_BUCKET}/${path}`, {
       method: 'POST',
       headers: {
         'apikey': SB_KEY,
-        'Authorization': `Bearer ${SB_KEY}`,
+        'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
         'Content-Type': file.type || 'image/png',
         'x-upsert': 'true',
       },
@@ -1722,7 +1725,7 @@ async function deleteImage(path) {
   try {
     await fetch(`${SB_STORAGE}/${SB_BUCKET}/${path}`, {
       method: 'DELETE',
-      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
     });
   } catch(e) {}
 }
@@ -1732,7 +1735,7 @@ async function sbFetch(method, body) {
     method,
     headers: {
       'apikey': SB_KEY,
-      'Authorization': `Bearer ${SB_KEY}`,
+      'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
       'Content-Type': 'application/json',
       'Prefer': method === 'POST' ? 'resolution=merge-duplicates' : 'return=minimal',
     },
@@ -1744,7 +1747,7 @@ async function sbFetch(method, body) {
 async function cloudLoad() {
   try {
     const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_RECORD_ID}&select=data`, {
-      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
     });
     const rows = await res.json();
     if (rows && rows[0] && rows[0].data) {
@@ -1901,7 +1904,7 @@ let archiveData = { weeks: [] }; // max 3 weeks
 async function loadArchive() {
   try {
     const res = await fetch(`${SB_URL}/action_plan?id=eq.archive&select=data`, {
-      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
     });
     const rows = await res.json();
     if (rows && rows[0] && rows[0].data) {
@@ -1917,7 +1920,7 @@ async function saveArchive() {
       method: 'POST',
       headers: {
         'apikey': SB_KEY,
-        'Authorization': `Bearer ${SB_KEY}`,
+        'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
         'Content-Type': 'application/json',
         'Prefer': 'resolution=merge-duplicates',
       },
