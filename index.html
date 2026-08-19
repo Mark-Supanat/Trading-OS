@@ -1044,6 +1044,40 @@ select.field-sm option{background:#111827;color:var(--text)}
   <div class="page" id="page-analytics">
     <div class="page-inner">
 
+      <!-- THIS WEEK SUMMARY -->
+      <div class="dash-widget" style="margin-bottom:14px;padding:20px 22px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div class="dash-widget-title" style="margin-bottom:0;font-size:12px">📅 สรุปสัปดาห์นี้ — <span id="weekRangeLabel">—</span></div>
+          <div id="weekTradeCount" style="font-family:var(--font-mono);font-size:11px;color:var(--text2)">—</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+          <div style="text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Trades</div>
+            <div id="weekTotalTrades" style="font-family:var(--font-display);font-size:26px">—</div>
+          </div>
+          <div style="text-align:center;padding:10px;border-radius:12px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15)">
+            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Win Rate</div>
+            <div id="weekWinRate" style="font-family:var(--font-display);font-size:26px;color:#34d399">—</div>
+          </div>
+          <div style="text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">W / L</div>
+            <div id="weekWL" style="font-family:var(--font-display);font-size:26px">—</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase">Grade</span>
+          <div id="weekGradeBreakdown" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        </div>
+
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Symbol Breakdown</div>
+        <div id="weekSymbolTable" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div style="font-family:var(--font-mono);font-size:9.5px;color:var(--text3);margin-top:10px;line-height:1.6">
+          * ยังไม่มีคอลัมน์เวลาปิดออเดอร์ใน Google Sheet เลยยังคำนวณ "ระยะเวลาถือ" ให้ไม่ได้ — บอกชื่อคอลัมน์ที่ใช้ได้เลยถ้าอยากเพิ่ม
+        </div>
+      </div>
+
       <!-- CONTROLS -->
       <div style="margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
@@ -1265,12 +1299,92 @@ async function loadAnalytics() {
         .catch(() => [])
     ));
     anAllTrades = results.flat();
+    renderThisWeekSummary();
     renderAnalytics();
   } catch(e) {
     document.getElementById('anKpiGrid').innerHTML = '<div class="an-kpi-card"><div class="an-kpi-label" style="color:#dc2626">โหลดข้อมูลไม่ได้</div></div>';
   } finally {
     if (btn) { btn.textContent = '🔄 Refresh'; btn.disabled = false; }
   }
+}
+
+function getWeekRange(d = new Date()) {
+  const day = d.getDay() || 7; // Mon=1..Sun=7
+  const mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() - day + 1, 0, 0, 0, 0);
+  const nextMon = new Date(mon);
+  nextMon.setDate(mon.getDate() + 7);
+  return { start: mon, end: nextMon };
+}
+
+function renderThisWeekSummary() {
+  const { start, end } = getWeekRange();
+  const trades = anAllTrades.filter(t => {
+    if (!t.dateOpen) return false;
+    const d = new Date(t.dateOpen);
+    return d >= start && d < end;
+  });
+
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const fri = new Date(start); fri.setDate(start.getDate() + 4);
+  const rangeLabel = document.getElementById('weekRangeLabel');
+  if (rangeLabel) rangeLabel.textContent = `${start.getDate()}-${fri.getDate()} ${months[fri.getMonth()]} ${fri.getFullYear()}`;
+
+  const countEl = document.getElementById('weekTradeCount');
+  const totalEl = document.getElementById('weekTotalTrades');
+  const winRateEl = document.getElementById('weekWinRate');
+  const wlEl = document.getElementById('weekWL');
+  const gradeEl = document.getElementById('weekGradeBreakdown');
+  const symTableEl = document.getElementById('weekSymbolTable');
+  if (!totalEl) return;
+
+  if (!trades.length) {
+    countEl.textContent = '';
+    totalEl.textContent = '0';
+    winRateEl.textContent = '—';
+    wlEl.textContent = '—';
+    gradeEl.innerHTML = `<span style="font-family:var(--font-mono);font-size:11px;color:var(--text3)">ยังไม่มีเทรดในสัปดาห์นี้</span>`;
+    symTableEl.innerHTML = '';
+    return;
+  }
+
+  countEl.textContent = `${trades.length} ไม้`;
+  totalEl.textContent = trades.length;
+
+  const wins = trades.filter(t => t.wl === 'W').length;
+  const losses = trades.filter(t => t.wl === 'L').length;
+  const decided = wins + losses;
+  winRateEl.textContent = decided ? `${((wins/decided)*100).toFixed(1)}%` : '—';
+  wlEl.innerHTML = `<span style="color:#34d399">${wins}</span><span style="color:var(--text3);font-size:16px"> / </span><span style="color:#fb7185">${losses}</span>`;
+
+  // Grade breakdown
+  const gradeCount = {};
+  trades.forEach(t => { const g = t.gradeFinal || t.grade || '—'; gradeCount[g] = (gradeCount[g]||0) + 1; });
+  const gradeClassMap = { A:'an-pill-grade-a', B:'an-pill-grade-b', C:'an-pill-grade-c' };
+  gradeEl.innerHTML = Object.entries(gradeCount).sort((a,b)=>a[0].localeCompare(b[0])).map(([g,c]) =>
+    `<span class="an-pill ${gradeClassMap[g]||''}" style="${!gradeClassMap[g]?'background:rgba(255,255,255,.06);color:var(--text3)':''}">${g} · ${c}</span>`
+  ).join('');
+
+  // Per-symbol breakdown
+  const bySym = {};
+  trades.forEach(t => {
+    const s = t.sym || '—';
+    if (!bySym[s]) bySym[s] = { count:0, w:0, l:0, pnl:0 };
+    bySym[s].count++;
+    if (t.wl === 'W') bySym[s].w++;
+    if (t.wl === 'L') bySym[s].l++;
+    bySym[s].pnl += parseFloat(t.pnlPct) || 0;
+  });
+  symTableEl.innerHTML = Object.entries(bySym).sort((a,b)=>b[1].count-a[1].count).map(([sym, s]) => {
+    const pnlColor = s.pnl>0?'#34d399':s.pnl<0?'#fb7185':'var(--text2)';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)">
+      <div style="font-family:var(--font-mono);font-size:12px;font-weight:600">${sym}</div>
+      <div style="display:flex;align-items:center;gap:14px;font-family:var(--font-mono);font-size:11px;color:var(--text2)">
+        <span>${s.count} ไม้</span>
+        <span><span style="color:#34d399">${s.w}W</span> / <span style="color:#fb7185">${s.l}L</span></span>
+        <span style="color:${pnlColor};font-weight:600;min-width:56px;text-align:right">${s.pnl>=0?'+':''}${s.pnl.toFixed(1)}%</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function getFilteredTrades() {
