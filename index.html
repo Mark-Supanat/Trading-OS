@@ -842,8 +842,31 @@ select.field-sm option{background:#111827;color:var(--text)}
         </div>
       </div>
 
-      <!-- ROW 2: Symbol Bias Cards -->
-      <div id="dashSymbolCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px"></div>
+      <!-- ROW 2: TradingView Ticker Tape (real-time, official widget) -->
+      <div class="dash-widget" style="padding:0;margin-bottom:14px;overflow:hidden">
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+          {
+            "symbols": [
+              { "proName": "OANDA:XAUUSD", "title": "XAUUSD" },
+              { "proName": "OANDA:XAGUSD", "title": "XAGUSD" },
+              { "proName": "BINANCE:BTCUSDT", "title": "BTCUSDT" },
+              { "proName": "TFEX:S501!", "title": "S50" },
+              { "proName": "NASDAQ:NDX", "title": "NDX" },
+              { "proName": "TVC:USOIL", "title": "USOIL" },
+              { "proName": "FX:USDJPY", "title": "USDJPY" },
+              { "proName": "FX:EURUSD", "title": "EURUSD" },
+              { "proName": "FX:GBPUSD", "title": "GBPUSD" }
+            ],
+            "colorTheme": "dark",
+            "isTransparent": true,
+            "displayMode": "adaptive",
+            "locale": "en"
+          }
+          </script>
+        </div>
+      </div>
 
       <!-- ROW 3: Market Pulse / This Week / Economic Calendar -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
@@ -1535,7 +1558,6 @@ function closeSidebar() {
 // ============================================
 // DASHBOARD
 // ============================================
-let dashPrices = {};
 
 // ============================================
 // DAILY TRADING QUOTE — rotates once per calendar day (local time),
@@ -1672,88 +1694,10 @@ function updateDashboard() {
   const noteEl = document.getElementById('dashNote');
   if (noteEl) noteEl.value = localStorage.getItem('forex_dash_note') || '';
 
-  // Symbol cards + fetch prices
-  renderDashSymbolCards();
-  fetchYahooPrices();
-
   // Daily quote (rotates once per calendar day)
   renderDailyQuote();
 }
 
-// Yahoo Finance via allorigins proxy
-const YAHOO_SYMBOLS = {
-  'XAUUSD':'GC=F','XAGUSD':'SI=F','BTCUSDT':'BTC-USD',
-  'USDJPY':'JPY=X','EURUSD':'EURUSD=X','GBPUSD':'GBPUSD=X',
-  'USOIL':'CL=F','S50':'^SET','NDX':'NQ=F',
-};
-
-async function fetchYahooPrices() {
-  for (const sym of SYMBOLS) {
-    const ticker = YAHOO_SYMBOLS[sym.name];
-    if (!ticker) continue;
-    try {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=5d`;
-      const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const res = await fetch(proxy);
-      const data = await res.json();
-      const result = data?.chart?.result?.[0];
-      if (!result) continue;
-      const meta = result.meta;
-      const price = meta.regularMarketPrice || meta.previousClose;
-      const prevClose = meta.previousClose || meta.chartPreviousClose;
-      const change = (price && prevClose) ? ((price-prevClose)/prevClose*100) : 0;
-      const closes = result.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
-      dashPrices[sym.name] = { price, change, closes };
-    } catch(e) {}
-  }
-  renderDashSymbolCards();
-}
-
-function renderDashSymbolCards() {
-  const container = document.getElementById('dashSymbolCards');
-  if (!container) return;
-  const today = ['SUN','MON','TUE','WED','THU','FRI','SAT'][new Date().getDay()];
-  const activeDay = DAYS.includes(today) ? today : 'PLAN';
-
-  container.innerHTML = SYMBOLS.map(sym => {
-    const bias = ((biasState[sym.id]||{})[activeDay]) || '';
-    const p = dashPrices[sym.name];
-    const biasBg = {LONG:'rgba(16,185,129,.2)',SHORT:'rgba(244,63,94,.2)',NEUTRAL:'rgba(129,140,248,.2)',WAIT:'rgba(251,146,60,.2)'}[bias] || 'rgba(255,255,255,.05)';
-    const biasColor = {LONG:'#10b981',SHORT:'#f43f5e',NEUTRAL:'#a5b4fc',WAIT:'#fb923c'}[bias] || 'var(--text3)';
-
-    // sparkline
-    let sparkline = `<div style="height:36px;display:flex;align-items:center"><span style="color:var(--text3);font-size:10px;font-family:var(--font-mono)">—</span></div>`;
-    if (p?.closes?.length > 1) {
-      const vals = p.closes;
-      const min = Math.min(...vals), max = Math.max(...vals), range = max-min||1;
-      const w=140, h=36;
-      const pts = vals.map((v,i)=>`${(i/(vals.length-1))*w},${h-((v-min)/range)*h}`).join(' ');
-      const lc = p.change>=0?'#10b981':'#f43f5e';
-      sparkline = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="overflow:visible;margin:8px 0 6px"><polyline fill="none" stroke="${lc}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="${pts}"/></svg>`;
-    }
-
-    const priceStr = p ? formatDashPrice(sym.name, p.price) : '—';
-    const changeStr = p ? `${p.change>=0?'+':''}${p.change.toFixed(2)}%` : '';
-    const changeCls = p ? (p.change>=0?'up':'down') : '';
-
-    return `<div class="dash-sym-card ${sym.cls}" onclick="switchPage('action-plan');setTimeout(()=>scrollToCard('${sym.id}'),300)">
-      <div class="dash-sym-name"><span class="sym-icon-badge" style="background:${sym.iconBg||'rgba(255,255,255,.08)'};color:${sym.iconColor||'inherit'}">${sym.icon||''}</span>${sym.name}</div>
-      <div style="display:flex;align-items:baseline;gap:4px">
-        <span class="dash-sym-price">${priceStr}</span>
-        <span class="dash-sym-change ${changeCls}">${changeStr}</span>
-      </div>
-      ${sparkline}
-      <div class="dash-sym-bias" style="background:${biasBg};color:${biasColor}">${bias||'—'}</div>
-    </div>`;
-  }).join('');
-}
-
-function formatDashPrice(sym, price) {
-  if (!price) return '—';
-  if (sym==='BTCUSDT') return price.toLocaleString('en',{maximumFractionDigits:0});
-  if (['XAUUSD','S50','NDX','USOIL'].includes(sym)) return price.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
-  return price.toFixed(4);
-}
 
 function saveDashNote() {
   localStorage.setItem('forex_dash_note', document.getElementById('dashNote').value);
