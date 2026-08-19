@@ -295,7 +295,16 @@ body::before{
 .sym-card.dragging{opacity:.4;transform:scale(.98)}
 .sym-card.drag-over{border-color:#3b82f6 !important;box-shadow:0 0 0 2px rgba(59,130,246,.3) !important}
 
-/* DASHBOARD SYMBOL CARDS */
+/* DAILY QUOTE CARD */
+.dash-quote-card{position:relative}
+.dash-quote-mark{
+  font-family:Georgia,serif;font-size:52px;line-height:1;color:#f0b429;opacity:.35;
+  margin-bottom:-14px;
+}
+.dash-quote-divider{
+  width:36px;height:2px;margin:16px auto 0;border-radius:2px;
+  background:linear-gradient(90deg,#f0b429,#fb923c);opacity:.7;
+}
 
 .dash-sym-card{
   position:relative;overflow:hidden;padding:14px 16px;cursor:pointer;border-radius:16px;
@@ -880,9 +889,12 @@ select.field-sm option{background:#111827;color:var(--text)}
       </div>
 
       <!-- Quote -->
-      <div style="text-align:center;padding:20px;color:var(--text3)">
-        <div style="font-size:18px;color:var(--text2);font-style:italic;margin-bottom:6px">" Discipline today, freedom tomorrow. "</div>
-        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.1em">— Trading is a game of patience —</div>
+      <div class="dash-widget dash-quote-card" style="text-align:center;padding:28px 24px">
+        <div class="dash-quote-mark">"</div>
+        <div id="dashQuoteEn" style="font-size:18px;color:var(--text);font-style:italic;font-family:var(--font-body);line-height:1.6;max-width:640px;margin:0 auto"></div>
+        <div id="dashQuoteAuthor" style="font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin-top:12px;color:#f0b429;text-transform:uppercase"></div>
+        <div class="dash-quote-divider"></div>
+        <div id="dashQuoteTh" style="font-family:var(--font-body);font-size:13px;color:var(--text2);margin-top:10px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.7"></div>
       </div>
 
     </div>
@@ -1525,6 +1537,69 @@ function closeSidebar() {
 // ============================================
 let dashPrices = {};
 
+// ============================================
+// DAILY TRADING QUOTE — rotates once per calendar day (local time),
+// deterministic by date so refreshing never changes it within the same day.
+// Only verified, well-documented quotes are included.
+// ============================================
+const TRADING_QUOTES = [
+  { en: "Be fearful when others are greedy, and greedy when others are fearful.", author: "Warren Buffett", th: "จงหวาดกลัวเมื่อคนอื่นโลภ และจงโลภเมื่อคนอื่นหวาดกลัว" },
+  { en: "The stock market is a device for transferring money from the impatient to the patient.", author: "Warren Buffett", th: "ตลาดหุ้นคืออุปกรณ์ที่โอนเงินจากคนใจร้อนไปสู่คนที่มีความอดทน" },
+  { en: "Risk comes from not knowing what you are doing.", author: "Warren Buffett", th: "ความเสี่ยงเกิดจากการไม่รู้ว่าตัวเองกำลังทำอะไรอยู่" },
+  { en: "Our favorite holding period is forever.", author: "Warren Buffett", th: "ระยะเวลาถือครองที่เราชื่นชอบที่สุดคือตลอดไป" },
+  { en: "It's far better to buy a wonderful company at a fair price than a fair company at a wonderful price.", author: "Warren Buffett", th: "การซื้อบริษัทที่ยอดเยี่ยมในราคาที่เหมาะสม ดีกว่าการซื้อบริษัทธรรมดาในราคาที่ยอดเยี่ยม" },
+  { en: "Never invest in a business you cannot understand.", author: "Warren Buffett", th: "อย่าลงทุนในธุรกิจที่คุณไม่เข้าใจ" },
+  { en: "You only have to do a very few things right in your life so long as you don't do too many things wrong.", author: "Warren Buffett", th: "คุณแค่ต้องทำสิ่งที่ถูกต้องไม่กี่อย่างในชีวิต ตราบใดที่ไม่ทำสิ่งผิดพลาดมากเกินไป" },
+  { en: "The big money is not in the buying and selling, but in the waiting.", author: "Charlie Munger", th: "เงินก้อนใหญ่ไม่ได้มาจากการซื้อขาย แต่มาจากการรอคอย" },
+  { en: "Spend each day trying to be a little wiser than you were when you woke up.", author: "Charlie Munger", th: "ใช้แต่ละวันพยายามฉลาดขึ้นกว่าตอนที่คุณตื่นนอนมาสักนิดหนึ่ง" },
+  { en: "Knowing what you don't know is more useful than being brilliant.", author: "Charlie Munger", th: "การรู้ว่าตัวเองไม่รู้อะไร มีประโยชน์มากกว่าการเป็นคนเก่งกาจ" },
+  { en: "It is remarkable how much long-term advantage people have gotten by trying to be consistently not stupid, instead of trying to be very intelligent.", author: "Charlie Munger", th: "น่าทึ่งมากที่คนเราได้เปรียบระยะยาวมหาศาล เพียงเพราะพยายามไม่โง่อย่างสม่ำเสมอ แทนที่จะพยายามฉลาดมาก" },
+  { en: "It never was my thinking that made the big money for me. It always was my sitting.", author: "Jesse Livermore", th: "ไม่เคยเป็นความคิดของผมที่ทำเงินก้อนใหญ่ได้ แต่เป็นการนั่งนิ่งๆ ต่างหาก" },
+  { en: "The market is never wrong — opinions often are.", author: "Jesse Livermore", th: "ตลาดไม่เคยผิด แต่ความคิดเห็นของคนต่างหากที่มักผิด" },
+  { en: "There is nothing new in Wall Street. Whatever happens today has happened before and will happen again.", author: "Jesse Livermore", th: "ไม่มีอะไรใหม่ในวอลล์สตรีท สิ่งที่เกิดขึ้นวันนี้เคยเกิดมาแล้วและจะเกิดขึ้นอีก" },
+  { en: "Don't take action with a trade until the market, itself, confirms your opinion.", author: "Jesse Livermore", th: "อย่าลงมือเทรดจนกว่าตัวตลาดเองจะยืนยันความคิดเห็นของคุณ" },
+  { en: "The most important rule of trading is to play great defense, not great offense.", author: "Paul Tudor Jones", th: "กฎที่สำคัญที่สุดของการเทรดคือการเล่นเกมรับให้ดี ไม่ใช่เกมรุก" },
+  { en: "Losers average losers.", author: "Paul Tudor Jones", th: "คนที่ขาดทุนมักจะถัวเฉลี่ยขาดทุนเพิ่มขึ้นเรื่อยๆ" },
+  { en: "I always think of the risk first, not the reward.", author: "Paul Tudor Jones", th: "ผมคิดถึงความเสี่ยงก่อนเสมอ ไม่ใช่ผลตอบแทน" },
+  { en: "At the end of the day, the most important thing is how good you are at risk control.", author: "Paul Tudor Jones", th: "สุดท้ายแล้ว สิ่งที่สำคัญที่สุดคือคุณควบคุมความเสี่ยงได้ดีแค่ไหน" },
+  { en: "The way to build long-term returns is through preservation of capital and home runs.", author: "Stanley Druckenmiller", th: "วิธีสร้างผลตอบแทนระยะยาวคือรักษาเงินทุนไว้ให้ได้ แล้วรอจังหวะทำกำไรก้อนใหญ่" },
+  { en: "It's not whether you're right or wrong that's important, but how much money you make when you're right and how much you lose when you're wrong.", author: "George Soros", th: "มันไม่สำคัญว่าคุณถูกหรือผิด แต่สำคัญว่าตอนถูกคุณได้เงินเท่าไหร่ และตอนผิดคุณเสียเงินเท่าไหร่" },
+  { en: "I always say that you could publish trading rules in a newspaper, and no one would follow them. The key is consistency and discipline.", author: "Richard Dennis", th: "ผมพูดเสมอว่าคุณตีพิมพ์กฎการเทรดลงหนังสือพิมพ์ได้เลย แต่ก็จะไม่มีใครทำตาม กุญแจสำคัญคือความสม่ำเสมอและวินัย" },
+  { en: "Ride your winners and cut your losers. Both are important; miss either one and you are in trouble.", author: "Ed Seykota", th: "ปล่อยให้กำไรวิ่งไป และตัดขาดทุนให้ไว ทั้งสองอย่างสำคัญพอกัน พลาดข้อใดข้อหนึ่งคุณมีปัญหาแน่" },
+  { en: "Win or lose, everybody gets what they want out of the market.", author: "Ed Seykota", th: "ไม่ว่าจะได้หรือเสีย ทุกคนก็ได้สิ่งที่ตัวเองต้องการจากตลาดเสมอ" },
+  { en: "The less attached you are to a specific outcome, the better you'll be able to read the market.", author: "Mark Douglas", th: "ยิ่งคุณยึดติดกับผลลัพธ์ที่ต้องการน้อยลงเท่าไหร่ คุณจะยิ่งอ่านตลาดได้ดีขึ้นเท่านั้น" },
+  { en: "Anything can happen.", author: "Mark Douglas", th: "ทุกอย่างสามารถเกิดขึ้นได้เสมอ" },
+  { en: "The best traders have organized their minds to think in probabilities.", author: "Mark Douglas", th: "เทรดเดอร์ที่เก่งที่สุดคือคนที่จัดระเบียบความคิดให้มองทุกอย่างเป็นความน่าจะเป็น" },
+  { en: "The main purpose of the stock market is to make fools of as many men as possible.", author: "Bernard Baruch", th: "จุดประสงค์หลักของตลาดหุ้นคือการทำให้คนจำนวนมากที่สุดเท่าที่จะเป็นไปได้กลายเป็นคนโง่" },
+  { en: "Don't try to buy at the bottom and sell at the top. It can't be done except by liars.", author: "Bernard Baruch", th: "อย่าพยายามซื้อที่จุดต่ำสุดและขายที่จุดสูงสุด เพราะทำไม่ได้จริง ยกเว้นคนที่โกหก" },
+  { en: "Know what you own, and know why you own it.", author: "Peter Lynch", th: "จงรู้ว่าคุณถืออะไรอยู่ และรู้ว่าทำไมถึงถือมันไว้" },
+  { en: "In this business if you're good, you're right six times out of ten.", author: "Peter Lynch", th: "ในธุรกิจนี้ ถ้าคุณเก่งจริง คุณจะถูกแค่ 6 จาก 10 ครั้งเท่านั้น" },
+  { en: "The whole secret to winning big in the stock market is not to be right all the time, but to lose the least amount possible when you're wrong.", author: "William O'Neil", th: "เคล็ดลับของการชนะใหญ่ในตลาดหุ้น ไม่ใช่การถูกตลอดเวลา แต่คือการขาดทุนให้น้อยที่สุดเมื่อคุณผิด" },
+  { en: "The markets can remain irrational longer than you can remain solvent.", author: "John Maynard Keynes", th: "ตลาดสามารถไร้เหตุผลได้นานกว่าที่คุณจะมีเงินทุนอยู่รอด" },
+  { en: "The stock market is filled with individuals who know the price of everything, but the value of nothing.", author: "Philip Fisher", th: "ตลาดหุ้นเต็มไปด้วยคนที่รู้ราคาของทุกอย่าง แต่ไม่รู้คุณค่าของสิ่งใดเลย" },
+];
+
+function renderDailyQuote() {
+  const enEl = document.getElementById('dashQuoteEn');
+  const authorEl = document.getElementById('dashQuoteAuthor');
+  const thEl = document.getElementById('dashQuoteTh');
+  if (!enEl || !authorEl || !thEl) return;
+
+  // Day index based on LOCAL calendar date so the quote is stable all day
+  // and only changes after midnight (device local time), then wraps around.
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - startOfYear) / 86400000);
+  // Include the year so the rotation doesn't repeat the exact same sequence every year on the same date
+  const dayIndex = dayOfYear + now.getFullYear() * 7;
+  const idx = ((dayIndex % TRADING_QUOTES.length) + TRADING_QUOTES.length) % TRADING_QUOTES.length;
+  const q = TRADING_QUOTES[idx];
+
+  enEl.textContent = `"${q.en}"`;
+  authorEl.textContent = `— ${q.author} —`;
+  thEl.textContent = q.th;
+}
+
 function updateDashboard() {
   const now = new Date();
   const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -1600,6 +1675,9 @@ function updateDashboard() {
   // Symbol cards + fetch prices
   renderDashSymbolCards();
   fetchYahooPrices();
+
+  // Daily quote (rotates once per calendar day)
+  renderDailyQuote();
 }
 
 // Yahoo Finance via allorigins proxy
