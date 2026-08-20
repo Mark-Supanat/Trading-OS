@@ -3197,4 +3197,44 @@ function exportData() {
     DAYS.forEach(day => {
       const d = (data[sym.id]?.days || {})[day] || {};
       const hasImg = (chartImages[currentWeek] || {})[`${sym.id}__${day}`] ? '[📷]' : '';
-      if (d.pattern || d.strategy || d.bias || d.risk |
+      if (d.pattern || d.strategy || d.bias || d.risk || d.note) {
+        text += `  [${day}] ${hasImg} Pattern: ${d.pattern||'—'} | Strategy: ${d.strategy||'—'} | Bias: ${d.bias||'—'}\n`;
+        if (d.risk) text += `         Risk: ${d.risk}\n`;
+        if (d.note) text += `         Note: ${d.note}\n`;
+      }
+    });
+    text += '\n';
+  });
+  text += `SUMMARY: ${data.ov_summary}`;
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ActionPlan_${currentWeek.replace(/\s/g,'_')}.txt`;
+  a.click();
+  showToast('📋 Export สำเร็จ');
+}
+
+// ============================================
+// HELPERS
+// ============================================
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = val;
+}
+function getVal(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
