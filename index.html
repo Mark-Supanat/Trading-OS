@@ -335,6 +335,24 @@ body::before{
 .dash-day-dot{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .3s}
 .dash-day-dot.done{background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.5);color:#10b981}
 .dash-day-dot.today{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.5);border-width:2px}
+.dash-day-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--text2);font-weight:600}
+
+.dash-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);margin:16px 0 14px}
+
+.routine-row{display:flex;align-items:center;gap:11px;padding:8px 2px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer}
+.routine-row:last-child{border-bottom:none}
+.routine-check{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;border:2px solid rgba(255,255,255,.16);color:transparent;transition:all .25s cubic-bezier(.34,1.56,.64,1);
+}
+.routine-row.done .routine-check{background:linear-gradient(135deg,#34d399,#10b981);border-color:transparent;color:#04140d;box-shadow:0 0 0 3px rgba(52,211,153,.12)}
+.routine-emoji{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.routine-text{font-family:var(--font-body);font-size:12.5px;color:var(--text);flex:1}
+.routine-row.done .routine-text{color:var(--text2);text-decoration:line-through;text-decoration-color:rgba(123,144,184,.5)}
+.routine-row:not(.checkable){cursor:default}
+.routine-row:not(.checkable) .routine-text{font-style:italic;color:var(--text2);font-size:12px}
+.routine-tag{font-family:var(--font-mono);font-size:8px;letter-spacing:.05em;color:var(--text3);padding:2px 6px;border-radius:5px;background:rgba(255,255,255,.05);text-transform:uppercase}
+[data-theme="light"] .dash-day-label{color:#4b5f8a}
 
 /* MARKET PULSE BULLETS */
 .pulse-bullet{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2);line-height:1.5}
@@ -880,20 +898,34 @@ select.field-sm option{background:#111827;color:var(--text)}
           <div id="dashPulseTime" style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--text3)"></div>
         </div>
 
-        <!-- This Week Tracker -->
+        <!-- This Week Tracker + Daily Routine -->
         <div class="dash-widget">
           <div class="dash-widget-title">THIS WEEK</div>
           <div style="display:flex;justify-content:space-between;margin-top:12px;margin-bottom:12px">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">จันทร์</div><div id="weekday_0" class="dash-day-dot"></div></div>
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">อังคาร</div><div id="weekday_1" class="dash-day-dot"></div></div>
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">พุธ</div><div id="weekday_2" class="dash-day-dot"></div></div>
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">พฤหัส</div><div id="weekday_3" class="dash-day-dot"></div></div>
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--text3)">ศุกร์</div><div id="weekday_4" class="dash-day-dot"></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">MON</div><div id="weekday_0" class="dash-day-dot"></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">TUE</div><div id="weekday_1" class="dash-day-dot"></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">WED</div><div id="weekday_2" class="dash-day-dot"></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">THU</div><div id="weekday_3" class="dash-day-dot"></div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">FRI</div><div id="weekday_4" class="dash-day-dot"></div></div>
           </div>
           <div style="background:rgba(255,255,255,.06);border-radius:4px;height:4px;overflow:hidden">
             <div id="weekProgress" style="height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:4px;transition:width .5s;width:0%"></div>
           </div>
           <div id="weekProgressLabel" style="margin-top:6px;font-family:var(--font-mono);font-size:10px;color:var(--text3)">0 / 5 วัน</div>
+
+          <div class="dash-divider"></div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--text2);text-transform:uppercase">🌱 Daily Routine</div>
+            <div id="routineCount" style="font-family:var(--font-mono);font-size:10px;color:var(--text3)">0 / 4 วันนี้</div>
+          </div>
+          <div id="routineList"></div>
+          <div class="routine-row">
+            <div style="width:24px;flex-shrink:0"></div>
+            <div class="routine-emoji">📚</div>
+            <div class="routine-text">อ่านหนังสือ / บทความวิจัย / ทำวิจัยเอง</div>
+            <span class="routine-tag">ไม่บังคับ</span>
+          </div>
         </div>
 
         <!-- Economic Calendar -->
@@ -1810,11 +1842,86 @@ function updateDashboard() {
 
   // Daily quote (rotates once per calendar day)
   renderDailyQuote();
+
+  // Daily routine checklist
+  renderRoutine();
 }
 
 
 function saveDashNote() {
   localStorage.setItem('forex_dash_note', document.getElementById('dashNote').value);
+}
+
+// ============================================
+// DAILY ROUTINE — synced to Supabase (same `action_plan` table, row id='routine')
+// ============================================
+const SB_ROUTINE_ID = 'routine';
+let routineData = {}; // { 'YYYY-MM-DD': { meditate:bool, gm:bool, exercise:bool, meals:bool } }
+let routineSaveTimer = null;
+
+const ROUTINE_ITEMS = [
+  { key:'meditate', emoji:'🧘', label:'นั่งสมาธิ อย่างน้อย 5 นาที' },
+  { key:'gm',       emoji:'☀️', label:'GM กับ ChatGPT ช่วงเช้า' },
+  { key:'exercise', emoji:'🏋️', label:'ออกกำลังกาย (เวท/เทนนิส)' },
+  { key:'meals',    emoji:'🍽️', label:'กินข้าวครบ 3 มื้อ' },
+];
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+async function loadRoutineCloud() {
+  try {
+    const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_ROUTINE_ID}&select=data`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
+    });
+    const rows = await res.json();
+    return (rows && rows[0] && rows[0].data) ? rows[0].data : {};
+  } catch(e) { console.warn('Routine load failed:', e); return {}; }
+}
+
+async function saveRoutineCloud() {
+  try {
+    await fetch(`${SB_URL}/action_plan`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ id: SB_ROUTINE_ID, data: routineData }),
+    });
+  } catch(e) { console.warn('Routine save failed:', e); }
+}
+
+function renderRoutine() {
+  const list = document.getElementById('routineList');
+  const countEl = document.getElementById('routineCount');
+  if (!list) return;
+  const today = routineData[todayKey()] || {};
+
+  list.innerHTML = ROUTINE_ITEMS.map(item => {
+    const done = !!today[item.key];
+    return `<div class="routine-row ${done?'done':''} checkable" onclick="toggleRoutineItem('${item.key}')">
+      <div class="routine-check">✓</div>
+      <div class="routine-emoji">${item.emoji}</div>
+      <div class="routine-text">${item.label}</div>
+    </div>`;
+  }).join('');
+
+  const doneCount = ROUTINE_ITEMS.filter(i => today[i.key]).length;
+  if (countEl) countEl.textContent = `${doneCount} / ${ROUTINE_ITEMS.length} วันนี้`;
+}
+
+function toggleRoutineItem(key) {
+  const dk = todayKey();
+  if (!routineData[dk]) routineData[dk] = {};
+  routineData[dk][key] = !routineData[dk][key];
+  renderRoutine();
+  clearTimeout(routineSaveTimer);
+  routineSaveTimer = setTimeout(saveRoutineCloud, 600);
 }
 
 // ============================================
@@ -2056,6 +2163,7 @@ async function initApp() {
   // Auto Load จาก Supabase ก่อน, fallback localStorage
   showToast('☁ กำลังโหลดข้อมูล...');
   const cloudData = await cloudLoad();
+  routineData = await loadRoutineCloud();
   if (cloudData) {
     allData = cloudData;
     localStorage.setItem('forex_action_plan', JSON.stringify(allData));
