@@ -928,11 +928,35 @@ select.field-sm option{background:#111827;color:var(--text)}
           </div>
         </div>
 
-        <!-- Economic Calendar -->
-        <div class="dash-widget">
-          <div class="dash-widget-title">ECONOMIC CALENDAR THIS WEEK</div>
-          <div id="dashCalendar" style="margin-top:8px">
-            <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">แปะรูป Calendar ใน Action Plan ก่อนครับ</div>
+        <!-- Economic Calendar + Live Market News -->
+        <div class="dash-widget" style="display:flex;flex-direction:column;padding:0;overflow:hidden">
+          <div style="padding:16px 18px 10px">
+            <div class="dash-widget-title" style="margin-bottom:0">📰 MARKET NEWS <span style="color:#34d399;font-size:9px;letter-spacing:.05em">● LIVE</span></div>
+          </div>
+          <div style="height:220px;overflow:hidden">
+            <div class="tradingview-widget-container" style="height:100%">
+              <div class="tradingview-widget-container__widget"></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+              {
+                "feedMode": "all_symbols",
+                "isTransparent": true,
+                "displayMode": "compact",
+                "width": "100%",
+                "height": "100%",
+                "colorTheme": "dark",
+                "locale": "en"
+              }
+              </script>
+            </div>
+          </div>
+
+          <div class="dash-divider" style="margin:0 18px"></div>
+
+          <div style="padding:12px 18px 16px">
+            <div class="dash-widget-title" style="margin-bottom:0">ECONOMIC CALENDAR THIS WEEK</div>
+            <div id="dashCalendar" style="margin-top:8px">
+              <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">แปะรูป Calendar ใน Action Plan ก่อนครับ</div>
+            </div>
           </div>
         </div>
       </div>
@@ -3173,44 +3197,4 @@ function exportData() {
     DAYS.forEach(day => {
       const d = (data[sym.id]?.days || {})[day] || {};
       const hasImg = (chartImages[currentWeek] || {})[`${sym.id}__${day}`] ? '[📷]' : '';
-      if (d.pattern || d.strategy || d.bias || d.risk || d.note) {
-        text += `  [${day}] ${hasImg} Pattern: ${d.pattern||'—'} | Strategy: ${d.strategy||'—'} | Bias: ${d.bias||'—'}\n`;
-        if (d.risk) text += `         Risk: ${d.risk}\n`;
-        if (d.note) text += `         Note: ${d.note}\n`;
-      }
-    });
-    text += '\n';
-  });
-  text += `SUMMARY: ${data.ov_summary}`;
-  const blob = new Blob([text], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `ActionPlan_${currentWeek.replace(/\s/g,'_')}.txt`;
-  a.click();
-  showToast('📋 Export สำเร็จ');
-}
-
-// ============================================
-// HELPERS
-// ============================================
-function setVal(id, val) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.value = val;
-}
-function getVal(id) {
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
-}
-
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
-}
-</script>
-</body>
-</html>
+      if (d.pattern || d.strategy || d.bias || d.risk |
