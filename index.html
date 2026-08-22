@@ -361,8 +361,8 @@ body::before{
 [data-theme="light"] .dash-day-label{color:#4b5f8a}
 
 /* MARKET PULSE BULLETS */
-.pulse-bullet{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2);line-height:1.5}
-.pulse-dot{width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0;margin-top:6px}
+.pulse-bullet{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#f0c96a;font-weight:500;line-height:1.5}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:#f0b429;flex-shrink:0;margin-top:6px}
 
 [data-theme="light"] .dash-sym-card{background:#f5f7ff;border-color:#dde3f5}
 [data-theme="light"] .dash-day-dot{background:#f0f4ff;border-color:#c4cde8}
@@ -704,7 +704,8 @@ select.field-sm option{background:#111827;color:var(--text)}
 }
 
 /* LAYOUT WITH SIDEBAR */
-.page-layout{display:grid;grid-template-columns:1fr 155px;gap:10px;align-items:start;position:relative}
+.page-layout{display:grid;grid-template-columns:1fr 155px 190px;gap:10px;align-items:start;position:relative}
+.calc-sidebar{position:sticky;top:60px}
 .main-content{min-width:0}
 .summary-sidebar{position:sticky;top:60px;height:fit-content;padding:0 12px}
 
@@ -1024,6 +1025,10 @@ select.field-sm option{background:#111827;color:var(--text)}
             <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">เขียน Market Analysis ใน Action Plan ก่อน</div>
           </div>
           <div id="dashPulseTime" style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--text3)"></div>
+
+          <div class="dash-divider"></div>
+          <div class="dash-widget-title" style="margin-bottom:6px">QUICK NOTE</div>
+          <textarea id="dashNote" placeholder="จดไว้ก่อน — Key level วันนี้, สิ่งที่ต้องระวัง..." style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;resize:none;min-height:50px;line-height:1.7" oninput="saveDashNote()"></textarea>
         </div>
 
         <!-- This Week Tracker + Daily Routine -->
@@ -1097,12 +1102,6 @@ select.field-sm option{background:#111827;color:var(--text)}
             <div id="newsEventList"></div>
           </div>
         </div>
-      </div>
-
-      <!-- Quick Note -->
-      <div class="dash-widget" style="margin-bottom:14px">
-        <div class="dash-widget-title">QUICK NOTE</div>
-        <textarea id="dashNote" placeholder="จดไว้ก่อน — Key level วันนี้, สิ่งที่ต้องระวัง..." style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;resize:none;min-height:60px;line-height:1.7;margin-top:4px" oninput="saveDashNote()"></textarea>
       </div>
 
       <!-- Quote -->
@@ -1212,8 +1211,10 @@ select.field-sm option{background:#111827;color:var(--text)}
       <textarea class="field-input" id="ov_summary" placeholder="Focus คู่ไหน..." rows="4" oninput="autoSave()" style="font-size:11px;min-height:70px;resize:none"></textarea>
     </div>
   </div>
+</div>
 
-  <!-- POSITION SIZE CALCULATOR -->
+<!-- POSITION SIZE CALCULATOR — separate column, right of Bias Summary -->
+<div class="calc-sidebar">
   <div class="summary-panel calc-panel">
     <div class="summary-panel-title">🧮 CALCULATOR</div>
     <div class="calc-field"><label>Balance ($)</label><input type="text" id="calcBalance" value="10000" oninput="calcPositionSize()"></div>
@@ -2050,10 +2051,15 @@ function updateDashboard() {
 
   // Session
   const h = now.getHours();
-  let session = 'ตลาดปิด', sessionTime = 'Between Sessions';
-  if (h >= 4 && h < 11) { session = '🌏 ASIA'; sessionTime = '04:00 – 11:00 น.'; }
+  const dowForSession = now.getDay(); // 0=Sun, 6=Sat
+  let session, sessionTime;
+  if (dowForSession === 0 || dowForSession === 6) {
+    session = '🏖️ HOLIDAY';
+    sessionTime = 'ตลาด Forex ปิดสุดสัปดาห์';
+  } else if (h >= 4 && h < 11) { session = '🌏 ASIA'; sessionTime = '04:00 – 11:00 น.'; }
   else if (h >= 14 && h < 20) { session = '🌍 LONDON'; sessionTime = '14:00 – 20:00 น.'; }
   else if (h >= 20 || h < 1) { session = '🌎 NEW YORK'; sessionTime = '20:00 – 01:00 น.'; }
+  else { session = 'ตลาดปิด'; sessionTime = 'Between Sessions'; }
   const sessEl = document.getElementById('dashSession');
   if (sessEl) sessEl.textContent = session;
   const sessTimeEl = document.getElementById('dashSessionTime');
@@ -2097,9 +2103,9 @@ function updateDashboard() {
     ? `<img src="${calImg}" style="width:100%;max-height:200px;object-fit:contain;border-radius:8px;cursor:zoom-in;background:#060810" onclick="window.open('${calImg}','_blank')">`
     : '<div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">แปะรูป Calendar ใน Action Plan ก่อนครับ</div>';
 
-  // Quick note
+  // Quick note — prefer cloud (synced across devices), fallback to local if cloud empty
   const noteEl = document.getElementById('dashNote');
-  if (noteEl) noteEl.value = localStorage.getItem('forex_dash_note') || '';
+  if (noteEl) noteEl.value = dashNoteCloudText || localStorage.getItem('forex_dash_note') || '';
 
   // Daily quote (rotates once per calendar day)
   renderDailyQuote();
@@ -2199,8 +2205,42 @@ function renderNewsEvents() {
 // re-check every 30s so the countdown/banner stays live without refreshing
 setInterval(renderNewsEvents, 30000);
 
+// ============================================
+// QUICK NOTE — synced to Supabase (same `action_plan` table, row id='quicknote')
+// ============================================
+const SB_NOTE_ID = 'quicknote';
+let dashNoteSaveTimer = null;
+
+async function loadNoteCloud() {
+  try {
+    const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_NOTE_ID}&select=data`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
+    });
+    const rows = await res.json();
+    return (rows && rows[0] && rows[0].data && rows[0].data.text) || '';
+  } catch(e) { console.warn('Quick note load failed:', e); return ''; }
+}
+
+async function saveNoteCloud(text) {
+  try {
+    await fetch(`${SB_URL}/action_plan`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ id: SB_NOTE_ID, data: { text } }),
+    });
+  } catch(e) { console.warn('Quick note save failed:', e); }
+}
+
 function saveDashNote() {
-  localStorage.setItem('forex_dash_note', document.getElementById('dashNote').value);
+  const text = document.getElementById('dashNote').value;
+  localStorage.setItem('forex_dash_note', text); // offline fallback
+  clearTimeout(dashNoteSaveTimer);
+  dashNoteSaveTimer = setTimeout(() => saveNoteCloud(text), 600);
 }
 
 // ============================================
@@ -2208,6 +2248,7 @@ function saveDashNote() {
 // ============================================
 const SB_ROUTINE_ID = 'routine';
 let routineData = {}; // { 'YYYY-MM-DD': { meditate:bool, gm:bool, exercise:bool, meals:bool } }
+let dashNoteCloudText = '';
 let routineSaveTimer = null;
 
 const ROUTINE_ITEMS = [
@@ -2527,6 +2568,7 @@ async function initApp() {
   showToast('☁ กำลังโหลดข้อมูล...');
   const cloudData = await cloudLoad();
   routineData = await loadRoutineCloud();
+  dashNoteCloudText = await loadNoteCloud();
   if (cloudData) {
     allData = cloudData;
     localStorage.setItem('forex_action_plan', JSON.stringify(allData));
