@@ -361,7 +361,7 @@ body::before{
 [data-theme="light"] .dash-day-label{color:#4b5f8a}
 
 /* MARKET PULSE BULLETS */
-.pulse-bullet{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#f0c96a;font-weight:500;line-height:1.5}
+.pulse-bullet{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2);line-height:1.5}
 .pulse-dot{width:6px;height:6px;border-radius:50%;background:#f0b429;flex-shrink:0;margin-top:6px}
 
 [data-theme="light"] .dash-sym-card{background:#f5f7ff;border-color:#dde3f5}
@@ -704,8 +704,34 @@ select.field-sm option{background:#111827;color:var(--text)}
 }
 
 /* LAYOUT WITH SIDEBAR */
-.page-layout{display:grid;grid-template-columns:1fr 155px 190px;gap:10px;align-items:start;position:relative}
-.calc-sidebar{position:sticky;top:60px}
+.page-layout{display:grid;grid-template-columns:1fr 155px;gap:10px;align-items:start;position:relative}
+
+/* POSITION SIZE CALCULATOR — floating widget (doesn't squeeze main content) */
+.calc-fab{
+  position:fixed;bottom:22px;right:22px;z-index:150;
+  width:52px;height:52px;border-radius:50%;border:1.5px solid rgba(240,180,41,.4);
+  background:linear-gradient(135deg,rgba(240,180,41,.9),rgba(251,146,60,.9));
+  color:#1e1400;font-size:22px;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 0 0 rgba(240,180,41,.4);
+  transition:transform .2s, box-shadow .2s;
+}
+.calc-fab:hover{transform:scale(1.08);box-shadow:0 10px 28px rgba(0,0,0,.5),0 0 0 6px rgba(240,180,41,.15)}
+.calc-float-panel{
+  position:fixed;bottom:84px;right:22px;z-index:150;width:230px;
+  background:linear-gradient(160deg,rgba(10,14,24,.95),rgba(6,9,16,.95));
+  border:1.5px solid rgba(240,180,41,.35);border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,.6);backdrop-filter:blur(20px);
+  padding:14px;display:none;
+}
+.calc-float-panel.open{display:block;animation:calc-pop .2s ease}
+@keyframes calc-pop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.calc-float-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.calc-close-btn{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;padding:2px 6px}
+.calc-close-btn:hover{color:var(--text)}
+@media(max-width:600px){
+  .calc-float-panel{right:14px;left:14px;width:auto;bottom:78px}
+  .calc-fab{right:14px;bottom:14px}
+}
 .main-content{min-width:0}
 .summary-sidebar{position:sticky;top:60px;height:fit-content;padding:0 12px}
 
@@ -1020,7 +1046,7 @@ select.field-sm option{background:#111827;color:var(--text)}
 
         <!-- Market Pulse -->
         <div class="dash-widget">
-          <div class="dash-widget-title">MARKET PULSE</div>
+          <div class="dash-widget-title" style="color:#f0b429">MARKET PULSE</div>
           <div id="dashPulse" style="margin-top:4px;display:flex;flex-direction:column;gap:8px;min-height:80px">
             <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">เขียน Market Analysis ใน Action Plan ก่อน</div>
           </div>
@@ -1213,10 +1239,17 @@ select.field-sm option{background:#111827;color:var(--text)}
   </div>
 </div>
 
-<!-- POSITION SIZE CALCULATOR — separate column, right of Bias Summary -->
-<div class="calc-sidebar">
-  <div class="summary-panel calc-panel">
-    <div class="summary-panel-title">🧮 CALCULATOR</div>
+</div><!-- end page-layout -->
+</div><!-- end action-plan inner -->
+  </div><!-- end page-action-plan -->
+
+  <!-- POSITION SIZE CALCULATOR — floating widget, doesn't affect page layout -->
+  <button class="calc-fab" id="calcFab" onclick="toggleCalcPanel()" title="Position Size Calculator">🧮</button>
+  <div class="calc-float-panel" id="calcFloatPanel">
+    <div class="calc-float-header">
+      <span class="summary-panel-title" style="margin:0">🧮 CALCULATOR</span>
+      <button class="calc-close-btn" onclick="toggleCalcPanel()">✕</button>
+    </div>
     <div class="calc-field"><label>Balance ($)</label><input type="text" id="calcBalance" value="10000" oninput="calcPositionSize()"></div>
     <div class="calc-field"><label>Risk (%)</label><input type="text" id="calcRisk" value="1" oninput="calcPositionSize()"></div>
     <div class="calc-field"><label>Entry</label><input type="text" id="calcEntry" placeholder="0.00" oninput="calcPositionSize()"></div>
@@ -1231,11 +1264,6 @@ select.field-sm option{background:#111827;color:var(--text)}
       <div class="calc-result-main-value" id="calcLotSize">—</div>
     </div>
   </div>
-</div>
-
-</div><!-- end page-layout -->
-</div><!-- end action-plan inner -->
-  </div><!-- end page-action-plan -->
 
   <!-- ===== PAGE: HISTORY ===== -->
   <div class="page" id="page-history">
@@ -1930,6 +1958,9 @@ function switchPage(pageId) {
   document.getElementById('topbarTitle').textContent = PAGE_TITLES[pageId] || pageId.toUpperCase();
   document.getElementById('topbarActions').innerHTML = pageId === 'action-plan' ? ACTION_PLAN_ACTIONS : '';
   document.getElementById('topbarGreeting').style.display = pageId === 'dashboard' ? 'flex' : 'none';
+  const calcFab = document.getElementById('calcFab');
+  if (calcFab) calcFab.style.display = pageId === 'action-plan' ? 'flex' : 'none';
+  if (pageId !== 'action-plan') document.getElementById('calcFloatPanel').classList.remove('open');
   if (pageId === 'dashboard') updateDashboard();
   if (pageId === 'analytics' && anAllTrades.length === 0) loadAnalytics();
   if (pageId === 'history') renderHistoryPageContent();
@@ -2647,18 +2678,18 @@ function renderHistoryPageContent() {
   }
   container.innerHTML = archiveData.weeks.map((w, wi) => `
     <div class="history-week-item" style="margin-bottom:12px">
-      <div class="history-week-header" onclick="toggleHistoryWeek(${wi})">
+      <div class="history-week-header" onclick="toggleHistoryWeek(${wi},'page')">
         <div style="display:flex;align-items:center;gap:10px">
           <span class="history-week-label">📅 ${w.label}</span>
           <span class="readonly-badge">READ ONLY</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="history-week-meta">${new Date(w.archivedAt).toLocaleDateString('th-TH')}</span>
-          <span id="hchevron_${wi}">▼</span>
+          <span id="hchevron_page_${wi}">▼</span>
         </div>
       </div>
-      <div class="history-week-body" id="hbody_${wi}">
-        ${renderHistoryWeekContent(w, wi)}
+      <div class="history-week-body" id="hbody_page_${wi}">
+        ${renderHistoryWeekContent(w, wi, 'page')}
       </div>
     </div>
   `).join('');
@@ -2753,31 +2784,32 @@ function renderHistoryPanel() {
   panel.style.display = 'block';
   list.innerHTML = archiveData.weeks.map((w, wi) => `
     <div class="history-week-item">
-      <div class="history-week-header" onclick="toggleHistoryWeek(${wi})">
+      <div class="history-week-header" onclick="toggleHistoryWeek(${wi},'panel')">
         <div style="display:flex;align-items:center;gap:10px">
           <span class="history-week-label">📅 ${w.label}</span>
           <span class="readonly-badge">READ ONLY</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="history-week-meta">${new Date(w.archivedAt).toLocaleDateString('th-TH')}</span>
-          <span id="hchevron_${wi}">▼</span>
+          <span id="hchevron_panel_${wi}">▼</span>
         </div>
       </div>
-      <div class="history-week-body" id="hbody_${wi}">
-        ${renderHistoryWeekContent(w, wi)}
+      <div class="history-week-body" id="hbody_panel_${wi}">
+        ${renderHistoryWeekContent(w, wi, 'panel')}
       </div>
     </div>
   `).join('');
 }
 
-function toggleHistoryWeek(wi) {
-  const body = document.getElementById(`hbody_${wi}`);
-  const chevron = document.getElementById(`hchevron_${wi}`);
+function toggleHistoryWeek(wi, scope) {
+  const body = document.getElementById(`hbody_${scope}_${wi}`);
+  const chevron = document.getElementById(`hchevron_${scope}_${wi}`);
+  if (!body || !chevron) return;
   const open = body.classList.toggle('open');
   chevron.textContent = open ? '▲' : '▼';
 }
 
-function renderHistoryWeekContent(w, wi) {
+function renderHistoryWeekContent(w, wi, scope) {
   const data = w.data || {};
   const imgs = w.images || {};
 
@@ -2801,7 +2833,7 @@ function renderHistoryWeekContent(w, wi) {
     const tabsHtml = days.map((d,i) => {
       const dd = symDays[d] || {};
       const hasContent = dd.note || dd.pattern || imgs[`${sym.id}__${d}`];
-      return `<button class="history-day-tab${i===0?' active':''}" onclick="switchHistoryDay(${wi},'${sym.id}','${d}',this)" ${hasContent?'style="position:relative"':''}>${d}${hasContent?'<span style="position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#10b981;display:block"></span>':''}</button>`;
+      return `<button class="history-day-tab${i===0?' active':''}" onclick="switchHistoryDay(${wi},'${sym.id}','${d}',this,'${scope}')" ${hasContent?'style="position:relative"':''}>${d}${hasContent?'<span style="position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#10b981;display:block"></span>':''}</button>`;
     }).join('');
 
     const contentHtml = days.map((d,i) => {
@@ -2809,7 +2841,7 @@ function renderHistoryWeekContent(w, wi) {
       const imgUrl = imgs[`${sym.id}__${d}`];
       const biasColor = dd.bias === 'LONG' ? '#065f46' : dd.bias === 'SHORT' ? '#991b1b' : dd.bias === 'NEUTRAL' ? '#5b21b6' : 'var(--text2)';
       const biasBg = dd.bias === 'LONG' ? '#d1fae5' : dd.bias === 'SHORT' ? '#fee2e2' : dd.bias === 'NEUTRAL' ? '#ede9fe' : 'var(--bg3)';
-      return `<div id="hday_${wi}_${sym.id}_${d}" style="display:${i===0?'flex':'none'};flex-direction:column;gap:10px">
+      return `<div id="hday_${scope}_${wi}_${sym.id}_${d}" style="display:${i===0?'flex':'none'};flex-direction:column;gap:10px">
         <div class="history-field-row">
           <div><div class="history-field-label">Pattern</div><div class="history-field-value">${dd.pattern || '—'}</div></div>
           <div><div class="history-field-label">Strategy</div><div class="history-field-value">${dd.strategy || '—'}</div></div>
@@ -2836,17 +2868,17 @@ function renderHistoryWeekContent(w, wi) {
   return html;
 }
 
-function switchHistoryDay(wi, symId, day, btn) {
+function switchHistoryDay(wi, symId, day, btn, scope) {
   const days = ['PLAN','MON','TUE','WED','THU','FRI'];
   // deactivate all tabs for this sym
   btn.closest('.history-sym-card').querySelectorAll('.history-day-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   // hide all day content for this sym
   days.forEach(d => {
-    const el = document.getElementById(`hday_${wi}_${symId}_${d}`);
+    const el = document.getElementById(`hday_${scope}_${wi}_${symId}_${d}`);
     if (el) el.style.display = 'none';
   });
-  const target = document.getElementById(`hday_${wi}_${symId}_${day}`);
+  const target = document.getElementById(`hday_${scope}_${wi}_${symId}_${day}`);
   if (target) target.style.display = 'flex';
 }
 
@@ -3520,6 +3552,10 @@ async function saveData() {
 // ============================================
 // POSITION SIZE CALCULATOR
 // ============================================
+function toggleCalcPanel() {
+  document.getElementById('calcFloatPanel').classList.toggle('open');
+}
+
 function parseNum(str) {
   const n = parseFloat(String(str).replace(/,/g, ''));
   return isNaN(n) ? 0 : n;
