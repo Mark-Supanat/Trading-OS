@@ -710,6 +710,46 @@ select.field-sm option{background:#111827;color:var(--text)}
 
 /* STICKY SUMMARY PANEL */
 .summary-panel{padding:10px 8px}
+.calc-panel{margin-top:10px;border:1.5px solid rgba(240,180,41,.3) !important}
+.calc-field{margin-bottom:6px}
+.calc-field label{font-family:var(--font-mono);font-size:7.5px;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:2px;letter-spacing:.04em}
+.calc-field input{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;
+  padding:4px 6px;color:var(--text);font-family:var(--font-mono);font-size:10px;outline:none;
+}
+.calc-field input:focus{border-color:rgba(240,180,41,.5)}
+.calc-result-mini{text-align:center;background:rgba(255,255,255,.03);border-radius:6px;padding:5px 2px}
+.calc-result-mini-label{font-family:var(--font-mono);font-size:6.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+.calc-result-mini-value{font-family:var(--font-display);font-size:13px;color:var(--text);margin-top:2px}
+.calc-result-main{margin-top:6px;text-align:center;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:8px 4px}
+.calc-result-main-value{font-family:var(--font-display);font-size:17px;color:#34d399;margin-top:2px}
+
+/* NEWS WARNING BANNER */
+.news-banner{
+  display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:10px;margin:10px 0;
+  background:linear-gradient(90deg,rgba(251,146,60,.14),rgba(244,63,94,.10));
+  border:1px solid rgba(251,146,60,.35);
+  animation:pulse-warn 2s ease-in-out infinite;
+}
+@keyframes pulse-warn{0%,100%{box-shadow:0 0 0 0 rgba(251,146,60,.15)}50%{box-shadow:0 0 0 6px rgba(251,146,60,0)}}
+.news-banner-icon{font-size:14px;flex-shrink:0}
+.news-banner-text{font-size:11.5px;color:var(--text)}
+.news-banner-text b{color:#fb923c}
+.news-banner-cd{font-family:var(--font-mono);font-size:10px;color:#fb923c;font-weight:700;margin-left:auto;white-space:nowrap}
+.quick-add-news{display:flex;gap:6px;margin-top:12px}
+.quick-add-news input{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;
+  padding:6px 8px;color:var(--text);font-family:var(--font-mono);font-size:10.5px;outline:none;
+}
+.quick-add-news input#newsEventName{flex:1.4}
+.quick-add-news input#newsEventTime{flex:0.6}
+.quick-add-news button{
+  padding:6px 12px;border-radius:6px;border:none;background:linear-gradient(135deg,#f0b429,#fb923c);
+  color:#1e1400;font-family:var(--font-body);font-size:10.5px;font-weight:700;cursor:pointer;
+}
+.news-event-row{display:flex;align-items:center;justify-content:space-between;padding:5px 2px;font-family:var(--font-mono);font-size:10.5px;color:var(--text2)}
+.news-event-row button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:2px 6px}
+.news-event-row button:hover{color:#f43f5e}
 .summary-panel-title{font-family:var(--font-mono);font-size:9px;letter-spacing:.16em;color:var(--gold);margin-bottom:8px;text-transform:uppercase;text-align:center}
 .summary-sym-row{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;border-radius:8px;border:1px solid var(--border);margin-bottom:4px;cursor:pointer;transition:all .15s;text-align:center;background:rgba(255,255,255,.02)}
 .summary-sym-row:hover{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.06)}
@@ -1042,9 +1082,19 @@ select.field-sm option{background:#111827;color:var(--text)}
 
           <div style="padding:12px 18px 16px">
             <div class="dash-widget-title" style="margin-bottom:0">ECONOMIC CALENDAR THIS WEEK</div>
+
+            <div id="newsWarningBanner"></div>
+
             <div id="dashCalendar" style="margin-top:8px">
               <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">แปะรูป Calendar ใน Action Plan ก่อนครับ</div>
             </div>
+
+            <div class="quick-add-news">
+              <input type="text" id="newsEventName" placeholder="ชื่อข่าว เช่น NFP, CPI, FOMC">
+              <input type="text" id="newsEventTime" placeholder="19:30">
+              <button onclick="addNewsEvent()">+ เพิ่ม</button>
+            </div>
+            <div id="newsEventList"></div>
           </div>
         </div>
       </div>
@@ -1162,6 +1212,24 @@ select.field-sm option{background:#111827;color:var(--text)}
       <textarea class="field-input" id="ov_summary" placeholder="Focus คู่ไหน..." rows="4" oninput="autoSave()" style="font-size:11px;min-height:70px;resize:none"></textarea>
     </div>
   </div>
+
+  <!-- POSITION SIZE CALCULATOR -->
+  <div class="summary-panel calc-panel">
+    <div class="summary-panel-title">🧮 CALCULATOR</div>
+    <div class="calc-field"><label>Balance ($)</label><input type="text" id="calcBalance" value="10000" oninput="calcPositionSize()"></div>
+    <div class="calc-field"><label>Risk (%)</label><input type="text" id="calcRisk" value="1" oninput="calcPositionSize()"></div>
+    <div class="calc-field"><label>Entry</label><input type="text" id="calcEntry" placeholder="0.00" oninput="calcPositionSize()"></div>
+    <div class="calc-field"><label>Stop Loss</label><input type="text" id="calcStop" placeholder="0.00" oninput="calcPositionSize()"></div>
+    <div class="calc-field"><label>Contract/Lot</label><input type="text" id="calcContract" value="100000" oninput="calcPositionSize()"></div>
+    <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div class="calc-result-mini"><div class="calc-result-mini-label">Risk $</div><div class="calc-result-mini-value" id="calcRiskAmt">—</div></div>
+      <div class="calc-result-mini"><div class="calc-result-mini-label">Distance</div><div class="calc-result-mini-value" id="calcDistance">—</div></div>
+    </div>
+    <div class="calc-result-main">
+      <div class="calc-result-mini-label">แนะนำขนาด</div>
+      <div class="calc-result-main-value" id="calcLotSize">—</div>
+    </div>
+  </div>
 </div>
 
 </div><!-- end page-layout -->
@@ -1265,6 +1333,17 @@ select.field-sm option{background:#111827;color:var(--text)}
         <div class="dash-widget an-chart-widget">
           <div class="dash-widget-title"><span class="an-chart-icon">📈</span>Monthly P&L (%)</div>
           <canvas id="chartMonthly" height="220"></canvas>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+        <div class="dash-widget an-chart-widget">
+          <div class="dash-widget-title"><span class="an-chart-icon">🎖️</span>Win Rate by Grade</div>
+          <canvas id="chartWinByGrade" height="220"></canvas>
+        </div>
+        <div class="dash-widget an-chart-widget">
+          <div class="dash-widget-title"><span class="an-chart-icon">💹</span>Equity Curve (Cumulative P&L %)</div>
+          <canvas id="chartEquity" height="220"></canvas>
         </div>
       </div>
 
@@ -1569,6 +1648,8 @@ function renderAnalytics() {
   renderSessionChart(trades);
   renderGradeChart(trades);
   renderMonthlyChart(trades);
+  renderWinByGradeChart(trades);
+  renderEquityChart(trades);
   renderTradeTable();
 }
 
@@ -1731,6 +1812,60 @@ function renderMonthlyChart(trades) {
     type:'bar',
     data:{ labels, datasets:[{ data, backgroundColor: data.map(v => v>=0 ? '#10b981' : '#f43f5e'), borderRadius:6, maxBarThickness:44 }] },
     options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{ ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e',maxRotation:45}, grid:{display:false} } } }
+  });
+}
+
+function renderWinByGradeChart(trades) {
+  destroyChart('chartWinByGrade');
+  const grades = ['A','B','C'];
+  const data = grades.map(g => {
+    const gt = trades.filter(t => (t.gradeFinal||t.grade)===g);
+    return gt.length ? parseFloat(calcWinRate(gt)) : 0;
+  });
+  const counts = grades.map(g => trades.filter(t => (t.gradeFinal||t.grade)===g).length);
+  const ctx = document.getElementById('chartWinByGrade');
+  if (!ctx) return;
+  anCharts['chartWinByGrade'] = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:grades, datasets:[{ data, backgroundColor:['#10b981','#f0b429','#f43f5e'], borderRadius:6, maxBarThickness:70 }] },
+    options:{ responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        label:c=>`Win Rate: ${c.raw}%`,
+        afterLabel:c=>`(${counts[c.dataIndex]} เทรด)`
+      }}},
+      scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } }
+    }
+  });
+}
+
+function renderEquityChart(trades) {
+  destroyChart('chartEquity');
+  const sorted = [...trades].filter(t=>t.dateOpen).sort((a,b) => new Date(a.dateOpen)-new Date(b.dateOpen));
+  let cumulative = 0;
+  const points = sorted.map(t => {
+    cumulative += parseFloat(t.pnlPct) || 0;
+    return cumulative;
+  });
+  const labels = sorted.map((t,i) => i+1);
+  const ctx = document.getElementById('chartEquity');
+  if (!ctx) return;
+  const isUp = points.length && points[points.length-1] >= 0;
+  anCharts['chartEquity'] = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[{
+      data:points, borderColor: isUp ? '#34d399' : '#f43f5e', backgroundColor: isUp ? 'rgba(52,211,153,.1)' : 'rgba(244,63,94,.1)',
+      borderWidth:2, pointRadius:0, tension:.25, fill:true,
+    }] },
+    options:{ responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        title:c=>`เทรดที่ ${c[0].label}`,
+        label:c=>`สะสม: ${c.raw>=0?'+':''}${c.raw.toFixed(1)}%`
+      }}},
+      scales:{
+        y:{ ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } },
+        x:{ ticks:{ color:'#6b7a9e', maxTicksLimit:10 }, grid:{display:false}, title:{display:true,text:'ลำดับเทรด',color:'#6b7a9e',font:{size:10}} }
+      }
+    }
   });
 }
 
@@ -1971,8 +2106,98 @@ function updateDashboard() {
 
   // Daily routine checklist
   renderRoutine();
+
+  // High-impact news warning banner
+  renderNewsEvents();
+
+  // Position size calculator — restore saved balance/risk/contract settings
+  loadCalcInputs();
 }
 
+
+// ============================================
+// HIGH-IMPACT NEWS WARNING
+// ============================================
+function getNewsEvents() {
+  try {
+    const all = JSON.parse(localStorage.getItem('forex_news_events') || '{}');
+    return all[currentWeek] || [];
+  } catch(e) { return []; }
+}
+
+function saveNewsEvents(events) {
+  try {
+    const all = JSON.parse(localStorage.getItem('forex_news_events') || '{}');
+    all[currentWeek] = events;
+    localStorage.setItem('forex_news_events', JSON.stringify(all));
+  } catch(e) {}
+}
+
+function addNewsEvent() {
+  const nameEl = document.getElementById('newsEventName');
+  const timeEl = document.getElementById('newsEventTime');
+  const name = nameEl.value.trim();
+  const time = timeEl.value.trim();
+  if (!name || !/^\d{1,2}:\d{2}$/.test(time)) {
+    showToast('⚠ กรอกชื่อข่าว + เวลาแบบ HH:MM เช่น 19:30');
+    return;
+  }
+  const events = getNewsEvents();
+  events.push({ name, time, id: Date.now() });
+  saveNewsEvents(events);
+  nameEl.value = '';
+  timeEl.value = '';
+  renderNewsEvents();
+}
+
+function removeNewsEvent(id) {
+  const events = getNewsEvents().filter(e => e.id !== id);
+  saveNewsEvents(events);
+  renderNewsEvents();
+}
+
+function renderNewsEvents() {
+  const listEl = document.getElementById('newsEventList');
+  const bannerEl = document.getElementById('newsWarningBanner');
+  if (!listEl || !bannerEl) return;
+
+  const now = new Date();
+  const events = getNewsEvents();
+
+  // compute minutes-until for each event (today, using the given HH:MM)
+  const withTiming = events.map(e => {
+    const [h, m] = e.time.split(':').map(Number);
+    const eventTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+    const minsUntil = Math.round((eventTime - now) / 60000);
+    return { ...e, minsUntil };
+  });
+
+  // list of upcoming events (not yet passed)
+  const upcoming = withTiming.filter(e => e.minsUntil > -5).sort((a,b) => a.minsUntil - b.minsUntil);
+
+  listEl.innerHTML = upcoming.map(e => `
+    <div class="news-event-row">
+      <span>${e.name} — ${e.time} ${e.minsUntil >= 0 ? `(อีก ${e.minsUntil} นาที)` : '(ผ่านไปแล้ว)'}</span>
+      <button onclick="removeNewsEvent(${e.id})" title="ลบ">✕</button>
+    </div>
+  `).join('');
+
+  // show warning banner for the soonest event within 60 minutes
+  const soon = upcoming.find(e => e.minsUntil >= 0 && e.minsUntil <= 60);
+  if (soon) {
+    bannerEl.innerHTML = `
+      <div class="news-banner">
+        <span class="news-banner-icon">⚠️</span>
+        <span class="news-banner-text">ข่าวสำคัญ: <b>${soon.name}</b></span>
+        <span class="news-banner-cd">อีก ${soon.minsUntil} นาที · ${soon.time}</span>
+      </div>`;
+  } else {
+    bannerEl.innerHTML = '';
+  }
+}
+
+// re-check every 30s so the countdown/banner stays live without refreshing
+setInterval(renderNewsEvents, 30000);
 
 function saveDashNote() {
   localStorage.setItem('forex_dash_note', document.getElementById('dashNote').value);
@@ -2056,16 +2281,19 @@ function toggleRoutineItem(key) {
 const GOLD_BAR_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 8h14l2 10H3l2-10z" fill="#fff8dc" stroke="#8a6d00" stroke-width="1"/><path d="M5 8h14l1 4H4l1-4z" fill="#fffbe8"/></svg>`;
 const SILVER_BAR_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 8h14l2 10H3l2-10z" fill="#e8edf2" stroke="#5b6b7a" stroke-width="1"/><path d="M5 8h14l1 4H4l1-4z" fill="#f5f8fb"/></svg>`;
 
+const FLAG_IMG = (code) => `<img src="https://flagcdn.com/w80/${code}.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+const BTC_IMG = `<img src="https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/btc.svg" alt="" style="width:70%;height:70%;object-fit:contain">`;
+
 const SYMBOLS = [
   {id:'xagusd', name:'XAGUSD', tf:'H4 — H1', cls:'sym-xag', icon:SILVER_BAR_SVG, iconBg:'#94a3b8', iconColor:'#1e293b'},
   {id:'xauusd', name:'XAUUSD', tf:'H4 — H1', cls:'sym-xau', icon:GOLD_BAR_SVG, iconBg:'#f0b429', iconColor:'#1e1400'},
-  {id:'btcusdt', name:'BTCUSDT', tf:'Day — H4', cls:'sym-btc', icon:'₿', iconBg:'#f7931a', iconColor:'#fff'},
-  {id:'usdjpy', name:'USDJPY', tf:'Day — H4', cls:'sym-jpy', icon:'🇯🇵', iconBg:'#1f2937', iconColor:'#fff'},
-  {id:'eurusd', name:'EURUSD', tf:'Day — H4', cls:'sym-eur', icon:'🇪🇺', iconBg:'#1f2937', iconColor:'#fff'},
-  {id:'gbpusd', name:'GBPUSD', tf:'H4 — H1', cls:'sym-gbp', icon:'🇬🇧', iconBg:'#1f2937', iconColor:'#fff'},
-  {id:'s50', name:'S50', tf:'H1', cls:'sym-s50', icon:'🇹🇭', iconBg:'#1f2937', iconColor:'#fff'},
+  {id:'btcusdt', name:'BTCUSDT', tf:'Day — H4', cls:'sym-btc', icon:BTC_IMG, iconBg:'#0d1117', iconColor:'#fff'},
+  {id:'usdjpy', name:'USDJPY', tf:'Day — H4', cls:'sym-jpy', icon:FLAG_IMG('jp'), iconBg:'#1f2937', iconColor:'#fff'},
+  {id:'eurusd', name:'EURUSD', tf:'Day — H4', cls:'sym-eur', icon:FLAG_IMG('eu'), iconBg:'#1f2937', iconColor:'#fff'},
+  {id:'gbpusd', name:'GBPUSD', tf:'H4 — H1', cls:'sym-gbp', icon:FLAG_IMG('gb'), iconBg:'#1f2937', iconColor:'#fff'},
+  {id:'s50', name:'S50', tf:'H1', cls:'sym-s50', icon:FLAG_IMG('th'), iconBg:'#1f2937', iconColor:'#fff'},
   {id:'usoil', name:'USOIL', tf:'H4', cls:'sym-oil', icon:'🛢️', iconBg:'#292524', iconColor:'#fff'},
-  {id:'ndx', name:'NDX', tf:'Day — H4', cls:'sym-ndx', icon:'100', iconBg:'#3b82f6', iconColor:'#fff'},
+  {id:'ndx', name:'NDX', tf:'Day — H4', cls:'sym-ndx', icon:FLAG_IMG('us'), iconBg:'#1f2937', iconColor:'#fff'},
 ];
 
 const PATTERNS = [
@@ -3245,6 +3473,54 @@ async function saveData() {
   localStorage.setItem('forex_action_plan', JSON.stringify(allData));
   await cloudSave(allData);
   showToast('💾 บันทึกแล้ว ☁');
+}
+
+// ============================================
+// POSITION SIZE CALCULATOR
+// ============================================
+function parseNum(str) {
+  const n = parseFloat(String(str).replace(/,/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+
+function calcPositionSize() {
+  const balance = parseNum(document.getElementById('calcBalance').value);
+  const riskPct = parseNum(document.getElementById('calcRisk').value);
+  const entry = parseNum(document.getElementById('calcEntry').value);
+  const stop = parseNum(document.getElementById('calcStop').value);
+  const contractSize = parseNum(document.getElementById('calcContract').value) || 1;
+
+  const riskAmt = balance * (riskPct / 100);
+  const distance = Math.abs(entry - stop);
+
+  const riskAmtEl = document.getElementById('calcRiskAmt');
+  const distanceEl = document.getElementById('calcDistance');
+  const lotEl = document.getElementById('calcLotSize');
+
+  riskAmtEl.textContent = riskAmt ? `$${riskAmt.toLocaleString('en', {maximumFractionDigits: 2})}` : '—';
+  distanceEl.textContent = distance ? distance.toLocaleString('en', {maximumFractionDigits: 5}) : '—';
+
+  if (riskAmt > 0 && distance > 0) {
+    const units = riskAmt / distance;
+    const lots = units / contractSize;
+    lotEl.textContent = `${lots.toLocaleString('en', {maximumFractionDigits: 3})} Lot`;
+  } else {
+    lotEl.textContent = '—';
+  }
+
+  localStorage.setItem('forex_calc_inputs', JSON.stringify({balance: document.getElementById('calcBalance').value, risk: document.getElementById('calcRisk').value, contract: document.getElementById('calcContract').value}));
+}
+
+function loadCalcInputs() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('forex_calc_inputs') || 'null');
+    if (saved) {
+      if (saved.balance) document.getElementById('calcBalance').value = saved.balance;
+      if (saved.risk) document.getElementById('calcRisk').value = saved.risk;
+      if (saved.contract) document.getElementById('calcContract').value = saved.contract;
+    }
+  } catch(e) {}
+  calcPositionSize();
 }
 
 function autoSave() {
