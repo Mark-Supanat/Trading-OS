@@ -732,7 +732,28 @@ select.field-sm option{background:#111827;color:var(--text)}
 @media(max-width:600px){
   .calc-float-panel{right:14px;left:14px;width:auto;bottom:78px}
   .calc-fab{right:14px;bottom:14px}
+  .focus-float-panel{right:14px;left:14px;width:auto;bottom:216px}
+  .focus-fab{right:14px;bottom:80px}
 }
+
+/* FOCUS ON — floating FAB, stacked above the calculator */
+.focus-fab{
+  position:fixed;bottom:86px;right:22px;z-index:150;
+  width:52px;height:52px;border-radius:50%;border:1.5px solid rgba(59,130,246,.45);
+  background:linear-gradient(135deg,rgba(59,130,246,.9),rgba(129,140,248,.9));
+  color:#0b0f1a;font-size:22px;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transition:transform .2s, box-shadow .2s;
+}
+.focus-fab:hover{transform:scale(1.08);box-shadow:0 10px 28px rgba(0,0,0,.5),0 0 0 6px rgba(59,130,246,.15)}
+.focus-float-panel{
+  position:fixed;bottom:148px;right:22px;z-index:150;width:270px;
+  background:linear-gradient(160deg,rgba(10,14,24,.97),rgba(6,9,16,.97));
+  border:1.5px solid rgba(59,130,246,.4);border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,.6);backdrop-filter:blur(20px);
+  padding:14px;display:none;
+}
+.focus-float-panel.open{display:block;animation:calc-pop .2s ease}
 .main-content{min-width:0}
 .summary-sidebar{position:sticky;top:60px;height:fit-content;padding:0 12px}
 
@@ -761,31 +782,47 @@ select.field-sm option{background:#111827;color:var(--text)}
   font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:#93c5fd;text-transform:uppercase;
   text-align:center;margin-bottom:8px;font-weight:700;
 }
-.focus-subhead{font-family:var(--font-mono);font-size:7.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 5px}
-.focus-ordered-list{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
+.focus-subhead{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 8px}
+.focus-ordered-list{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
 .focus-chip-drag{
-  display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:8px;cursor:grab;
+  display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;cursor:grab;
   background:rgba(59,130,246,.16);border:1px solid rgba(147,197,253,.4);
-  font-family:var(--font-mono);font-size:10px;font-weight:700;color:#93c5fd;
+  font-family:var(--font-mono);font-size:13px;font-weight:700;color:#93c5fd;
 }
 .focus-chip-drag.dragging{opacity:.4}
 .focus-chip-drag .rank{
-  width:14px;height:14px;border-radius:4px;background:rgba(147,197,253,.25);color:#dbeafe;
-  display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;
+  width:20px;height:20px;border-radius:5px;background:rgba(147,197,253,.25);color:#dbeafe;
+  display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;
 }
 .focus-chip-drag .fname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.focus-chip-drag .updown{display:flex;flex-direction:column;line-height:1;gap:1px;flex-shrink:0}
-.focus-chip-drag .updown span{cursor:pointer;color:#5a7bb5;font-size:7px}
+.focus-chip-drag .updown{display:flex;flex-direction:column;line-height:1;gap:4px;flex-shrink:0}
+.focus-chip-drag .updown span{cursor:pointer;color:#5a7bb5;font-size:11px;padding:2px}
 .focus-chip-drag .updown span:hover{color:#dbeafe}
-.focus-chip-drag .remove-x{color:#4a5f8a;font-size:10px;cursor:pointer;flex-shrink:0}
+.focus-chip-drag .remove-x{color:#4a5f8a;font-size:15px;cursor:pointer;flex-shrink:0;padding:2px 4px}
 .focus-chip-drag .remove-x:hover{color:#f87171}
-.focus-empty{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-align:center;padding:6px}
-.focus-available{display:flex;flex-wrap:wrap;gap:4px}
+.focus-empty{font-family:var(--font-mono);font-size:10px;color:var(--text3);text-align:center;padding:10px}
+.focus-available{display:flex;flex-wrap:wrap;gap:7px}
 .focus-chip-add{
-  padding:3px 7px;border-radius:12px;font-family:var(--font-mono);font-size:9px;font-weight:600;cursor:pointer;
+  padding:6px 12px;border-radius:14px;font-family:var(--font-mono);font-size:11.5px;font-weight:600;cursor:pointer;
   border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:var(--text3);
 }
 .focus-chip-add:hover{border-color:rgba(147,197,253,.4);color:#93c5fd}
+
+/* DASHBOARD FOCUS ON DISPLAY */
+.dash-focus-label{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:#93c5fd;
+  text-transform:uppercase;font-weight:700;margin-bottom:7px;
+}
+.dash-focus-pills{display:flex;flex-wrap:wrap;gap:6px}
+.dash-focus-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 4px;border-radius:20px;
+  background:rgba(59,130,246,.16);border:1px solid rgba(147,197,253,.35);
+  font-family:var(--font-mono);font-size:12px;font-weight:700;color:#dbeafe;
+}
+.dash-focus-rank{
+  width:18px;height:18px;border-radius:50%;background:rgba(147,197,253,.3);color:#0b0f1a;
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;
+}
 
 /* NEWS WARNING BANNER */
 .news-banner{
@@ -1254,13 +1291,6 @@ select.field-sm option{background:#111827;color:var(--text)}
   <div class="summary-card">
     <div class="section-tag">WEEKLY SUMMARY</div>
     <div class="summary-grid" id="summaryGridMobile"></div>
-    <div style="margin-top:14px" class="focus-card">
-      <div class="focus-title">🎯 FOCUS ON</div>
-      <div class="focus-subhead">ลากหรือกด ▲▼ เพื่อเรียงลำดับ</div>
-      <div class="focus-ordered-list" id="focusOrdered_mobile"></div>
-      <div class="focus-subhead">แตะเพื่อเพิ่ม</div>
-      <div class="focus-available" id="focusAvailable_mobile"></div>
-    </div>
   </div>
 
 </div><!-- end main-content -->
@@ -1271,19 +1301,24 @@ select.field-sm option{background:#111827;color:var(--text)}
     <div class="summary-panel-title">BIAS SUMMARY</div>
     <div id="summaryGrid"></div>
   </div>
-
-  <div class="summary-panel focus-card" style="margin-top:10px">
-    <div class="focus-title">🎯 FOCUS ON</div>
-    <div class="focus-subhead">ลากหรือกด ▲▼ เพื่อเรียงลำดับ</div>
-    <div class="focus-ordered-list" id="focusOrdered_desktop"></div>
-    <div class="focus-subhead">แตะเพื่อเพิ่ม</div>
-    <div class="focus-available" id="focusAvailable_desktop"></div>
-  </div>
 </div>
 
 </div><!-- end page-layout -->
 </div><!-- end action-plan inner -->
   </div><!-- end page-action-plan -->
+
+  <!-- FOCUS ON — floating widget, more room to use comfortably -->
+  <button class="focus-fab" id="focusFab" onclick="toggleFocusPanel()" title="Focus On">🎯</button>
+  <div class="focus-float-panel" id="focusFloatPanel">
+    <div class="calc-float-header">
+      <span class="summary-panel-title" style="margin:0;color:#93c5fd">🎯 FOCUS ON</span>
+      <button class="calc-close-btn" onclick="toggleFocusPanel()">✕</button>
+    </div>
+    <div class="focus-subhead">ลากหรือกด ▲▼ เพื่อเรียงลำดับ</div>
+    <div class="focus-ordered-list" id="focusOrdered"></div>
+    <div class="focus-subhead">แตะเพื่อเพิ่ม</div>
+    <div class="focus-available" id="focusAvailable"></div>
+  </div>
 
   <!-- POSITION SIZE CALCULATOR — floating widget, doesn't affect page layout -->
   <button class="calc-fab" id="calcFab" onclick="toggleCalcPanel()" title="Position Size Calculator">🧮</button>
@@ -2003,6 +2038,9 @@ function switchPage(pageId) {
   const calcFab = document.getElementById('calcFab');
   if (calcFab) calcFab.style.display = pageId === 'action-plan' ? 'flex' : 'none';
   if (pageId !== 'action-plan') document.getElementById('calcFloatPanel').classList.remove('open');
+  const focusFab = document.getElementById('focusFab');
+  if (focusFab) focusFab.style.display = pageId === 'action-plan' ? 'flex' : 'none';
+  if (pageId !== 'action-plan') document.getElementById('focusFloatPanel').classList.remove('open');
   if (pageId === 'dashboard') updateDashboard();
   if (pageId === 'analytics' && anAllTrades.length === 0) loadAnalytics();
   if (pageId === 'history') renderHistoryPageContent();
@@ -2355,11 +2393,9 @@ function shortSymName(sym) {
 }
 
 function renderFocusWidget() {
-  ['desktop','mobile'].forEach(scope => {
-    const orderedEl = document.getElementById(`focusOrdered_${scope}`);
-    const availEl = document.getElementById(`focusAvailable_${scope}`);
-    if (!orderedEl || !availEl) return;
-
+  const orderedEl = document.getElementById('focusOrdered');
+  const availEl = document.getElementById('focusAvailable');
+  if (orderedEl && availEl) {
     if (!focusList.length) {
       orderedEl.innerHTML = `<div class="focus-empty">ยังไม่ได้เลือก</div>`;
     } else {
@@ -2378,9 +2414,13 @@ function renderFocusWidget() {
     availEl.innerHTML = SYMBOLS.filter(s => !focusList.includes(s.id)).map(s =>
       `<span class="focus-chip-add" onclick="addFocusSymbol('${s.id}')">${shortSymName(s)}</span>`
     ).join('');
-  });
+  }
 
   renderDashFocusLine();
+}
+
+function toggleFocusPanel() {
+  document.getElementById('focusFloatPanel').classList.toggle('open');
 }
 
 function addFocusSymbol(id) {
@@ -2430,11 +2470,11 @@ function renderDashFocusLine() {
   const el = document.getElementById('dashFocusLine');
   if (!el) return;
   if (!focusList.length) { el.innerHTML = ''; return; }
-  const parts = focusList.map((id, i) => {
+  const pills = focusList.map((id, i) => {
     const sym = SYMBOLS.find(s => s.id === id);
-    return sym ? `<span style="color:#93c5fd">${i+1}.${shortSymName(sym)}</span>` : '';
-  }).filter(Boolean).join(' <span style="color:var(--text3)">›</span> ');
-  el.innerHTML = `<div style="font-family:var(--font-mono);font-size:15px;font-weight:700;letter-spacing:.02em">🎯 ${parts}</div>`;
+    return sym ? `<span class="dash-focus-pill"><span class="dash-focus-rank">${i+1}</span>${shortSymName(sym)}</span>` : '';
+  }).filter(Boolean).join('');
+  el.innerHTML = `<div class="dash-focus-label">🎯 FOCUS ON</div><div class="dash-focus-pills">${pills}</div>`;
 }
 
 function saveDashNote() {
@@ -3816,66 +3856,4 @@ function scrollToCard(symId) {
   if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function syncSummaryNote(el) {
-  const main = document.getElementById('ov_summary');
-  if (main) main.value = el.value;
-  autoSave();
-}
-
-// ============================================
-// EXPORT
-// ============================================
-function exportData() {
-  const data = collectData();
-  let text = `ACTION PLAN — ${currentWeek}\n`;
-  text += `${'='.repeat(50)}\n\n`;
-  text += `WEEK: ${data.ov_week}\n`;
-  text += `KEY RISK: ${data.ov_risk}\n`;
-  text += `DXY BIAS: ${data.dxy_bias}\n`;
-  text += `ANALYSIS: ${data.ov_analysis}\n\n`;
-  SYMBOLS.forEach(sym => {
-    text += `${sym.name}\n`;
-    DAYS.forEach(day => {
-      const d = (data[sym.id]?.days || {})[day] || {};
-      const hasImg = (chartImages[currentWeek] || {})[`${sym.id}__${day}`] ? '[📷]' : '';
-      if (d.pattern || d.strategy || d.bias || d.risk || d.note) {
-        text += `  [${day}] ${hasImg} Pattern: ${d.pattern||'—'} | Strategy: ${d.strategy||'—'} | Bias: ${d.bias||'—'}\n`;
-        if (d.risk) text += `         Risk: ${d.risk}\n`;
-        if (d.note) text += `         Note: ${d.note}\n`;
-      }
-    });
-    text += '\n';
-  });
-  text += `SUMMARY: ${data.ov_summary}`;
-  const blob = new Blob([text], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `ActionPlan_${currentWeek.replace(/\s/g,'_')}.txt`;
-  a.click();
-  showToast('📋 Export สำเร็จ');
-}
-
-// ============================================
-// HELPERS
-// ============================================
-function setVal(id, val) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.value = val;
-}
-function getVal(id) {
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
-}
-
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
-}
-</script>
-</body>
-</html>
+function syncSumma
