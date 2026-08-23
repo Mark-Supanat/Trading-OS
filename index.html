@@ -532,6 +532,7 @@ body::before{
 .field-input:focus{border-color:rgba(59,130,246,.6);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
 .field-input::placeholder{color:var(--text3)}
 textarea.field-input{min-height:80px;line-height:1.6}
+#ov_analysis{min-height:130px;font-size:14.5px;line-height:1.8}
 [data-theme="light"] .field-input{background:#f5f7ff}
 
 /* DXY BIAS BAR */
@@ -750,6 +751,41 @@ select.field-sm option{background:#111827;color:var(--text)}
 .calc-result-mini-value{font-family:var(--font-display);font-size:13px;color:var(--text);margin-top:2px}
 .calc-result-main{margin-top:6px;text-align:center;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:8px 4px}
 .calc-result-main-value{font-family:var(--font-display);font-size:17px;color:#34d399;margin-top:2px}
+
+/* FOCUS ON WIDGET */
+.focus-card{
+  border:1.5px solid rgba(59,130,246,.45) !important;
+  box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 0 1px rgba(59,130,246,.1),inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.focus-title{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:#93c5fd;text-transform:uppercase;
+  text-align:center;margin-bottom:8px;font-weight:700;
+}
+.focus-subhead{font-family:var(--font-mono);font-size:7.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 5px}
+.focus-ordered-list{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
+.focus-chip-drag{
+  display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:8px;cursor:grab;
+  background:rgba(59,130,246,.16);border:1px solid rgba(147,197,253,.4);
+  font-family:var(--font-mono);font-size:10px;font-weight:700;color:#93c5fd;
+}
+.focus-chip-drag.dragging{opacity:.4}
+.focus-chip-drag .rank{
+  width:14px;height:14px;border-radius:4px;background:rgba(147,197,253,.25);color:#dbeafe;
+  display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;
+}
+.focus-chip-drag .fname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.focus-chip-drag .updown{display:flex;flex-direction:column;line-height:1;gap:1px;flex-shrink:0}
+.focus-chip-drag .updown span{cursor:pointer;color:#5a7bb5;font-size:7px}
+.focus-chip-drag .updown span:hover{color:#dbeafe}
+.focus-chip-drag .remove-x{color:#4a5f8a;font-size:10px;cursor:pointer;flex-shrink:0}
+.focus-chip-drag .remove-x:hover{color:#f87171}
+.focus-empty{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-align:center;padding:6px}
+.focus-available{display:flex;flex-wrap:wrap;gap:4px}
+.focus-chip-add{
+  padding:3px 7px;border-radius:12px;font-family:var(--font-mono);font-size:9px;font-weight:600;cursor:pointer;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:var(--text3);
+}
+.focus-chip-add:hover{border-color:rgba(147,197,253,.4);color:#93c5fd}
 
 /* NEWS WARNING BANNER */
 .news-banner{
@@ -1006,6 +1042,7 @@ select.field-sm option{background:#111827;color:var(--text)}
           <div class="dash-widget-title">CURRENT WEEK</div>
           <div class="dash-widget-value" id="dashWeek" style="font-size:22px;margin-top:4px">—</div>
           <div class="dash-widget-sub" id="dashDXY">DXY Bias: —</div>
+          <div id="dashFocusLine" style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.08)"></div>
         </div>
         <div class="dash-widget" style="position:relative">
           <div style="position:absolute;top:16px;right:16px;color:var(--text3);font-size:18px">🕐</div>
@@ -1195,7 +1232,7 @@ select.field-sm option{background:#111827;color:var(--text)}
     <div style="margin-top:12px">
       <div class="overview-field ov-box ov-box-analysis">
         <label>📊 MARKET ANALYSIS (DXY / OVERALL BIAS)</label>
-        <textarea class="field-input" id="ov_analysis" placeholder="วิเคราะห์ภาพรวม อิง DXY เป็นหลัก..." rows="3" oninput="autoSave()"></textarea>
+        <textarea class="field-input" id="ov_analysis" placeholder="วิเคราะห์ภาพรวม อิง DXY เป็นหลัก..." rows="5" oninput="autoSave()"></textarea>
       </div>
     </div>
     <div class="dxy-bar">
@@ -1217,11 +1254,12 @@ select.field-sm option{background:#111827;color:var(--text)}
   <div class="summary-card">
     <div class="section-tag">WEEKLY SUMMARY</div>
     <div class="summary-grid" id="summaryGridMobile"></div>
-    <div style="margin-top:14px">
-      <div class="overview-field">
-        <label style="font-size:11px;color:var(--text);font-family:var(--font-mono);letter-spacing:.08em;font-weight:700;display:block;margin-bottom:6px">TRADE PLAN NOTE</label>
-        <textarea class="field-input" id="ov_summary_mobile" placeholder="สรุปแผนการเทรด..." rows="3" oninput="syncSummaryNote(this)"></textarea>
-      </div>
+    <div style="margin-top:14px" class="focus-card">
+      <div class="focus-title">🎯 FOCUS ON</div>
+      <div class="focus-subhead">ลากหรือกด ▲▼ เพื่อเรียงลำดับ</div>
+      <div class="focus-ordered-list" id="focusOrdered_mobile"></div>
+      <div class="focus-subhead">แตะเพื่อเพิ่ม</div>
+      <div class="focus-available" id="focusAvailable_mobile"></div>
     </div>
   </div>
 
@@ -1232,10 +1270,14 @@ select.field-sm option{background:#111827;color:var(--text)}
   <div class="summary-panel">
     <div class="summary-panel-title">BIAS SUMMARY</div>
     <div id="summaryGrid"></div>
-    <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
-      <label style="font-size:9px;color:var(--text2);font-family:var(--font-mono);font-weight:700;letter-spacing:.08em;display:block;margin-bottom:5px">TRADE PLAN NOTE</label>
-      <textarea class="field-input" id="ov_summary" placeholder="Focus คู่ไหน..." rows="4" oninput="autoSave()" style="font-size:11px;min-height:70px;resize:none"></textarea>
-    </div>
+  </div>
+
+  <div class="summary-panel focus-card" style="margin-top:10px">
+    <div class="focus-title">🎯 FOCUS ON</div>
+    <div class="focus-subhead">ลากหรือกด ▲▼ เพื่อเรียงลำดับ</div>
+    <div class="focus-ordered-list" id="focusOrdered_desktop"></div>
+    <div class="focus-subhead">แตะเพื่อเพิ่ม</div>
+    <div class="focus-available" id="focusAvailable_desktop"></div>
   </div>
 </div>
 
@@ -2147,6 +2189,9 @@ function updateDashboard() {
   // High-impact news warning banner
   renderNewsEvents();
 
+  // Focus On priority list
+  renderDashFocusLine();
+
   // Position size calculator — restore saved balance/risk/contract settings
   loadCalcInputs();
 }
@@ -2267,6 +2312,131 @@ async function saveNoteCloud(text) {
   } catch(e) { console.warn('Quick note save failed:', e); }
 }
 
+// ============================================
+// FOCUS ON — synced to Supabase (same `action_plan` table, row id='focus')
+// ============================================
+const SB_FOCUS_ID = 'focus';
+let focusSaveTimer = null;
+let focusDragSrcId = null;
+
+async function loadFocusCloud() {
+  try {
+    const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_FOCUS_ID}&select=data`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
+    });
+    const rows = await res.json();
+    return (rows && rows[0] && rows[0].data && rows[0].data.list) || [];
+  } catch(e) { console.warn('Focus list load failed:', e); return []; }
+}
+
+async function saveFocusCloud() {
+  try {
+    await fetch(`${SB_URL}/action_plan`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ id: SB_FOCUS_ID, data: { list: focusList } }),
+    });
+  } catch(e) { console.warn('Focus list save failed:', e); }
+}
+
+function saveFocusDebounced() {
+  localStorage.setItem('forex_focus_list', JSON.stringify(focusList));
+  clearTimeout(focusSaveTimer);
+  focusSaveTimer = setTimeout(saveFocusCloud, 600);
+}
+
+function shortSymName(sym) {
+  return sym.name.replace('USDT','').replace('USD','');
+}
+
+function renderFocusWidget() {
+  ['desktop','mobile'].forEach(scope => {
+    const orderedEl = document.getElementById(`focusOrdered_${scope}`);
+    const availEl = document.getElementById(`focusAvailable_${scope}`);
+    if (!orderedEl || !availEl) return;
+
+    if (!focusList.length) {
+      orderedEl.innerHTML = `<div class="focus-empty">ยังไม่ได้เลือก</div>`;
+    } else {
+      orderedEl.innerHTML = focusList.map((id, i) => {
+        const sym = SYMBOLS.find(s => s.id === id);
+        if (!sym) return '';
+        return `<div class="focus-chip-drag" draggable="true" data-id="${id}"
+          ondragstart="focusDragStart(event,'${id}')" ondragover="focusDragOver(event)" ondrop="focusDrop(event,'${id}')" ondragend="focusDragEnd(event)">
+          <span class="rank">${i+1}</span><span class="fname">${shortSymName(sym)}</span>
+          <span class="updown"><span onclick="moveFocus('${id}',-1)" title="ขึ้น">▲</span><span onclick="moveFocus('${id}',1)" title="ลง">▼</span></span>
+          <span class="remove-x" onclick="removeFocusSymbol('${id}')" title="เอาออก">✕</span>
+        </div>`;
+      }).join('');
+    }
+
+    availEl.innerHTML = SYMBOLS.filter(s => !focusList.includes(s.id)).map(s =>
+      `<span class="focus-chip-add" onclick="addFocusSymbol('${s.id}')">${shortSymName(s)}</span>`
+    ).join('');
+  });
+
+  renderDashFocusLine();
+}
+
+function addFocusSymbol(id) {
+  if (!focusList.includes(id)) focusList.push(id);
+  renderFocusWidget();
+  saveFocusDebounced();
+}
+
+function removeFocusSymbol(id) {
+  focusList = focusList.filter(x => x !== id);
+  renderFocusWidget();
+  saveFocusDebounced();
+}
+
+function moveFocus(id, dir) {
+  const i = focusList.indexOf(id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= focusList.length) return;
+  [focusList[i], focusList[j]] = [focusList[j], focusList[i]];
+  renderFocusWidget();
+  saveFocusDebounced();
+}
+
+function focusDragStart(e, id) {
+  focusDragSrcId = id;
+  e.target.closest('.focus-chip-drag').classList.add('dragging');
+}
+function focusDragOver(e) { e.preventDefault(); }
+function focusDragEnd(e) {
+  const el = e.target.closest('.focus-chip-drag');
+  if (el) el.classList.remove('dragging');
+}
+function focusDrop(e, targetId) {
+  e.preventDefault();
+  if (!focusDragSrcId || targetId === focusDragSrcId) return;
+  const from = focusList.indexOf(focusDragSrcId);
+  const to = focusList.indexOf(targetId);
+  if (from < 0 || to < 0) return;
+  focusList.splice(from, 1);
+  focusList.splice(to, 0, focusDragSrcId);
+  focusDragSrcId = null;
+  renderFocusWidget();
+  saveFocusDebounced();
+}
+
+function renderDashFocusLine() {
+  const el = document.getElementById('dashFocusLine');
+  if (!el) return;
+  if (!focusList.length) { el.innerHTML = ''; return; }
+  const parts = focusList.map((id, i) => {
+    const sym = SYMBOLS.find(s => s.id === id);
+    return sym ? `<span style="color:#93c5fd">${i+1}.${shortSymName(sym)}</span>` : '';
+  }).filter(Boolean).join(' <span style="color:var(--text3)">›</span> ');
+  el.innerHTML = `<div style="font-family:var(--font-mono);font-size:15px;font-weight:700;letter-spacing:.02em">🎯 ${parts}</div>`;
+}
+
 function saveDashNote() {
   const text = document.getElementById('dashNote').value;
   localStorage.setItem('forex_dash_note', text); // offline fallback
@@ -2280,6 +2450,7 @@ function saveDashNote() {
 const SB_ROUTINE_ID = 'routine';
 let routineData = {}; // { 'YYYY-MM-DD': { meditate:bool, gm:bool, exercise:bool, meals:bool } }
 let dashNoteCloudText = '';
+let focusList = []; // array of symbol ids, in priority order
 let routineSaveTimer = null;
 
 const ROUTINE_ITEMS = [
@@ -2600,6 +2771,10 @@ async function initApp() {
   const cloudData = await cloudLoad();
   routineData = await loadRoutineCloud();
   dashNoteCloudText = await loadNoteCloud();
+  focusList = await loadFocusCloud();
+  if (!focusList.length) {
+    try { focusList = JSON.parse(localStorage.getItem('forex_focus_list') || '[]'); } catch(e) { focusList = []; }
+  }
   if (cloudData) {
     allData = cloudData;
     localStorage.setItem('forex_action_plan', JSON.stringify(allData));
@@ -2633,6 +2808,7 @@ async function initApp() {
   renderSymbols();
   loadWeekData();
   loadArchive();
+  renderFocusWidget();
 
   // restore last active page
   const lastPage = localStorage.getItem('forex_active_page') || 'action-plan';
