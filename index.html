@@ -13,6 +13,7 @@
 <meta name="theme-color" content="#0b0f1a">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -490,6 +491,9 @@ body::before{
 .history-month-count{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-right:8px}
 .history-month-body{display:none;padding-top:10px}
 .history-month-body.open{display:block}
+.history-export-btn{font-family:var(--font-mono);font-size:10px;font-weight:700;color:#fb923c;background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.35);border-radius:8px;padding:4px 10px;cursor:pointer;transition:background .15s;letter-spacing:.04em}
+.history-export-btn:hover{background:rgba(251,146,60,.22)}
+.history-export-btn:disabled{opacity:.5;cursor:wait}
 .readonly-badge{display:inline-block;background:rgba(251,146,60,.15);color:#fb923c;font-size:9px;font-family:var(--font-mono);padding:2px 8px;border-radius:10px;border:1px solid rgba(251,146,60,.3);font-weight:700;letter-spacing:.06em}
 .history-sym-card{background:rgba(17,24,39,.6);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
 .history-sym-name{font-family:var(--font-display);font-size:20px;letter-spacing:.08em;margin-bottom:8px}
@@ -3014,8 +3018,9 @@ function renderGroupedHistory(scope) {
     <div class="history-month-group">
       <div class="history-month-header" onclick="toggleHistoryMonth('${scope}','${g.monthKey}')">
         <span class="history-month-label">🗓️ ${g.monthLabel.toUpperCase()}</span>
-        <div style="display:flex;align-items:center;gap:4px">
+        <div style="display:flex;align-items:center;gap:8px">
           <span class="history-month-count">${g.items.length} สัปดาห์</span>
+          <button class="history-export-btn" id="exportBtn_${scope}_${g.monthKey}" onclick="event.stopPropagation(); exportMonthData('${g.monthKey}','${g.monthLabel.replace(/'/g, "\\'")}', '${scope}_${g.monthKey}')">⬇ EXPORT</button>
           <span id="mchevron_${scope}_${g.monthKey}">${gi === 0 ? '▲' : '▼'}</span>
         </div>
       </div>
@@ -3048,6 +3053,141 @@ function toggleHistoryMonth(scope, monthKey) {
   if (!body || !chevron) return;
   const open = body.classList.toggle('open');
   chevron.textContent = open ? '▲' : '▼';
+}
+
+function sanitizeFilename(str) {
+  return String(str).replace(/[^a-zA-Z0-9ก-๙_-]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+// Export ข้อมูล + รูปกราฟของทั้งเดือนเป็น .zip (data.json + images/) สำหรับส่งให้ AI วิเคราะห์
+async function exportMonthData(monthKey, monthLabel, btnId) {
+  const btn = document.getElementById(`exportBtn_${btnId}`);
+  const groups = groupWeeksByMonth(archiveData.weeks);
+  const group = groups.find(g => g.monthKey === monthKey);
+  if (!group || group.items.length === 0) {
+    showToast('⚠️ ไม่พบข้อมูลของเดือนนี้');
+    return;
+  }
+  if (typeof JSZip === 'undefined') {
+    showToast('❌ โหลด export library ไม่สำเร็จ ลองรีเฟรชหน้าใหม่');
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังเตรียม...'; }
+  showToast('📦 กำลัง export ข้อมูล...');
+
+  try {
+    const zip = new JSZip();
+    const imgFolder = zip.folder('images');
+    const failedImages = [];
+    let imgCounter = 0;
+    const weeksJson = [];
+
+    for (const { w } of group.items) {
+      const weekSlug = sanitizeFilename(w.label || w.weekKey || 'week');
+      const data = w.data || {};
+      const images = w.images || {};
+
+      const symbolsOut = SYMBOLS.map(sym => {
+        const symData = data[sym.id] || {};
+        const days = symData.days || {};
+        return {
+          id: sym.id,
+          name: sym.name,
+          ctdNote: symData.ctdNote || '',
+          days: DAYS.map(d => {
+            const dayData = days[d] || {};
+            const imgKey = `${sym.id}__${d}`;
+            const hasChart = !!images[imgKey];
+            return {
+              day: d,
+              pattern: dayData.pattern || '',
+              strategy: dayData.strategy || '',
+              bias: dayData.bias || '',
+              risk: dayData.risk || '',
+              note: dayData.note || '',
+              tf: dayData.tf || '',
+              chartFile: hasChart ? `images/${weekSlug}__${sanitizeFilename(imgKey)}.png` : null,
+            };
+          }),
+        };
+      });
+
+      weeksJson.push({
+        label: w.label,
+        weekKey: w.weekKey,
+        archivedAt: w.archivedAt,
+        overview: {
+          weekRange: data.ov_week || '',
+          keyRisk: data.ov_risk || '',
+          analysis: data.ov_analysis || '',
+          summary: data.ov_summary || '',
+          dxyBias: data.dxy_bias || '',
+        },
+        symbols: symbolsOut,
+        calendarChartFile: images['__cal__'] ? `images/${weekSlug}__calendar.png` : null,
+      });
+
+      // ดึงรูปกราฟใส่ zip (base64 ตรงๆ หรือ fetch จาก URL Supabase)
+      for (const [key, src] of Object.entries(images)) {
+        if (!src || typeof src !== 'string') continue;
+        const baseName = key === '__cal__' ? `${weekSlug}__calendar` : `${weekSlug}__${sanitizeFilename(key)}`;
+        try {
+          if (src.startsWith('data:')) {
+            const match = src.match(/^data:image\/(\w+);base64,(.*)$/);
+            if (match) {
+              const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
+              imgFolder.file(`${baseName}.${ext}`, match[2], { base64: true });
+              imgCounter++;
+            } else {
+              failedImages.push(`${baseName} (รูปแบบ data URI ไม่รู้จัก)`);
+            }
+          } else {
+            const res = await fetch(src);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            imgFolder.file(`${baseName}.png`, blob);
+            imgCounter++;
+          }
+        } catch (e) {
+          console.warn('Export image failed:', key, e);
+          failedImages.push(`${baseName} (${e.message || 'fetch failed'})`);
+        }
+      }
+    }
+
+    const exportObj = {
+      exportMonth: monthKey,
+      monthLabel,
+      generatedAt: new Date().toISOString(),
+      weekCount: weeksJson.length,
+      imageCount: imgCounter,
+      weeks: weeksJson,
+    };
+
+    zip.file('data.json', JSON.stringify(exportObj, null, 2));
+    if (failedImages.length > 0) {
+      zip.file('image_export_log.txt', `รูปที่ export ไม่สำเร็จ (${failedImages.length} รูป):\n` + failedImages.join('\n'));
+    }
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `trading-os-export-${monthKey}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    showToast(failedImages.length > 0
+      ? `⚠️ Export เสร็จ แต่มี ${failedImages.length} รูปดึงไม่สำเร็จ (ดู image_export_log.txt)`
+      : `✅ Export สำเร็จ! (${weeksJson.length} สัปดาห์, ${imgCounter} รูป)`);
+  } catch (e) {
+    console.error('Export failed:', e);
+    showToast('❌ Export ล้มเหลว: ' + (e.message || 'unknown error'));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⬇ EXPORT'; }
+  }
 }
 
 function toggleHistoryWeek(wi, scope) {
