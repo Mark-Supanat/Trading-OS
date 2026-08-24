@@ -483,6 +483,13 @@ body::before{
 .history-week-meta{font-family:var(--font-mono);font-size:10px;color:var(--text3)}
 .history-week-body{display:none;padding:16px;background:rgba(11,15,26,.5)}
 .history-week-body.open{display:block}
+.history-month-group{margin-bottom:16px}
+.history-month-header{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.25);border-radius:12px;cursor:pointer;transition:background .15s}
+.history-month-header:hover{background:rgba(251,146,60,.1)}
+.history-month-label{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text);letter-spacing:.05em}
+.history-month-count{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-right:8px}
+.history-month-body{display:none;padding-top:10px}
+.history-month-body.open{display:block}
 .readonly-badge{display:inline-block;background:rgba(251,146,60,.15);color:#fb923c;font-size:9px;font-family:var(--font-mono);padding:2px 8px;border-radius:10px;border:1px solid rgba(251,146,60,.3);font-weight:700;letter-spacing:.06em}
 .history-sym-card{background:rgba(17,24,39,.6);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
 .history-sym-name{font-family:var(--font-display);font-size:20px;letter-spacing:.08em;margin-bottom:8px}
@@ -1346,7 +1353,7 @@ select.field-sm option{background:#111827;color:var(--text)}
   <div class="page" id="page-history">
     <div class="page-inner">
       <div style="margin-bottom:16px">
-        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text3);letter-spacing:.08em">เก็บไว้สูงสุด 3 สัปดาห์ล่าสุด — Read Only</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text3);letter-spacing:.08em">เก็บสะสมทุกสัปดาห์ แยกตามเดือน — Read Only</div>
       </div>
       <div id="historyPageContent">
         <div class="placeholder-page">
@@ -2892,29 +2899,13 @@ function renderHistoryPageContent() {
     </div>`;
     return;
   }
-  container.innerHTML = archiveData.weeks.map((w, wi) => `
-    <div class="history-week-item" style="margin-bottom:12px">
-      <div class="history-week-header" onclick="toggleHistoryWeek(${wi},'page')">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span class="history-week-label">📅 ${w.label}</span>
-          <span class="readonly-badge">READ ONLY</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="history-week-meta">${new Date(w.archivedAt).toLocaleDateString('th-TH')}</span>
-          <span id="hchevron_page_${wi}">▼</span>
-        </div>
-      </div>
-      <div class="history-week-body" id="hbody_page_${wi}">
-        ${renderHistoryWeekContent(w, wi, 'page')}
-      </div>
-    </div>
-  `).join('');
+  container.innerHTML = renderGroupedHistory('page');
 }
 
 // ============================================
 // ARCHIVE & HISTORY
 // ============================================
-let archiveData = { weeks: [] }; // max 3 weeks
+let archiveData = { weeks: [] }; // เก็บสะสมทั้งหมด ไม่มี limit — จัดกลุ่มแสดงผลตามเดือน
 
 async function loadArchive() {
   try {
@@ -2961,9 +2952,8 @@ async function archiveWeek() {
     images: JSON.parse(JSON.stringify(chartImages[currentWeek] || {})),
   };
 
-  // เพิ่มเข้า archiveData และตัดเกิน 3
+  // เพิ่มเข้า archiveData — เก็บสะสมทั้งหมด ไม่ลบของเก่า
   archiveData.weeks.unshift(entry);
-  if (archiveData.weeks.length > 3) archiveData.weeks = archiveData.weeks.slice(0, 3);
   await saveArchive();
 
   // เริ่ม current week ใหม่
@@ -2998,23 +2988,66 @@ function renderHistoryPanel() {
     return;
   }
   panel.style.display = 'block';
-  list.innerHTML = archiveData.weeks.map((w, wi) => `
-    <div class="history-week-item">
-      <div class="history-week-header" onclick="toggleHistoryWeek(${wi},'panel')">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span class="history-week-label">📅 ${w.label}</span>
-          <span class="readonly-badge">READ ONLY</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="history-week-meta">${new Date(w.archivedAt).toLocaleDateString('th-TH')}</span>
-          <span id="hchevron_panel_${wi}">▼</span>
+  list.innerHTML = renderGroupedHistory('panel');
+}
+
+// จัดกลุ่ม weeks ตามเดือน (ใช้ archivedAt เป็นตัวตัดสิน ไม่พึ่ง label เพราะ format ไม่คงที่)
+function groupWeeksByMonth(weeks) {
+  const groups = {};
+  const order = [];
+  weeks.forEach((w, wi) => {
+    const d = new Date(w.archivedAt);
+    const monthKey = isNaN(d) ? 'unknown' : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (!groups[monthKey]) {
+      const monthLabel = isNaN(d) ? 'ไม่ทราบเดือน' : d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+      groups[monthKey] = { monthKey, monthLabel, items: [] };
+      order.push(monthKey);
+    }
+    groups[monthKey].items.push({ w, wi });
+  });
+  return order.map(k => groups[k]);
+}
+
+function renderGroupedHistory(scope) {
+  const groups = groupWeeksByMonth(archiveData.weeks);
+  return groups.map((g, gi) => `
+    <div class="history-month-group">
+      <div class="history-month-header" onclick="toggleHistoryMonth('${scope}','${g.monthKey}')">
+        <span class="history-month-label">🗓️ ${g.monthLabel.toUpperCase()}</span>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span class="history-month-count">${g.items.length} สัปดาห์</span>
+          <span id="mchevron_${scope}_${g.monthKey}">${gi === 0 ? '▲' : '▼'}</span>
         </div>
       </div>
-      <div class="history-week-body" id="hbody_panel_${wi}">
-        ${renderHistoryWeekContent(w, wi, 'panel')}
+      <div class="history-month-body${gi === 0 ? ' open' : ''}" id="mbody_${scope}_${g.monthKey}">
+        ${g.items.map(({ w, wi }) => `
+          <div class="history-week-item">
+            <div class="history-week-header" onclick="toggleHistoryWeek(${wi},'${scope}')">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="history-week-label">📅 ${w.label}</span>
+                <span class="readonly-badge">READ ONLY</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="history-week-meta">${new Date(w.archivedAt).toLocaleDateString('th-TH')}</span>
+                <span id="hchevron_${scope}_${wi}">▼</span>
+              </div>
+            </div>
+            <div class="history-week-body" id="hbody_${scope}_${wi}">
+              ${renderHistoryWeekContent(w, wi, scope)}
+            </div>
+          </div>
+        `).join('')}
       </div>
     </div>
   `).join('');
+}
+
+function toggleHistoryMonth(scope, monthKey) {
+  const body = document.getElementById(`mbody_${scope}_${monthKey}`);
+  const chevron = document.getElementById(`mchevron_${scope}_${monthKey}`);
+  if (!body || !chevron) return;
+  const open = body.classList.toggle('open');
+  chevron.textContent = open ? '▲' : '▼';
 }
 
 function toggleHistoryWeek(wi, scope) {
