@@ -491,9 +491,15 @@ body::before{
 .history-month-count{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-right:8px}
 .history-month-body{display:none;padding-top:10px}
 .history-month-body.open{display:block}
-.history-export-btn{font-family:var(--font-mono);font-size:10px;font-weight:700;color:#fb923c;background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.35);border-radius:8px;padding:4px 10px;cursor:pointer;transition:background .15s;letter-spacing:.04em}
+.history-export-btn{font-family:var(--font-mono);font-size:10px;font-weight:700;color:#fb923c;background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.35);border-radius:8px;padding:4px 10px;cursor:pointer;transition:background .15s;letter-spacing:.04em;white-space:nowrap}
 .history-export-btn:hover{background:rgba(251,146,60,.22)}
 .history-export-btn:disabled{opacity:.5;cursor:wait}
+.history-export-btn-ghost{color:var(--text3);background:rgba(255,255,255,.04);border-color:var(--border)}
+.history-export-btn-ghost:hover{background:rgba(255,255,255,.08)}
+.history-week-checkbox{width:15px;height:15px;accent-color:#fb923c;cursor:pointer;flex-shrink:0}
+.export-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;margin-bottom:12px;background:rgba(255,255,255,.03);border:1px dashed var(--border);border-radius:10px;flex-wrap:wrap}
+.export-toolbar-hint{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.03em}
+.export-toolbar-count{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fb923c;letter-spacing:.03em}
 .readonly-badge{display:inline-block;background:rgba(251,146,60,.15);color:#fb923c;font-size:9px;font-family:var(--font-mono);padding:2px 8px;border-radius:10px;border:1px solid rgba(251,146,60,.3);font-weight:700;letter-spacing:.06em}
 .history-sym-card{background:rgba(17,24,39,.6);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
 .history-sym-name{font-family:var(--font-display);font-size:20px;letter-spacing:.08em;margin-bottom:8px}
@@ -3012,15 +3018,18 @@ function groupWeeksByMonth(weeks) {
   return order.map(k => groups[k]);
 }
 
+// เก็บ selection ของ checkbox แบบ global (ใช้ archivedAt เป็น unique id) — sync ข้าม scope/เดือนได้
+let selectedWeeksForExport = new Set();
+
 function renderGroupedHistory(scope) {
   const groups = groupWeeksByMonth(archiveData.weeks);
-  return groups.map((g, gi) => `
+  return renderExportToolbar(scope) + groups.map((g, gi) => `
     <div class="history-month-group">
       <div class="history-month-header" onclick="toggleHistoryMonth('${scope}','${g.monthKey}')">
         <span class="history-month-label">🗓️ ${g.monthLabel.toUpperCase()}</span>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="history-month-count">${g.items.length} สัปดาห์</span>
-          <button class="history-export-btn" id="exportBtn_${scope}_${g.monthKey}" onclick="event.stopPropagation(); exportMonthData('${g.monthKey}','${g.monthLabel.replace(/'/g, "\\'")}', '${scope}_${g.monthKey}')">⬇ EXPORT</button>
+          <button class="history-export-btn" id="exportBtn_${scope}_${g.monthKey}" onclick="event.stopPropagation(); exportMonthData('${g.monthKey}','${g.monthLabel.replace(/'/g, "\\'")}', '${scope}_${g.monthKey}')">⬇ EXPORT เดือนนี้</button>
           <span id="mchevron_${scope}_${g.monthKey}">${gi === 0 ? '▲' : '▼'}</span>
         </div>
       </div>
@@ -3029,6 +3038,7 @@ function renderGroupedHistory(scope) {
           <div class="history-week-item">
             <div class="history-week-header" onclick="toggleHistoryWeek(${wi},'${scope}')">
               <div style="display:flex;align-items:center;gap:10px">
+                <input type="checkbox" class="history-week-checkbox" title="เลือกเพื่อ export ข้ามเดือน" ${selectedWeeksForExport.has(w.archivedAt) ? 'checked' : ''} onclick="event.stopPropagation(); toggleWeekSelection('${w.archivedAt}')">
                 <span class="history-week-label">📅 ${w.label}</span>
                 <span class="readonly-badge">READ ONLY</span>
               </div>
@@ -3047,6 +3057,41 @@ function renderGroupedHistory(scope) {
   `).join('');
 }
 
+function renderExportToolbar(scope) {
+  const n = selectedWeeksForExport.size;
+  if (n === 0) {
+    return `<div class="export-toolbar" id="exportToolbar_${scope}">
+      <span class="export-toolbar-hint">☑️ ติ๊กเลือกสัปดาห์ (เลือกข้ามเดือนได้) แล้วกด Export Selected</span>
+    </div>`;
+  }
+  return `<div class="export-toolbar" id="exportToolbar_${scope}">
+    <span class="export-toolbar-count">✅ เลือกแล้ว ${n} สัปดาห์</span>
+    <div style="display:flex;gap:8px">
+      <button class="history-export-btn" onclick="exportSelectedWeeks('${scope}')">⬇ EXPORT SELECTED</button>
+      <button class="history-export-btn history-export-btn-ghost" onclick="clearWeekSelection()">✕ CLEAR</button>
+    </div>
+  </div>`;
+}
+
+function toggleWeekSelection(archivedAt) {
+  if (selectedWeeksForExport.has(archivedAt)) selectedWeeksForExport.delete(archivedAt);
+  else selectedWeeksForExport.add(archivedAt);
+  refreshExportToolbars();
+}
+
+function clearWeekSelection() {
+  selectedWeeksForExport.clear();
+  document.querySelectorAll('.history-week-checkbox').forEach(cb => { cb.checked = false; });
+  refreshExportToolbars();
+}
+
+function refreshExportToolbars() {
+  ['panel', 'page'].forEach(scope => {
+    const el = document.getElementById(`exportToolbar_${scope}`);
+    if (el) el.outerHTML = renderExportToolbar(scope);
+  });
+}
+
 function toggleHistoryMonth(scope, monthKey) {
   const body = document.getElementById(`mbody_${scope}_${monthKey}`);
   const chevron = document.getElementById(`mchevron_${scope}_${monthKey}`);
@@ -3057,6 +3102,94 @@ function toggleHistoryMonth(scope, monthKey) {
 
 function sanitizeFilename(str) {
   return String(str).replace(/[^a-zA-Z0-9ก-๙_-]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+// สร้าง JSON entry + เติมรูปกราฟของ 1 สัปดาห์เข้า zip — ใช้ร่วมกันทั้ง export รายเดือนและ export ที่เลือกเอง
+async function buildWeekExportEntry(w, imgFolder, failedImages) {
+  const weekSlug = sanitizeFilename(w.label || w.weekKey || 'week');
+  const data = w.data || {};
+  const images = w.images || {};
+  let imgCounter = 0;
+
+  const symbolsOut = SYMBOLS.map(sym => {
+    const symData = data[sym.id] || {};
+    const days = symData.days || {};
+    return {
+      id: sym.id,
+      name: sym.name,
+      ctdNote: symData.ctdNote || '',
+      days: DAYS.map(d => {
+        const dayData = days[d] || {};
+        const imgKey = `${sym.id}__${d}`;
+        const hasChart = !!images[imgKey];
+        return {
+          day: d,
+          pattern: dayData.pattern || '',
+          strategy: dayData.strategy || '',
+          bias: dayData.bias || '',
+          risk: dayData.risk || '',
+          note: dayData.note || '',
+          tf: dayData.tf || '',
+          chartFile: hasChart ? `images/${weekSlug}__${sanitizeFilename(imgKey)}.png` : null,
+        };
+      }),
+    };
+  });
+
+  const weekJson = {
+    label: w.label,
+    weekKey: w.weekKey,
+    archivedAt: w.archivedAt,
+    overview: {
+      weekRange: data.ov_week || '',
+      keyRisk: data.ov_risk || '',
+      analysis: data.ov_analysis || '',
+      summary: data.ov_summary || '',
+      dxyBias: data.dxy_bias || '',
+    },
+    symbols: symbolsOut,
+    calendarChartFile: images['__cal__'] ? `images/${weekSlug}__calendar.png` : null,
+  };
+
+  // ดึงรูปกราฟใส่ zip (base64 ตรงๆ หรือ fetch จาก URL Supabase)
+  for (const [key, src] of Object.entries(images)) {
+    if (!src || typeof src !== 'string') continue;
+    const baseName = key === '__cal__' ? `${weekSlug}__calendar` : `${weekSlug}__${sanitizeFilename(key)}`;
+    try {
+      if (src.startsWith('data:')) {
+        const match = src.match(/^data:image\/(\w+);base64,(.*)$/);
+        if (match) {
+          const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
+          imgFolder.file(`${baseName}.${ext}`, match[2], { base64: true });
+          imgCounter++;
+        } else {
+          failedImages.push(`${baseName} (รูปแบบ data URI ไม่รู้จัก)`);
+        }
+      } else {
+        const res = await fetch(src);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        imgFolder.file(`${baseName}.png`, blob);
+        imgCounter++;
+      }
+    } catch (e) {
+      console.warn('Export image failed:', key, e);
+      failedImages.push(`${baseName} (${e.message || 'fetch failed'})`);
+    }
+  }
+
+  return { weekJson, imgCounter };
+}
+
+function triggerZipDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 // Export ข้อมูล + รูปกราฟของทั้งเดือนเป็น .zip (data.json + images/) สำหรับส่งให้ AI วิเคราะห์
@@ -3083,76 +3216,9 @@ async function exportMonthData(monthKey, monthLabel, btnId) {
     const weeksJson = [];
 
     for (const { w } of group.items) {
-      const weekSlug = sanitizeFilename(w.label || w.weekKey || 'week');
-      const data = w.data || {};
-      const images = w.images || {};
-
-      const symbolsOut = SYMBOLS.map(sym => {
-        const symData = data[sym.id] || {};
-        const days = symData.days || {};
-        return {
-          id: sym.id,
-          name: sym.name,
-          ctdNote: symData.ctdNote || '',
-          days: DAYS.map(d => {
-            const dayData = days[d] || {};
-            const imgKey = `${sym.id}__${d}`;
-            const hasChart = !!images[imgKey];
-            return {
-              day: d,
-              pattern: dayData.pattern || '',
-              strategy: dayData.strategy || '',
-              bias: dayData.bias || '',
-              risk: dayData.risk || '',
-              note: dayData.note || '',
-              tf: dayData.tf || '',
-              chartFile: hasChart ? `images/${weekSlug}__${sanitizeFilename(imgKey)}.png` : null,
-            };
-          }),
-        };
-      });
-
-      weeksJson.push({
-        label: w.label,
-        weekKey: w.weekKey,
-        archivedAt: w.archivedAt,
-        overview: {
-          weekRange: data.ov_week || '',
-          keyRisk: data.ov_risk || '',
-          analysis: data.ov_analysis || '',
-          summary: data.ov_summary || '',
-          dxyBias: data.dxy_bias || '',
-        },
-        symbols: symbolsOut,
-        calendarChartFile: images['__cal__'] ? `images/${weekSlug}__calendar.png` : null,
-      });
-
-      // ดึงรูปกราฟใส่ zip (base64 ตรงๆ หรือ fetch จาก URL Supabase)
-      for (const [key, src] of Object.entries(images)) {
-        if (!src || typeof src !== 'string') continue;
-        const baseName = key === '__cal__' ? `${weekSlug}__calendar` : `${weekSlug}__${sanitizeFilename(key)}`;
-        try {
-          if (src.startsWith('data:')) {
-            const match = src.match(/^data:image\/(\w+);base64,(.*)$/);
-            if (match) {
-              const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
-              imgFolder.file(`${baseName}.${ext}`, match[2], { base64: true });
-              imgCounter++;
-            } else {
-              failedImages.push(`${baseName} (รูปแบบ data URI ไม่รู้จัก)`);
-            }
-          } else {
-            const res = await fetch(src);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const blob = await res.blob();
-            imgFolder.file(`${baseName}.png`, blob);
-            imgCounter++;
-          }
-        } catch (e) {
-          console.warn('Export image failed:', key, e);
-          failedImages.push(`${baseName} (${e.message || 'fetch failed'})`);
-        }
-      }
+      const { weekJson, imgCounter: c } = await buildWeekExportEntry(w, imgFolder, failedImages);
+      weeksJson.push(weekJson);
+      imgCounter += c;
     }
 
     const exportObj = {
@@ -3170,14 +3236,7 @@ async function exportMonthData(monthKey, monthLabel, btnId) {
     }
 
     const blob = await zip.generateAsync({ type: 'blob' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `trading-os-export-${monthKey}.zip`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    triggerZipDownload(blob, `trading-os-export-${monthKey}.zip`);
 
     showToast(failedImages.length > 0
       ? `⚠️ Export เสร็จ แต่มี ${failedImages.length} รูปดึงไม่สำเร็จ (ดู image_export_log.txt)`
@@ -3186,7 +3245,66 @@ async function exportMonthData(monthKey, monthLabel, btnId) {
     console.error('Export failed:', e);
     showToast('❌ Export ล้มเหลว: ' + (e.message || 'unknown error'));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '⬇ EXPORT'; }
+    if (btn) { btn.disabled = false; btn.textContent = '⬇ EXPORT เดือนนี้'; }
+  }
+}
+
+// Export เฉพาะสัปดาห์ที่ติ๊กเลือกไว้ — เลือกข้ามเดือนได้อิสระ
+async function exportSelectedWeeks(scope) {
+  const weeks = archiveData.weeks.filter(w => selectedWeeksForExport.has(w.archivedAt));
+  if (weeks.length === 0) {
+    showToast('⚠️ ยังไม่ได้เลือกสัปดาห์ไหนเลย');
+    return;
+  }
+  if (typeof JSZip === 'undefined') {
+    showToast('❌ โหลด export library ไม่สำเร็จ ลองรีเฟรชหน้าใหม่');
+    return;
+  }
+  // เรียงใหม่ล่าสุด -> เก่าสุด ให้อ่านง่าย
+  weeks.sort((a, b) => new Date(b.archivedAt) - new Date(a.archivedAt));
+
+  const toolbarBtn = document.querySelector(`#exportToolbar_${scope} .history-export-btn:not(.history-export-btn-ghost)`);
+  if (toolbarBtn) { toolbarBtn.disabled = true; toolbarBtn.textContent = '⏳ กำลังเตรียม...'; }
+  showToast(`📦 กำลัง export ${weeks.length} สัปดาห์ที่เลือก...`);
+
+  try {
+    const zip = new JSZip();
+    const imgFolder = zip.folder('images');
+    const failedImages = [];
+    let imgCounter = 0;
+    const weeksJson = [];
+
+    for (const w of weeks) {
+      const { weekJson, imgCounter: c } = await buildWeekExportEntry(w, imgFolder, failedImages);
+      weeksJson.push(weekJson);
+      imgCounter += c;
+    }
+
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    const exportObj = {
+      exportType: 'selected-weeks',
+      generatedAt: new Date().toISOString(),
+      weekCount: weeksJson.length,
+      imageCount: imgCounter,
+      weeks: weeksJson,
+    };
+
+    zip.file('data.json', JSON.stringify(exportObj, null, 2));
+    if (failedImages.length > 0) {
+      zip.file('image_export_log.txt', `รูปที่ export ไม่สำเร็จ (${failedImages.length} รูป):\n` + failedImages.join('\n'));
+    }
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    triggerZipDownload(blob, `trading-os-export-selected-${weeks.length}weeks-${dateStamp}.zip`);
+
+    showToast(failedImages.length > 0
+      ? `⚠️ Export เสร็จ แต่มี ${failedImages.length} รูปดึงไม่สำเร็จ (ดู image_export_log.txt)`
+      : `✅ Export สำเร็จ! (${weeksJson.length} สัปดาห์ที่เลือก, ${imgCounter} รูป)`);
+  } catch (e) {
+    console.error('Export selected failed:', e);
+    showToast('❌ Export ล้มเหลว: ' + (e.message || 'unknown error'));
+  } finally {
+    refreshExportToolbars();
   }
 }
 
