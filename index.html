@@ -512,6 +512,13 @@ body::before{
 .history-chart-img{width:100%;max-height:300px;object-fit:contain;border-radius:10px;border:1px solid var(--border);background:#060810;cursor:zoom-in;display:block}
 .history-note-text{font-size:13px;color:var(--text);line-height:1.75;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:10px 12px;white-space:pre-wrap;min-height:60px}
 
+/* MARKET PULSE / QUICK NOTE thin scrollbars */
+#dashPulse::-webkit-scrollbar,#dashNote::-webkit-scrollbar{width:5px}
+#dashPulse::-webkit-scrollbar-track,#dashNote::-webkit-scrollbar-track{background:transparent}
+#dashPulse::-webkit-scrollbar-thumb,#dashNote::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:10px}
+#dashPulse::-webkit-scrollbar-thumb:hover,#dashNote::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.24)}
+#dashPulse,#dashNote{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+
 /* WEEK SELECTOR */
 .week-bar{padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;align-items:center}
 .week-bar::-webkit-scrollbar{display:none}
@@ -1136,16 +1143,24 @@ select.field-sm option{background:#111827;color:var(--text)}
       <div class="dash-row3" style="margin-bottom:14px">
 
         <!-- Market Pulse -->
-        <div class="dash-widget">
-          <div class="dash-widget-title" style="color:#f0b429">MARKET PULSE</div>
-          <div id="dashPulse" style="margin-top:4px;display:flex;flex-direction:column;gap:8px;min-height:80px">
-            <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">เขียน Market Analysis ใน Action Plan ก่อน</div>
-          </div>
-          <div id="dashPulseTime" style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--text3)"></div>
+        <div class="dash-widget" style="display:flex;flex-direction:column;height:460px">
 
-          <div class="dash-divider"></div>
-          <div class="dash-widget-title" style="margin-bottom:6px">QUICK NOTE</div>
-          <textarea id="dashNote" placeholder="จดไว้ก่อน — Key level วันนี้, สิ่งที่ต้องระวัง..." style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;resize:none;min-height:50px;line-height:1.7" oninput="saveDashNote()"></textarea>
+          <!-- Market Pulse (60%) -->
+          <div style="display:flex;flex-direction:column;flex:6 6 0;min-height:0">
+            <div class="dash-widget-title" style="color:#f0b429;flex-shrink:0">MARKET PULSE</div>
+            <div id="dashPulse" style="margin-top:4px;display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;overflow-y:auto;padding-right:6px">
+              <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">เขียน Market Analysis ใน Action Plan ก่อน</div>
+            </div>
+            <div id="dashPulseTime" style="margin-top:8px;font-family:var(--font-mono);font-size:10px;color:var(--text3);flex-shrink:0"></div>
+          </div>
+
+          <div class="dash-divider" style="flex-shrink:0"></div>
+
+          <!-- Quick Note (40%) -->
+          <div style="display:flex;flex-direction:column;flex:4 4 0;min-height:0">
+            <div class="dash-widget-title" style="margin-bottom:6px;flex-shrink:0">QUICK NOTE</div>
+            <textarea id="dashNote" placeholder="จดไว้ก่อน — Key level วันนี้, สิ่งที่ต้องระวัง..." style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;resize:none;flex:1;min-height:0;line-height:1.7" oninput="saveDashNote()"></textarea>
+          </div>
         </div>
 
         <!-- This Week Tracker + Daily Routine -->
