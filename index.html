@@ -512,12 +512,12 @@ body::before{
 .history-chart-img{width:100%;max-height:300px;object-fit:contain;border-radius:10px;border:1px solid var(--border);background:#060810;cursor:zoom-in;display:block}
 .history-note-text{font-size:13px;color:var(--text);line-height:1.75;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:10px 12px;white-space:pre-wrap;min-height:60px}
 
-/* MARKET PULSE / QUICK NOTE thin scrollbars */
-#dashPulse::-webkit-scrollbar,#dashNote::-webkit-scrollbar{width:5px}
-#dashPulse::-webkit-scrollbar-track,#dashNote::-webkit-scrollbar-track{background:transparent}
-#dashPulse::-webkit-scrollbar-thumb,#dashNote::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:10px}
-#dashPulse::-webkit-scrollbar-thumb:hover,#dashNote::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.24)}
-#dashPulse,#dashNote{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+/* DASHBOARD ROW3 CARDS thin scrollbars (Market Pulse, Quick Note, This Week routine, Market News/Calendar) */
+.dash-row3 *::-webkit-scrollbar{width:5px}
+.dash-row3 *::-webkit-scrollbar-track{background:transparent}
+.dash-row3 *::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:10px}
+.dash-row3 *::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.24)}
+.dash-row3 *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
 
 /* WEEK SELECTOR */
 .week-bar{padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;align-items:center}
@@ -1143,7 +1143,7 @@ select.field-sm option{background:#111827;color:var(--text)}
       <div class="dash-row3" style="margin-bottom:14px">
 
         <!-- Market Pulse -->
-        <div class="dash-widget" style="display:flex;flex-direction:column;height:460px">
+        <div class="dash-widget" style="display:flex;flex-direction:column;height:480px">
 
           <!-- Market Pulse (60%) -->
           <div style="display:flex;flex-direction:column;flex:6 6 0;min-height:0">
@@ -1164,41 +1164,47 @@ select.field-sm option{background:#111827;color:var(--text)}
         </div>
 
         <!-- This Week Tracker + Daily Routine -->
-        <div class="dash-widget">
-          <div class="dash-widget-title">THIS WEEK</div>
-          <div style="display:flex;justify-content:space-between;margin-top:12px;margin-bottom:12px">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">MON</div><div id="weekday_0" class="dash-day-dot"></div></div>
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">TUE</div><div id="weekday_1" class="dash-day-dot"></div></div>
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">WED</div><div id="weekday_2" class="dash-day-dot"></div></div>
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">THU</div><div id="weekday_3" class="dash-day-dot"></div></div>
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">FRI</div><div id="weekday_4" class="dash-day-dot"></div></div>
+        <div class="dash-widget" style="display:flex;flex-direction:column;height:480px">
+          <div style="flex-shrink:0">
+            <div class="dash-widget-title">THIS WEEK</div>
+            <div style="display:flex;justify-content:space-between;margin-top:12px;margin-bottom:12px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">MON</div><div id="weekday_0" class="dash-day-dot"></div></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">TUE</div><div id="weekday_1" class="dash-day-dot"></div></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">WED</div><div id="weekday_2" class="dash-day-dot"></div></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">THU</div><div id="weekday_3" class="dash-day-dot"></div></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="dash-day-label">FRI</div><div id="weekday_4" class="dash-day-dot"></div></div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);border-radius:4px;height:4px;overflow:hidden">
+              <div id="weekProgress" style="height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:4px;transition:width .5s;width:0%"></div>
+            </div>
+            <div id="weekProgressLabel" style="margin-top:6px;font-family:var(--font-mono);font-size:10px;color:var(--text3)">0 / 5 วัน</div>
           </div>
-          <div style="background:rgba(255,255,255,.06);border-radius:4px;height:4px;overflow:hidden">
-            <div id="weekProgress" style="height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:4px;transition:width .5s;width:0%"></div>
-          </div>
-          <div id="weekProgressLabel" style="margin-top:6px;font-family:var(--font-mono);font-size:10px;color:var(--text3)">0 / 5 วัน</div>
 
-          <div class="dash-divider"></div>
+          <div class="dash-divider" style="flex-shrink:0"></div>
 
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--text2);text-transform:uppercase">🌱 Daily Routine</div>
-            <div id="routineCount" style="font-family:var(--font-mono);font-size:10px;color:var(--text3)">0 / 4 วันนี้</div>
-          </div>
-          <div id="routineList"></div>
-          <div class="routine-row">
-            <div style="width:24px;flex-shrink:0"></div>
-            <div class="routine-emoji">📚</div>
-            <div class="routine-text">อ่านหนังสือ / บทความวิจัย / ทำวิจัยเอง</div>
-            <span class="routine-tag">ไม่บังคับ</span>
+          <div style="display:flex;flex-direction:column;flex:1;min-height:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-shrink:0">
+              <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--text2);text-transform:uppercase">🌱 Daily Routine</div>
+              <div id="routineCount" style="font-family:var(--font-mono);font-size:10px;color:var(--text3)">0 / 4 วันนี้</div>
+            </div>
+            <div style="flex:1;min-height:0;overflow-y:auto;padding-right:4px">
+              <div id="routineList"></div>
+              <div class="routine-row">
+                <div style="width:24px;flex-shrink:0"></div>
+                <div class="routine-emoji">📚</div>
+                <div class="routine-text">อ่านหนังสือ / บทความวิจัย / ทำวิจัยเอง</div>
+                <span class="routine-tag">ไม่บังคับ</span>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Economic Calendar + Live Market News -->
-        <div class="dash-widget" style="display:flex;flex-direction:column;padding:0;overflow:hidden">
-          <div style="padding:16px 18px 10px">
+        <div class="dash-widget" style="display:flex;flex-direction:column;padding:0;overflow:hidden;height:480px">
+          <div style="padding:16px 18px 10px;flex-shrink:0">
             <div class="dash-widget-title" style="margin-bottom:0">📰 MARKET NEWS <span style="color:#34d399;font-size:9px;letter-spacing:.05em">● LIVE</span></div>
           </div>
-          <div style="height:220px;overflow:hidden">
+          <div style="height:220px;overflow:hidden;flex-shrink:0">
             <div class="tradingview-widget-container" style="height:100%">
               <div class="tradingview-widget-container__widget"></div>
               <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
@@ -1215,9 +1221,9 @@ select.field-sm option{background:#111827;color:var(--text)}
             </div>
           </div>
 
-          <div class="dash-divider" style="margin:0 18px"></div>
+          <div class="dash-divider" style="margin:0 18px;flex-shrink:0"></div>
 
-          <div style="padding:12px 18px 16px">
+          <div style="padding:12px 18px 16px;flex:1;min-height:0;overflow-y:auto">
             <div class="dash-widget-title" style="margin-bottom:0">ECONOMIC CALENDAR THIS WEEK</div>
 
             <div id="newsWarningBanner"></div>
