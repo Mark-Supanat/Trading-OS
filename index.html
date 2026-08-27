@@ -3608,6 +3608,7 @@ function renderSymbols() {
                       `<button class="tf-pill" onclick="setTFDay('${sym.id}','${d}','${tf}',this)">${tf}</button>`
                     ).join('')}
                   </div>
+                  <span id="updatedtext_${sym.id}_${d}" style="font-size:11px;color:#cbd5e1;font-family:var(--font-mono);white-space:nowrap;margin-left:auto"></span>
                 </div>
                 <div class="chart-dropzone" id="dropzone_${sym.id}_${d}"
                   ondragover="onDragOver(event,'${sym.id}','${d}')"
@@ -3628,10 +3629,7 @@ function renderSymbols() {
                 </div>
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;height:100%">
-                <div class="field-group" style="margin-bottom:0;display:flex;align-items:center;justify-content:space-between;gap:8px">
-                  <label style="margin-bottom:0">${d} — Note</label>
-                  <span id="updatedtext_${sym.id}_${d}" style="font-size:10px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap"></span>
-                </div>
+                <div class="field-group" style="margin-bottom:0"><label>${d} — Note</label></div>
                 <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="${d==='PLAN'?'วางแผนประจำสัปดาห์ Key level, Setup ที่รอ...':'Key level, Setup, สิ่งที่สังเกต...'}" oninput="touchDay('${sym.id}','${d}');autoSave()" style="min-height:160px;flex:1"></textarea>
               </div>
             </div>
