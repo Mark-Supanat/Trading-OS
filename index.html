@@ -692,7 +692,6 @@ select.field-sm option{background:#111827;color:var(--text)}
 .day-tab:first-child{border-color:rgba(59,130,246,.35);color:#60a5fa}
 .day-tab:first-child.day-active{background:linear-gradient(135deg,#3b82f6,#818cf8);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(59,130,246,.3)}
 .day-tab.has-img::after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#10b981;box-shadow:0 0 4px #10b981}
-.day-tab.has-update::before{content:'';position:absolute;top:1px;left:1px;width:6px;height:6px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 1.5px rgba(0,0,0,.55),0 0 4px rgba(239,68,68,.9)}
 .day-content{display:none}
 .day-note{width:100%;background:rgba(255,255,255,.04);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:14px;padding:10px 12px;border-radius:7px;outline:none;resize:none;min-height:200px;flex:1;line-height:1.8;transition:border-color .2s;font-weight:400}
 .day-note:focus{border-color:rgba(59,130,246,.5);box-shadow:0 0 0 2px rgba(59,130,246,.1)}
@@ -3629,7 +3628,10 @@ function renderSymbols() {
                 </div>
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;height:100%">
-                <div class="field-group" style="margin-bottom:0"><label>${d} — Note</label></div>
+                <div class="field-group" style="margin-bottom:0;display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <label style="margin-bottom:0">${d} — Note</label>
+                  <span id="updatedtext_${sym.id}_${d}" style="font-size:10px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap"></span>
+                </div>
                 <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="${d==='PLAN'?'วางแผนประจำสัปดาห์ Key level, Setup ที่รอ...':'Key level, Setup, สิ่งที่สังเกต...'}" oninput="touchDay('${sym.id}','${d}');autoSave()" style="min-height:160px;flex:1"></textarea>
               </div>
             </div>
@@ -3777,11 +3779,10 @@ function formatUpdateTime(ts) {
 }
 
 function updateDayTabTimestamp(symId, day) {
-  const tab = document.getElementById(`daytab_${symId}_${day}`);
-  if (!tab) return;
+  const span = document.getElementById(`updatedtext_${symId}_${day}`);
+  if (!span) return;
   const ts = (dayUpdateState[symId] || {})[day];
-  tab.classList.toggle('has-update', !!ts);
-  tab.title = ts ? formatUpdateTime(ts) : '';
+  span.textContent = formatUpdateTime(ts);
 }
 
 function touchDay(symId, day) {
@@ -4180,7 +4181,9 @@ function clearAllFields() {
       if (dropzone) dropzone.style.display = '';
       const tab = document.getElementById(`daytab_${sym.id}_${day}`);
       const content = document.getElementById(`daycontent_${sym.id}_${day}`);
-      if (tab) { tab.classList.remove('day-active','has-img','has-update'); tab.title=''; if(i===0) tab.classList.add('day-active'); }
+      if (tab) { tab.classList.remove('day-active','has-img'); if(i===0) tab.classList.add('day-active'); }
+      const updatedText = document.getElementById(`updatedtext_${sym.id}_${day}`);
+      if (updatedText) updatedText.textContent = '';
       if (content) content.style.display = (i === 0) ? 'flex' : 'none';
     });
   });
