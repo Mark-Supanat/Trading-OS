@@ -692,6 +692,7 @@ select.field-sm option{background:#111827;color:var(--text)}
 .day-tab:first-child{border-color:rgba(59,130,246,.35);color:#60a5fa}
 .day-tab:first-child.day-active{background:linear-gradient(135deg,#3b82f6,#818cf8);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(59,130,246,.3)}
 .day-tab.has-img::after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#10b981;box-shadow:0 0 4px #10b981}
+.day-tab.has-update::before{content:'';position:absolute;top:2px;left:2px;width:5px;height:5px;border-radius:50%;background:#f59e0b;box-shadow:0 0 4px #f59e0b}
 .day-content{display:none}
 .day-note{width:100%;background:rgba(255,255,255,.04);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font-body);font-size:14px;padding:10px 12px;border-radius:7px;outline:none;resize:none;min-height:200px;flex:1;line-height:1.8;transition:border-color .2s;font-weight:400}
 .day-note:focus{border-color:rgba(59,130,246,.5);box-shadow:0 0 0 2px rgba(59,130,246,.1)}
@@ -2925,6 +2926,7 @@ let allData = {};
 let biasState = {};
 let tfState = {};
 let activeDayState = {}; // activeDayState[symId] = 'MON'|'TUE'|...
+let dayUpdateState = {}; // dayUpdateState[symId][day] = timestamp (ms)
 let autoSaveTimer;
 let chartImages = {};
 
@@ -3574,14 +3576,14 @@ function renderSymbols() {
             <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr 1fr;gap:10px">
               <div class="field-group">
                 <label>Pattern</label>
-                <select class="field-sm" id="${sym.id}_${d}_pattern" onchange="autoSave();updateSummary()">
+                <select class="field-sm" id="${sym.id}_${d}_pattern" onchange="touchDay('${sym.id}','${d}');autoSave();updateSummary()">
                   <option value="">— เลือก —</option>
                   ${PATTERNS.map(p=>`<option value="${p}">${p}</option>`).join('')}
                 </select>
               </div>
               <div class="field-group">
                 <label>Strategy</label>
-                <select class="field-sm" id="${sym.id}_${d}_strategy" onchange="autoSave();updateSummary()">
+                <select class="field-sm" id="${sym.id}_${d}_strategy" onchange="touchDay('${sym.id}','${d}');autoSave();updateSummary()">
                   <option value="">— เลือก —</option>
                   ${STRATEGIES.map(s=>`<option value="${s}">${s}</option>`).join('')}
                 </select>
@@ -3594,7 +3596,7 @@ function renderSymbols() {
               </div>
               <div class="field-group">
                 <label>Risk / Note</label>
-                <input class="field-sm" id="${sym.id}_${d}_risk" placeholder="False Break, ข่าว..." oninput="autoSave()">
+                <input class="field-sm" id="${sym.id}_${d}_risk" placeholder="False Break, ข่าว..." oninput="touchDay('${sym.id}','${d}');autoSave()">
               </div>
             </div>
             <!-- Chart + TF + Note -->
@@ -3628,7 +3630,7 @@ function renderSymbols() {
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;height:100%">
                 <div class="field-group" style="margin-bottom:0"><label>${d} — Note</label></div>
-                <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="${d==='PLAN'?'วางแผนประจำสัปดาห์ Key level, Setup ที่รอ...':'Key level, Setup, สิ่งที่สังเกต...'}" oninput="autoSave()" style="min-height:160px;flex:1"></textarea>
+                <textarea class="day-note" id="daynote_${sym.id}_${d}" placeholder="${d==='PLAN'?'วางแผนประจำสัปดาห์ Key level, Setup ที่รอ...':'Key level, Setup, สิ่งที่สังเกต...'}" oninput="touchDay('${sym.id}','${d}');autoSave()" style="min-height:160px;flex:1"></textarea>
               </div>
             </div>
           </div>
@@ -3734,6 +3736,7 @@ function setBiasDay(symId, day, bias, btn) {
   const wrap = document.getElementById(`biaswrap_${symId}_${day}`);
   wrap.querySelectorAll('.bias-pill').forEach(b => b.className = 'bias-pill');
   btn.className = `bias-pill selected-${bias}`;
+  touchDay(symId, day);
   autoSave();
   updateSummary();
 }
@@ -3757,6 +3760,34 @@ function updateDayTabDots(symId) {
     const tab = document.getElementById(`daytab_${symId}_${d}`);
     if (tab) tab.classList.toggle('has-img', !!weekImgs[key]);
   });
+}
+
+// ============================================
+// LAST UPDATED (per day, per symbol)
+// ============================================
+function formatUpdateTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const now = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  if (d.toDateString() === now.toDateString()) return `อัปเดตล่าสุด ${hh}:${mm} น.`;
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `อัปเดตล่าสุด ${d.getDate()} ${months[d.getMonth()]} ${hh}:${mm} น.`;
+}
+
+function updateDayTabTimestamp(symId, day) {
+  const tab = document.getElementById(`daytab_${symId}_${day}`);
+  if (!tab) return;
+  const ts = (dayUpdateState[symId] || {})[day];
+  tab.classList.toggle('has-update', !!ts);
+  tab.title = ts ? formatUpdateTime(ts) : '';
+}
+
+function touchDay(symId, day) {
+  if (!dayUpdateState[symId]) dayUpdateState[symId] = {};
+  dayUpdateState[symId][day] = Date.now();
+  updateDayTabTimestamp(symId, day);
 }
 
 // ============================================
@@ -3822,6 +3853,7 @@ function readImageFile(file, symId, day) {
     wrap.classList.add('show');
     dropzone.style.display = 'none';
     updateDayTabDots(symId);
+    touchDay(symId, day);
 
     showToast('☁ กำลังอัปโหลดรูป...');
     const path = `${currentWeek}/${symId}__${day}.png`.replace(/\s/g,'_');
@@ -3854,6 +3886,7 @@ function setChartImage(symId, day, base64) {
   document.getElementById(`dropzone_${symId}_${day}`).style.display = 'none';
 
   updateDayTabDots(symId);
+  touchDay(symId, day);
   saveImages();
 }
 
@@ -3868,6 +3901,7 @@ async function removeChartImage(symId, day) {
   document.getElementById(`dropzone_${symId}_${day}`).style.display = '';
 
   updateDayTabDots(symId);
+  touchDay(symId, day);
   saveImages();
   await deleteImage(path);
   showToast('🗑 ลบรูปแล้ว');
@@ -4008,6 +4042,7 @@ function setTFDay(symId, day, tf, btn) {
   container.querySelectorAll('.tf-pill').forEach(b => b.classList.remove('tf-active'));
   btn.classList.add('tf-active');
   tfState[`${symId}__${day}`] = tf;
+  touchDay(symId, day);
   autoSave();
 }
 
@@ -4061,6 +4096,7 @@ function loadWeekData() {
   const data = allData[currentWeek] || {};
   biasState = {};
   activeDayState = {};
+  dayUpdateState = {};
 
   setVal('ov_week', data.ov_week || '');
   setVal('ov_risk', data.ov_risk || '');
@@ -4084,6 +4120,11 @@ function loadWeekData() {
       setVal(`daynote_${sym.id}_${day}`, dd.note || '');
       if (dd.bias) restoreBiasDay(sym.id, day, dd.bias);
       if (dd.tf) restoreTFDay(sym.id, day, dd.tf);
+      if (dd.updatedAt) {
+        if (!dayUpdateState[sym.id]) dayUpdateState[sym.id] = {};
+        dayUpdateState[sym.id][day] = dd.updatedAt;
+      }
+      updateDayTabTimestamp(sym.id, day);
     });
 
     // restore Connect The Dots note
@@ -4115,6 +4156,7 @@ function clearAllFields() {
   biasState = {};
   tfState = {};
   activeDayState = {};
+  dayUpdateState = {};
 
   document.getElementById('cal_img').src = '';
   document.getElementById('cal_img_wrap').classList.remove('show');
@@ -4138,7 +4180,7 @@ function clearAllFields() {
       if (dropzone) dropzone.style.display = '';
       const tab = document.getElementById(`daytab_${sym.id}_${day}`);
       const content = document.getElementById(`daycontent_${sym.id}_${day}`);
-      if (tab) { tab.classList.remove('day-active','has-img'); if(i===0) tab.classList.add('day-active'); }
+      if (tab) { tab.classList.remove('day-active','has-img','has-update'); tab.title=''; if(i===0) tab.classList.add('day-active'); }
       if (content) content.style.display = (i === 0) ? 'flex' : 'none';
     });
   });
@@ -4164,6 +4206,7 @@ function collectData() {
         risk:     getVal(`${sym.id}_${d}_risk`),
         note:     getVal(`daynote_${sym.id}_${d}`),
         tf:       tfState[`${sym.id}__${d}`] || '',
+        updatedAt: (dayUpdateState[sym.id] || {})[d] || '',
       };
     });
     data[sym.id] = {
