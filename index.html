@@ -423,6 +423,24 @@ body::before{
 .an-pill-grade-a{background:rgba(16,185,129,.15);color:#10b981}
 .an-pill-grade-b{background:rgba(240,180,41,.15);color:#f0b429}
 .an-pill-grade-c{background:rgba(244,63,94,.15);color:#f43f5e}
+.wk-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;overflow:hidden;transition:border-color .15s}
+.wk-card:hover{border-color:rgba(255,255,255,.12)}
+.wk-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;cursor:pointer;user-select:none}
+.wk-card-head-left{display:flex;align-items:center;gap:9px;min-width:0;overflow:hidden}
+.wk-card-sym{font-family:var(--font-mono);font-size:12px;font-weight:700;white-space:nowrap}
+.wk-card-meta{font-family:var(--font-mono);font-size:10.5px;color:var(--text3);white-space:nowrap}
+.wk-card-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.wk-card-pnl{font-family:var(--font-mono);font-size:12px;font-weight:700;min-width:52px;text-align:right}
+.wk-card-chev{font-size:11px;color:var(--text3);transition:transform .15s}
+.wk-card-body{display:none;padding:0 12px 12px;border-top:1px solid rgba(255,255,255,.06)}
+.wk-card-body.show{display:block}
+.wk-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 12px;font-family:var(--font-mono);font-size:11px;margin:10px 0}
+.wk-card-grid-label{font-size:9px;letter-spacing:.06em;color:var(--text3);text-transform:uppercase;margin-bottom:2px}
+.wk-card-setup{font-family:var(--font-mono);font-size:11px;color:var(--text2);margin-bottom:10px}
+.wk-card-note{font-family:var(--font-mono);font-size:10.5px;color:var(--text3);margin-bottom:10px;font-style:italic}
+.wk-card-charts{display:flex;gap:16px}
+.wk-card-chart-link{font-family:var(--font-mono);font-size:11px;color:#818cf8;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.wk-card-chart-link:hover{text-decoration:underline}
 .an-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--text3);gap:8px;grid-column:1/-1}
 .an-empty-state .an-empty-icon{font-size:32px;opacity:.4}
 .an-empty-state .an-empty-text{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em}
@@ -1436,9 +1454,14 @@ select.field-sm option{background:#111827;color:var(--text)}
 
         <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Symbol Breakdown</div>
         <div id="weekSymbolTable" style="display:flex;flex-direction:column;gap:6px"></div>
-        <div style="font-family:var(--font-mono);font-size:9.5px;color:var(--text3);margin-top:10px;line-height:1.6">
-          * ยังไม่มีคอลัมน์เวลาปิดออเดอร์ใน Google Sheet เลยยังคำนวณ "ระยะเวลาถือ" ให้ไม่ได้ — บอกชื่อคอลัมน์ที่ใช้ได้เลยถ้าอยากเพิ่ม
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;margin-bottom:8px">
+          <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase">Trade Detail</span>
+          <div style="display:flex;gap:6px">
+            <button class="btn-save" onclick="exportThisWeekCSV()" style="font-size:10px;padding:4px 10px">⬇ CSV</button>
+            <button class="btn-save" onclick="exportThisWeekJSON()" style="font-size:10px;padding:4px 10px">⬇ JSON</button>
+          </div>
         </div>
+        <div id="weekTradeCards" style="display:flex;flex-direction:column;gap:6px"></div>
       </div>
 
       <!-- CONTROLS -->
@@ -1690,13 +1713,18 @@ function getWeekRange(d = new Date()) {
   return { start: mon, end: nextMon };
 }
 
-function renderThisWeekSummary() {
+function getThisWeekTrades() {
   const { start, end } = getWeekRange();
-  const trades = anAllTrades.filter(t => {
+  return anAllTrades.filter(t => {
     if (!t.dateOpen) return false;
     const d = new Date(t.dateOpen);
     return d >= start && d < end;
   });
+}
+
+function renderThisWeekSummary() {
+  const { start, end } = getWeekRange();
+  const trades = getThisWeekTrades();
 
   const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   const fri = new Date(start); fri.setDate(start.getDate() + 4);
@@ -1718,6 +1746,8 @@ function renderThisWeekSummary() {
     wlEl.textContent = '—';
     gradeEl.innerHTML = `<span style="font-family:var(--font-mono);font-size:11px;color:var(--text3)">ยังไม่มีเทรดในสัปดาห์นี้</span>`;
     symTableEl.innerHTML = '';
+    const cardsEl = document.getElementById('weekTradeCards');
+    if (cardsEl) cardsEl.innerHTML = '';
     return;
   }
 
@@ -1759,6 +1789,120 @@ function renderThisWeekSummary() {
       </div>
     </div>`;
   }).join('');
+
+  renderWeekTradeCards(trades);
+}
+
+// ============================================
+// THIS WEEK — PER-TRADE CARDS
+// ============================================
+const WK_SYM_COLOR = { XAUUSD:'#fbbf24', XAGUSD:'#94a3b8', BTCUSDT:'#fb923c', USOIL:'#a3e635', NDX:'#22d3ee', USDJPY:'#60a5fa', EURUSD:'#60a5fa', GBPUSD:'#60a5fa', S50:'#60a5fa' };
+
+function renderWeekTradeCards(trades) {
+  const el = document.getElementById('weekTradeCards');
+  if (!el) return;
+  const sorted = [...trades].sort((a,b) => new Date(a.dateOpen) - new Date(b.dateOpen));
+  el.innerHTML = sorted.map((t, i) => {
+    const pnlPct = parseFloat(t.pnlPct) || 0;
+    const pnlUsd = parseFloat(t.pnlUsd) || 0;
+    const pnlColor = pnlPct > 0 ? '#34d399' : pnlPct < 0 ? '#fb7185' : 'var(--text2)';
+    const grade = t.gradeFinal || t.grade || '—';
+    const gradeClass = grade==='A'?'an-pill-grade-a':grade==='B'?'an-pill-grade-b':grade==='C'?'an-pill-grade-c':'';
+    const symColor = WK_SYM_COLOR[t.sym] || 'var(--text)';
+    const posColor = t.pos === 'BUY' ? '#34d399' : '#fb7185';
+    const dateStr = t.dateOpen ? new Date(t.dateOpen).toLocaleDateString('th-TH',{day:'2-digit',month:'short'}) : '—';
+
+    const chartLinks = [];
+    if (t.chartEnter) chartLinks.push(`<a class="wk-card-chart-link" href="${escAttr(t.chartEnter)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📈 View entry chart</a>`);
+    if (t.chartExit) chartLinks.push(`<a class="wk-card-chart-link" href="${escAttr(t.chartExit)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📈 View exit chart</a>`);
+
+    return `<div class="wk-card">
+      <div class="wk-card-head" onclick="toggleWeekCard(${i})">
+        <div class="wk-card-head-left">
+          <span class="an-pill ${gradeClass}" style="flex-shrink:0">${grade}</span>
+          <span class="wk-card-sym" style="color:${symColor}">${t.sym||'—'}</span>
+          <span class="wk-card-meta"><span style="color:${posColor}">${t.pos||'—'}</span> · ${t.dur||'—'} · ${dateStr}</span>
+        </div>
+        <div class="wk-card-right">
+          <span class="wk-card-pnl" style="color:${pnlColor}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1)}%</span>
+          <span class="wk-card-chev" id="wkChev${i}">▾</span>
+        </div>
+      </div>
+      <div class="wk-card-body" id="wkBody${i}">
+        <div class="wk-card-grid">
+          <div><div class="wk-card-grid-label">Enter</div>${t.enter ?? '—'}</div>
+          <div><div class="wk-card-grid-label">Exit</div>${t.exit ?? '—'}</div>
+          <div><div class="wk-card-grid-label">Lot</div>${t.lot ?? '—'}</div>
+          <div><div class="wk-card-grid-label">Session</div>${t.session || '—'}</div>
+          <div><div class="wk-card-grid-label">Exit Type</div>${t.tpsl || '—'}</div>
+          <div><div class="wk-card-grid-label">PNL$</div><span style="color:${pnlColor}">${pnlUsd>=0?'+':''}${pnlUsd.toFixed(2)}</span></div>
+        </div>
+        <div class="wk-card-setup">Setup: ${t.setup || '—'}</div>
+        ${t.note ? `<div class="wk-card-note">${t.note}</div>` : ''}
+        <div class="wk-card-charts">${chartLinks.length ? chartLinks.join('') : '<span style="font-family:var(--font-mono);font-size:10.5px;color:var(--text3)">ไม่มีลิงก์กราฟ</span>'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleWeekCard(i) {
+  const body = document.getElementById('wkBody' + i);
+  const chev = document.getElementById('wkChev' + i);
+  if (!body) return;
+  const isOpen = body.classList.toggle('show');
+  if (chev) chev.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+function escAttr(s) {
+  return String(s || '').replace(/"/g, '&quot;');
+}
+
+// ============================================
+// THIS WEEK — EXPORT (CSV / JSON)
+// ============================================
+const WK_EXPORT_FIELDS = ['no','dateOpen','dateClose','dur','sym','pos','lot','order','enter','session','exit','tpsl','pnlPct','pnlUsd','grade','setup','chartEnter','chartExit','wl','gradeFinal','note'];
+
+function weekExportFilename(ext) {
+  const label = (document.getElementById('weekRangeLabel')?.textContent || 'this-week').replace(/\s+/g,'-');
+  return `trading-os-week-${label}.${ext}`;
+}
+
+function exportThisWeekCSV() {
+  const trades = getThisWeekTrades();
+  if (!trades.length) { showToast('⚠ ไม่มีเทรดในสัปดาห์นี้ให้ export'); return; }
+  const header = WK_EXPORT_FIELDS.join(',');
+  const rows = trades.map(t => WK_EXPORT_FIELDS.map(f => {
+    let v = t[f] ?? '';
+    v = String(v).replace(/"/g, '""');
+    return /[",\n]/.test(v) ? `"${v}"` : v;
+  }).join(','));
+  const csv = [header, ...rows].join('\n');
+  downloadBlob(csv, weekExportFilename('csv'), 'text/csv;charset=utf-8');
+  showToast('⬇ Export CSV แล้ว');
+}
+
+function exportThisWeekJSON() {
+  const trades = getThisWeekTrades();
+  if (!trades.length) { showToast('⚠ ไม่มีเทรดในสัปดาห์นี้ให้ export'); return; }
+  const data = trades.map(t => {
+    const o = {};
+    WK_EXPORT_FIELDS.forEach(f => o[f] = t[f] ?? '');
+    return o;
+  });
+  downloadBlob(JSON.stringify(data, null, 2), weekExportFilename('json'), 'application/json;charset=utf-8');
+  showToast('⬇ Export JSON แล้ว');
+}
+
+function downloadBlob(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function getFilteredTrades() {
