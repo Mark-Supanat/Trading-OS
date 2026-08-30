@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Trading OS">
 <meta name="theme-color" content="#0b0f1a">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -44,9 +44,9 @@
   --card-radius:14px;
   --card-shadow:0 4px 20px rgba(0,0,0,.35);
   --card-glow:0 0 0 1px rgba(59,130,246,.08);
-  --font-display:'Sora',sans-serif;
-  --font-mono:'DM Mono',monospace;
-  --font-body:'DM Sans',sans-serif;
+  --font-display:'Inter',sans-serif;
+  --font-mono:'Inter',sans-serif;
+  --font-body:'Inter',sans-serif;
 }
 [data-theme="light"]{
   --bg:#f0f4ff;
@@ -425,36 +425,43 @@ body::before{
 .an-pill-grade-c{background:rgba(244,63,94,.15);color:#f43f5e}
 
 /* ===== JOURNAL PAGE ===== */
-#page-journal{--jn-accent:#2dd4bf;--jn-accent2:#5eead4;--jn-accent-dark:#0f766e}
+#page-journal{
+  background:#0a0e16;
+  --jn-accent:#2dd4bf;--jn-accent2:#5eead4;--jn-accent-dark:#0f766e;
+  --jn-panel2:#171d2b;
+  --jn-border:#1e2638;--jn-border2:#2c3650;
+}
+.jn-panel-box{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:14px;padding:16px 18px}
+.jn-panel-title-plain{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text)}
 
 .jn-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
-.jn-tabs{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:3px}
+.jn-tabs{display:flex;gap:2px;background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:3px}
 .jn-tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);border:none;background:none;font-family:var(--font-body);transition:all .15s}
 .jn-tab.active{background:var(--jn-accent-dark);color:#99f6e4}
-.jn-tab:hover:not(.active){background:var(--bg4,var(--bg3));color:var(--text)}
+.jn-tab:hover:not(.active){background:var(--jn-border);color:var(--text)}
 .jn-toolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .jn-sync-status{font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--jn-accent-dark);color:var(--jn-accent2);background:rgba(15,118,110,.12);font-family:var(--font-mono);white-space:nowrap}
 .jn-sync-status.jn-err{border-color:#b91c1c88;color:#f87171;background:rgba(69,10,10,.2)}
-.jn-btn{padding:6px 12px;height:30px;border:1px solid var(--border2);border-radius:7px;background:var(--bg3);color:var(--text);font-size:11px;font-family:var(--font-mono);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.jn-btn{padding:6px 12px;height:30px;border:1px solid var(--jn-border2);border-radius:7px;background:var(--jn-panel2);color:var(--text);font-size:11px;font-family:var(--font-mono);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
 .jn-btn:hover{border-color:var(--jn-accent)}
 .jn-btn-accent{background:var(--jn-accent-dark);border-color:#14b8a6;color:#99f6e4}
 .jn-btn-accent:hover{background:#115e59}
 
-.jn-mm-banner{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.jn-mm-banner{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:8px 14px;margin-bottom:14px}
 .jn-mm-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:10px}
 .jn-mm-title{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.08em;display:flex;align-items:center;gap:6px}
 .jn-mm-rules{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.jn-mm-rule{background:var(--bg2);color:var(--text2);padding:2px 8px;border-radius:4px;font-size:11px;border:1px solid var(--border2);font-family:var(--font-mono)}
+.jn-mm-rule{background:var(--jn-border);color:var(--text2);padding:2px 8px;border-radius:4px;font-size:11px;border:1px solid var(--jn-border2);font-family:var(--font-mono)}
 .jn-mm-body{display:none}
 .jn-mm-body.open{display:block}
-.jn-mm-edit-btn{font-size:10px;padding:2px 8px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);border-radius:4px;cursor:pointer;font-family:var(--font-mono)}
-.jn-mm-textarea{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:11px;font-family:var(--font-body);padding:8px;border-radius:6px;resize:none;min-height:70px;outline:none}
+.jn-mm-edit-btn{font-size:10px;padding:2px 8px;background:var(--jn-border);border:1px solid var(--jn-border2);color:var(--text2);border-radius:4px;cursor:pointer;font-family:var(--font-mono)}
+.jn-mm-textarea{width:100%;background:var(--jn-border);border:1px solid var(--jn-border2);color:var(--text);font-size:11px;font-family:var(--font-body);padding:8px;border-radius:6px;resize:none;min-height:70px;outline:none}
 .jn-mm-textarea:focus{border-color:var(--jn-accent)}
 
 .jn-kpi-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:14px}
 @media(max-width:1200px){.jn-kpi-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:640px){.jn-kpi-grid{grid-template-columns:repeat(2,1fr)}}
-.jn-kpi{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 12px}
+.jn-kpi{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:11px 12px}
 .jn-kpi-label{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;font-family:var(--font-mono)}
 .jn-kpi-value{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--text)}
 .jn-kpi-value.pos{color:var(--green)}
@@ -464,35 +471,42 @@ body::before{
 .jn-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
 .jn-cal-month{font-family:var(--font-display);font-weight:700;font-size:16px}
 .jn-cal-nav{display:flex;gap:6px}
-.jn-cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
-.jn-cal-dow{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-align:center;letter-spacing:.05em;text-transform:uppercase;padding-bottom:2px}
-.jn-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.jn-cal-cell{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 7px 6px;min-height:78px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
-.jn-cal-cell:hover{border-color:var(--border2)}
+.jn-cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr) 1.1fr;gap:6px;margin-bottom:8px}
+.jn-cal-dow{font-family:var(--font-body);font-size:11px;font-weight:700;color:var(--text2);text-align:center;letter-spacing:.03em;text-transform:uppercase;padding-bottom:2px}
+.jn-cal-dow.jn-week-dow{color:var(--jn-accent2)}
+.jn-cal-grid{display:grid;grid-template-columns:repeat(7,1fr) 1.1fr;gap:6px}
+.jn-cal-cell{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:7px 7px 6px;min-height:78px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
+.jn-cal-cell:hover{border-color:var(--jn-border2)}
 .jn-cal-cell.jn-empty{background:transparent;border-color:transparent;cursor:default}
 .jn-cal-cell.jn-today{border-color:var(--jn-accent)}
 .jn-cal-cell.jn-selected{border-color:var(--jn-accent);box-shadow:0 0 0 1px var(--jn-accent)}
 .jn-cal-cell.jn-pos{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.28)}
 .jn-cal-cell.jn-neg{background:rgba(244,63,94,.07);border-color:rgba(244,63,94,.28)}
+.jn-cal-cell.jn-week-cell{cursor:default;background:var(--jn-border)}
+.jn-cal-cell.jn-week-cell.jn-pos{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3)}
+.jn-cal-cell.jn-week-cell.jn-neg{background:rgba(244,63,104,.1);border-color:rgba(244,63,94,.3)}
 .jn-cal-daynum{font-family:var(--font-mono);font-size:10px;color:var(--text3)}
+.jn-cal-week-label{font-family:var(--font-body);font-size:9px;font-weight:700;color:var(--jn-accent2);letter-spacing:.06em;text-transform:uppercase}
 .jn-cal-pnl{font-family:var(--font-mono);font-size:12.5px;font-weight:700}
 .jn-cal-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
-.jn-cal-tag{font-family:var(--font-mono);font-size:8px;padding:1.5px 5px;border-radius:4px;line-height:1.5;white-space:nowrap}
+.jn-cal-tag{font-family:var(--font-body);font-size:8.5px;padding:1.5px 5px;border-radius:4px;line-height:1.5;white-space:nowrap;background:var(--jn-border);color:var(--text2);border:1px solid var(--jn-border2)}
 @media(max-width:600px){.jn-cal-cell{min-height:52px;padding:5px}.jn-cal-pnl{font-size:10px}.jn-cal-tags{display:none}}
 
-.jn-trade-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
-.jn-tc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-.jn-tc-sym{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:0}
-.jn-tc-pnl{font-family:var(--font-mono);font-size:14px;font-weight:700;margin-left:auto}
-.jn-tc-meta{font-family:var(--font-mono);font-size:10.5px;color:var(--text2);display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:8px}
-.jn-tc-meta span b{color:var(--text)}
-.jn-tc-setup{font-family:var(--font-mono);font-size:11.5px;color:var(--text2);margin-bottom:6px;line-height:1.5}
-.jn-tc-entryplan{font-family:var(--font-mono);font-size:10.5px;color:var(--text2);background:rgba(255,255,255,.03);border-left:2px solid var(--jn-accent-dark);padding:6px 10px;border-radius:0 6px 6px 0;margin-bottom:6px;line-height:1.5}
-.jn-tc-note{font-family:var(--font-mono);font-size:10.5px;color:var(--text3);font-style:italic;margin-top:6px;line-height:1.5}
-.jn-tc-links{display:flex;gap:12px;margin-top:8px}
-.jn-tc-links a{font-family:var(--font-mono);font-size:10.5px;color:var(--jn-accent2);text-decoration:none}
+.jn-trade-card{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.jn-tc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.jn-tc-sym{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:0}
+.jn-tc-pnl{font-family:var(--font-mono);font-size:15px;font-weight:700;margin-left:auto}
+.jn-tc-setup{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text);background:rgba(45,212,191,.08);border-left:3px solid var(--jn-accent);padding:7px 10px;border-radius:0 6px 6px 0;margin-bottom:10px;line-height:1.5}
+.jn-tc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 12px;margin-bottom:10px}
+@media(max-width:640px){.jn-tc-grid{grid-template-columns:repeat(2,1fr)}}
+.jn-tc-field label{display:block;font-family:var(--font-mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.jn-tc-field div{font-family:var(--font-mono);font-size:13px;color:var(--text);font-weight:600}
+.jn-tc-entryplan{font-family:var(--font-body);font-size:11.5px;color:var(--text2);background:rgba(255,255,255,.03);border-left:2px solid var(--jn-border2);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
+.jn-tc-note{font-family:var(--font-body);font-size:11.5px;color:var(--text3);font-style:italic;margin-top:8px;line-height:1.6}
+.jn-tc-links{display:flex;gap:14px;margin-top:10px}
+.jn-tc-links a{font-family:var(--font-body);font-size:11.5px;color:var(--jn-accent2);text-decoration:none;font-weight:600}
 .jn-tc-links a:hover{text-decoration:underline}
-.jn-day-detail{max-height:520px;overflow-y:auto}
+.jn-day-detail{max-height:560px;overflow-y:auto}
 
 .jn-bottom-col{display:flex;flex-direction:column;gap:14px;margin-top:14px}
 .jn-panel-title{font-family:var(--font-display);font-weight:700;font-size:12px;color:var(--jn-accent2);margin-bottom:14px;display:flex;align-items:center;gap:6px}
@@ -1546,7 +1560,7 @@ select.field-sm option{background:#111827;color:var(--text)}
       <div class="jn-kpi-grid" id="jnKpiGrid"></div>
 
       <!-- CALENDAR -->
-      <div class="dash-widget jn-cal-widget">
+      <div class="jn-panel-box jn-cal-widget">
         <div class="jn-cal-head">
           <div class="jn-cal-month" id="jnCalMonthLabel">—</div>
           <div class="jn-cal-nav">
@@ -1560,9 +1574,9 @@ select.field-sm option{background:#111827;color:var(--text)}
       </div>
 
       <!-- DAY DETAIL -->
-      <div class="dash-widget jn-day-detail" id="jnDayDetail" style="display:none;margin-top:14px">
+      <div class="jn-panel-box jn-day-detail" id="jnDayDetail" style="display:none;margin-top:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div class="dash-widget-title" style="margin-bottom:0" id="jnDayDetailTitle">—</div>
+          <div class="jn-panel-title-plain" id="jnDayDetailTitle">—</div>
           <button onclick="jnCloseDayDetail()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px">✕</button>
         </div>
         <div id="jnDayDetailBody"></div>
@@ -1570,14 +1584,14 @@ select.field-sm option{background:#111827;color:var(--text)}
 
       <!-- EQUITY CURVE + STREAKS -->
       <div class="jn-bottom-col">
-        <div class="dash-widget">
+        <div class="jn-panel-box">
           <div class="jn-panel-title"><span class="jn-panel-bar"></span>EQUITY CURVE</div>
           <div style="position:relative;height:220px">
             <canvas id="chartJournalEquity"></canvas>
           </div>
           <div class="jn-equity-total" id="jnEquityTotal"></div>
         </div>
-        <div class="dash-widget">
+        <div class="jn-panel-box">
           <div class="jn-panel-title"><span class="jn-panel-bar"></span>STREAKS</div>
           <div class="jn-streaks-grid" id="jnStreakBox"></div>
         </div>
@@ -2436,13 +2450,6 @@ function jnCleanDate(raw) {
   return isNaN(d) ? null : d;
 }
 
-function jnSymbolColor(sym) {
-  const palette = ['#3b82f6','#f0b429','#10b981','#7c3aed','#ea580c','#06b6d4','#ec4899','#84cc16','#f43f5e','#fb923c'];
-  let hash = 0;
-  for (let i=0;i<sym.length;i++) hash = (hash*31 + sym.charCodeAt(i))|0;
-  return palette[Math.abs(hash) % palette.length];
-}
-
 // ---- Stats ----
 function jnCalcStats(trades) {
   const wins = trades.filter(t => t.wl === 'W');
@@ -2546,8 +2553,8 @@ function renderJournalCalendar() {
   const monthNames = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   label.textContent = `${monthNames[jnCalMonth]} ${jnCalYear + 543}`;
 
-  const dows = ['จ','อ','พ','พฤ','ศ','ส','อา'];
-  dowRow.innerHTML = dows.map(d => `<div class="jn-cal-dow">${d}</div>`).join('');
+  const dows = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'];
+  dowRow.innerHTML = dows.map(d => `<div class="jn-cal-dow">${d}</div>`).join('') + `<div class="jn-cal-dow jn-week-dow">WEEKLY</div>`;
 
   const byDay = jnClosedByDay(jnGetTrades());
   const firstOfMonth = new Date(jnCalYear, jnCalMonth, 1);
@@ -2556,33 +2563,52 @@ function renderJournalCalendar() {
   const daysInMonth = new Date(jnCalYear, jnCalMonth + 1, 0).getDate();
   const todayKey = jnDateKey(new Date());
 
-  let cells = '';
-  for (let i = 0; i < startOffset; i++) cells += `<div class="jn-cal-cell jn-empty"></div>`;
+  // Build a flat list of day cells (null = empty/padding)
+  const cellList = [];
+  for (let i = 0; i < startOffset; i++) cellList.push(null);
   for (let day = 1; day <= daysInMonth; day++) {
     const d = new Date(jnCalYear, jnCalMonth, day);
     const key = jnDateKey(d);
-    const dayData = byDay[key];
-    let cls = 'jn-cal-cell';
-    if (key === todayKey) cls += ' jn-today';
-    if (key === jnSelectedDateKey) cls += ' jn-selected';
-    if (dayData) cls += dayData.pnl >= 0 ? ' jn-pos' : ' jn-neg';
-    const pnlHtml = dayData
-      ? `<div class="jn-cal-pnl" style="color:${dayData.pnl>=0?'var(--green)':'var(--red)'}">${dayData.pnl>=0?'+':'-'}$${Math.abs(dayData.pnl).toFixed(2)}</div>`
-      : '';
-    const syms = dayData ? [...dayData.syms].filter(Boolean) : [];
-    const tagsHtml = syms.length
-      ? `<div class="jn-cal-tags">${syms.map(s => {
-          const c = jnSymbolColor(s);
-          return `<span class="jn-cal-tag" style="background:${c}22;color:${c}">${s}</span>`;
-        }).join('')}</div>`
-      : '';
-    cells += `<div class="${cls}" onclick="jnSelectDay('${key}')">
-      <div class="jn-cal-daynum">${day}</div>
-      ${pnlHtml}
-      ${tagsHtml}
+    cellList.push({ day, key, data: byDay[key] });
+  }
+  while (cellList.length % 7 !== 0) cellList.push(null);
+
+  let html = '';
+  for (let i = 0; i < cellList.length; i += 7) {
+    const week = cellList.slice(i, i + 7);
+    week.forEach(c => {
+      if (!c) { html += `<div class="jn-cal-cell jn-empty"></div>`; return; }
+      const { day, key, data } = c;
+      let cls = 'jn-cal-cell';
+      if (key === todayKey) cls += ' jn-today';
+      if (key === jnSelectedDateKey) cls += ' jn-selected';
+      if (data) cls += data.pnl >= 0 ? ' jn-pos' : ' jn-neg';
+      const pnlHtml = data
+        ? `<div class="jn-cal-pnl" style="color:${data.pnl>=0?'var(--green)':'var(--red)'}">${data.pnl>=0?'+':'-'}$${Math.abs(data.pnl).toFixed(2)}</div>`
+        : '';
+      const syms = data ? [...data.syms].filter(Boolean) : [];
+      const tagsHtml = syms.length
+        ? `<div class="jn-cal-tags">${syms.map(s => `<span class="jn-cal-tag">${s}</span>`).join('')}</div>`
+        : '';
+      html += `<div class="${cls}" onclick="jnSelectDay('${key}')">
+        <div class="jn-cal-daynum">${day}</div>
+        ${pnlHtml}
+        ${tagsHtml}
+      </div>`;
+    });
+    // weekly summary cell
+    let weekPnl = 0, weekDays = 0;
+    week.forEach(c => { if (c && c.data) { weekPnl += c.data.pnl; weekDays++; } });
+    let weekCls = 'jn-cal-cell jn-week-cell';
+    if (weekDays) weekCls += weekPnl >= 0 ? ' jn-pos' : ' jn-neg';
+    const weekColor = weekDays ? (weekPnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--text3)';
+    html += `<div class="${weekCls}">
+      <div class="jn-cal-week-label">WEEKLY</div>
+      <div class="jn-cal-pnl" style="color:${weekColor}">${weekPnl>=0?'+':'-'}$${Math.abs(weekPnl).toFixed(2)}</div>
+      <div class="jn-cal-tags"><span class="jn-cal-tag">${weekDays} day${weekDays!==1?'s':''}</span></div>
     </div>`;
   }
-  grid.innerHTML = cells;
+  grid.innerHTML = html;
 }
 
 function jnSelectDay(key) {
@@ -2613,6 +2639,11 @@ function jnSelectDay(key) {
     const links = [];
     if (t.chartEnter) links.push(`<a href="${t.chartEnter}" target="_blank" rel="noopener">🖼 Chart Enter</a>`);
     if (t.chartExit) links.push(`<a href="${t.chartExit}" target="_blank" rel="noopener">🖼 Chart Exit</a>`);
+    const fields = [
+      ['Position', t.pos], ['Lot Size', t.lot], ['Order', t.order], ['Session', t.session],
+      ['Entry', t.enter], ['Exit', t.exit], ['Duration', t.dur], ['Exit Type', t.tpsl],
+      ['RRR', t.rrr], ['SL %', t.slPct], ['TP %', t.tpPct],
+    ];
     return `<div class="jn-trade-card">
       <div class="jn-tc-head">
         <span class="jn-tc-sym">${t.sym||'—'}</span>
@@ -2620,18 +2651,10 @@ function jnSelectDay(key) {
         <span class="an-pill ${gradeClass}">${grade}</span>
         <span class="jn-tc-pnl" style="color:${pnlColor}">${pnl>=0?'+':'-'}$${Math.abs(pnl).toFixed(2)} (${parseFloat(t.pnlPct||0)>=0?'+':''}${parseFloat(t.pnlPct||0).toFixed(2)}%)</span>
       </div>
-      <div class="jn-tc-meta">
-        <span><b>${t.pos||'—'}</b></span>
-        <span>Lot ${t.lot||'—'}</span>
-        <span>${t.order||'—'}</span>
-        <span>Enter ${t.enter||'—'}</span>
-        <span>Exit ${t.exit||'—'}</span>
-        <span>${t.session||'—'}</span>
-        <span>RRR ${t.rrr||'—'}</span>
-        <span>SL ${t.slPct||'—'}</span>
-        <span>TP ${t.tpPct||'—'}</span>
-      </div>
       ${t.setup ? `<div class="jn-tc-setup">🎯 ${t.setup}</div>` : ''}
+      <div class="jn-tc-grid">
+        ${fields.map(([label,val]) => `<div class="jn-tc-field"><label>${label}</label><div>${val||'—'}</div></div>`).join('')}
+      </div>
       ${t.entryPlan ? `<div class="jn-tc-entryplan">${t.entryPlan}</div>` : ''}
       ${t.exitExecution ? `<div class="jn-tc-note">🚪 Exit: ${t.exitExecution}</div>` : ''}
       ${t.note ? `<div class="jn-tc-note">📝 ${t.note}</div>` : ''}
