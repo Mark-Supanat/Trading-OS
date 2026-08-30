@@ -425,31 +425,60 @@ body::before{
 .an-pill-grade-c{background:rgba(244,63,94,.15);color:#f43f5e}
 
 /* ===== JOURNAL PAGE ===== */
-.jn-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-@media(max-width:900px){.jn-kpi-grid{grid-template-columns:repeat(2,1fr)}}
-.jn-main-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
-@media(max-width:900px){.jn-main-grid{grid-template-columns:1fr}}
-.jn-side-col{display:flex;flex-direction:column;gap:14px}
+#page-journal{--jn-accent:#2dd4bf;--jn-accent2:#5eead4;--jn-accent-dark:#0f766e}
+
+.jn-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.jn-tabs{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:3px}
+.jn-tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);border:none;background:none;font-family:var(--font-body);transition:all .15s}
+.jn-tab.active{background:var(--jn-accent-dark);color:#99f6e4}
+.jn-tab:hover:not(.active){background:var(--bg4,var(--bg3));color:var(--text)}
+.jn-toolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.jn-sync-status{font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--jn-accent-dark);color:var(--jn-accent2);background:rgba(15,118,110,.12);font-family:var(--font-mono);white-space:nowrap}
+.jn-sync-status.jn-err{border-color:#b91c1c88;color:#f87171;background:rgba(69,10,10,.2)}
+.jn-btn{padding:6px 12px;height:30px;border:1px solid var(--border2);border-radius:7px;background:var(--bg3);color:var(--text);font-size:11px;font-family:var(--font-mono);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.jn-btn:hover{border-color:var(--jn-accent)}
+.jn-btn-accent{background:var(--jn-accent-dark);border-color:#14b8a6;color:#99f6e4}
+.jn-btn-accent:hover{background:#115e59}
+
+.jn-mm-banner{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.jn-mm-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:10px}
+.jn-mm-title{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.jn-mm-rules{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.jn-mm-rule{background:var(--bg2);color:var(--text2);padding:2px 8px;border-radius:4px;font-size:11px;border:1px solid var(--border2);font-family:var(--font-mono)}
+.jn-mm-body{display:none}
+.jn-mm-body.open{display:block}
+.jn-mm-edit-btn{font-size:10px;padding:2px 8px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);border-radius:4px;cursor:pointer;font-family:var(--font-mono)}
+.jn-mm-textarea{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:11px;font-family:var(--font-body);padding:8px;border-radius:6px;resize:none;min-height:70px;outline:none}
+.jn-mm-textarea:focus{border-color:var(--jn-accent)}
+
+.jn-kpi-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:14px}
+@media(max-width:1200px){.jn-kpi-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:640px){.jn-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.jn-kpi{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 12px}
+.jn-kpi-label{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;font-family:var(--font-mono)}
+.jn-kpi-value{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--text)}
+.jn-kpi-value.pos{color:var(--green)}
+.jn-kpi-value.neg{color:var(--red)}
+
+.jn-cal-widget{margin-bottom:14px}
+.jn-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.jn-cal-month{font-family:var(--font-display);font-weight:700;font-size:16px}
+.jn-cal-nav{display:flex;gap:6px}
 .jn-cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
 .jn-cal-dow{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-align:center;letter-spacing:.05em;text-transform:uppercase;padding-bottom:2px}
 .jn-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.jn-cal-cell{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 7px 6px;min-height:74px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
+.jn-cal-cell{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 7px 6px;min-height:78px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
 .jn-cal-cell:hover{border-color:var(--border2)}
 .jn-cal-cell.jn-empty{background:transparent;border-color:transparent;cursor:default}
-.jn-cal-cell.jn-today{border-color:var(--gold)}
-.jn-cal-cell.jn-selected{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
-.jn-cal-cell.jn-pos{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3)}
-.jn-cal-cell.jn-neg{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.3)}
+.jn-cal-cell.jn-today{border-color:var(--jn-accent)}
+.jn-cal-cell.jn-selected{border-color:var(--jn-accent);box-shadow:0 0 0 1px var(--jn-accent)}
+.jn-cal-cell.jn-pos{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.28)}
+.jn-cal-cell.jn-neg{background:rgba(244,63,94,.07);border-color:rgba(244,63,94,.28)}
 .jn-cal-daynum{font-family:var(--font-mono);font-size:10px;color:var(--text3)}
 .jn-cal-pnl{font-family:var(--font-mono);font-size:12.5px;font-weight:700}
 .jn-cal-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
 .jn-cal-tag{font-family:var(--font-mono);font-size:8px;padding:1.5px 5px;border-radius:4px;line-height:1.5;white-space:nowrap}
 @media(max-width:600px){.jn-cal-cell{min-height:52px;padding:5px}.jn-cal-pnl{font-size:10px}.jn-cal-tags{display:none}}
-
-.jn-streak-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
-.jn-streak-row:last-child{border-bottom:none}
-.jn-streak-label{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase}
-.jn-streak-value{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:-.01em}
 
 .jn-trade-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
 .jn-tc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
@@ -458,12 +487,25 @@ body::before{
 .jn-tc-meta{font-family:var(--font-mono);font-size:10.5px;color:var(--text2);display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:8px}
 .jn-tc-meta span b{color:var(--text)}
 .jn-tc-setup{font-family:var(--font-mono);font-size:11.5px;color:var(--text2);margin-bottom:6px;line-height:1.5}
-.jn-tc-entryplan{font-family:var(--font-mono);font-size:10.5px;color:var(--text2);background:rgba(255,255,255,.03);border-left:2px solid var(--border2);padding:6px 10px;border-radius:0 6px 6px 0;margin-bottom:6px;line-height:1.5}
+.jn-tc-entryplan{font-family:var(--font-mono);font-size:10.5px;color:var(--text2);background:rgba(255,255,255,.03);border-left:2px solid var(--jn-accent-dark);padding:6px 10px;border-radius:0 6px 6px 0;margin-bottom:6px;line-height:1.5}
 .jn-tc-note{font-family:var(--font-mono);font-size:10.5px;color:var(--text3);font-style:italic;margin-top:6px;line-height:1.5}
 .jn-tc-links{display:flex;gap:12px;margin-top:8px}
-.jn-tc-links a{font-family:var(--font-mono);font-size:10.5px;color:var(--blue);text-decoration:none}
+.jn-tc-links a{font-family:var(--font-mono);font-size:10.5px;color:var(--jn-accent2);text-decoration:none}
 .jn-tc-links a:hover{text-decoration:underline}
 .jn-day-detail{max-height:520px;overflow-y:auto}
+
+.jn-bottom-col{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.jn-panel-title{font-family:var(--font-display);font-weight:700;font-size:12px;color:var(--jn-accent2);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.jn-panel-bar{width:3px;height:14px;background:var(--jn-accent);display:inline-block;border-radius:2px}
+.jn-equity-total{text-align:right;font-family:var(--font-display);font-weight:700;font-size:13px;margin-top:8px}
+.jn-equity-total.pos{color:var(--green)}
+.jn-equity-total.neg{color:var(--red)}
+.jn-streaks-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.jn-streak-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.jn-streak-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:var(--font-mono)}
+.jn-streak-value{font-family:var(--font-display);font-weight:700;font-size:16px}
+.jn-streak-value.pos{color:var(--green)}
+.jn-streak-value.neg{color:var(--red)}
 .wk-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;overflow:hidden;transition:border-color .15s}
 .wk-card:hover{border-color:rgba(255,255,255,.12)}
 .wk-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;cursor:pointer;user-select:none}
@@ -1465,38 +1507,56 @@ select.field-sm option{background:#111827;color:var(--text)}
   <div class="page" id="page-journal">
     <div class="page-inner">
 
-      <!-- KPI ROW -->
-      <div class="jn-kpi-grid" id="jnKpiGrid">
-        <div class="an-kpi-card"><div class="an-kpi-label">กำลังโหลด...</div></div>
+      <!-- TOOLBAR -->
+      <div class="jn-toolbar">
+        <div class="jn-tabs">
+          <button class="jn-tab" id="jn-tab-q1" onclick="jnSetQuarter('q1',this)">Q1 2026</button>
+          <button class="jn-tab" id="jn-tab-q2" onclick="jnSetQuarter('q2',this)">Q2 2026</button>
+          <button class="jn-tab active" id="jn-tab-q3" onclick="jnSetQuarter('q3',this)">Q3 2026</button>
+        </div>
+        <div class="jn-toolbar-right">
+          <div class="jn-sync-status" id="jnSyncStatus">⏳ กำลังโหลด...</div>
+          <button class="jn-btn" onclick="jnExportCSV()">⬇ Export CSV</button>
+          <button class="jn-btn" onclick="jnExportJSON()">⬇ Export JSON</button>
+          <button class="jn-btn" onclick="document.getElementById('jnImportFileInput').click()">⬆ Import JSON</button>
+          <input type="file" id="jnImportFileInput" accept="application/json" style="display:none" onchange="jnImportJSON(event)">
+          <button class="jn-btn" onclick="loadJournalPage(true)">↻ Reload</button>
+        </div>
       </div>
 
-      <!-- CALENDAR + SIDE PANEL -->
-      <div class="jn-main-grid">
-        <div class="dash-widget">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-            <div class="dash-widget-title" style="margin-bottom:0;font-size:14px" id="jnCalMonthLabel">—</div>
-            <div style="display:flex;gap:6px;align-items:center">
-              <button class="btn-new" onclick="jnCalNav(-1)" style="padding:4px 12px;font-size:13px">‹</button>
-              <button class="btn-new" onclick="jnCalToday()" style="padding:4px 12px;font-size:9px">TODAY</button>
-              <button class="btn-new" onclick="jnCalNav(1)" style="padding:4px 12px;font-size:13px">›</button>
+      <!-- MM RULES -->
+      <div class="jn-mm-banner">
+        <div class="jn-mm-head" onclick="jnToggleMM()">
+          <div class="jn-mm-title">⚠ TRADING MM RULES <span id="jnMmChevron">▸</span></div>
+          <button class="jn-mm-edit-btn" onclick="event.stopPropagation();jnToggleEditRules()" id="jnEditRulesBtn">✏ EDIT</button>
+        </div>
+        <div class="jn-mm-body" id="jnMmBody">
+          <div class="jn-mm-rules" id="jnMmRulesDisplay"></div>
+          <div id="jnMmRulesEditor" style="display:none;margin-top:8px">
+            <textarea id="jnMmRulesText" class="jn-mm-textarea" placeholder="พิมพ์กฎแต่ละข้อคั่นด้วย Enter หรือ | "></textarea>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <button onclick="jnSaveRules()" class="jn-btn jn-btn-accent" style="font-size:11px;padding:4px 12px">💾 Save</button>
+              <button onclick="jnToggleEditRules()" class="jn-btn" style="font-size:11px;padding:4px 12px">Cancel</button>
             </div>
           </div>
-          <div class="jn-cal-dow-row" id="jnCalDow"></div>
-          <div class="jn-cal-grid" id="jnCalGrid"></div>
         </div>
+      </div>
 
-        <div class="jn-side-col">
-          <div class="dash-widget">
-            <div class="dash-widget-title">🔥 Streaks</div>
-            <div id="jnStreakBox"></div>
-          </div>
-          <div class="dash-widget" style="flex:1;display:flex;flex-direction:column">
-            <div class="dash-widget-title">💹 Equity Curve</div>
-            <div style="position:relative;flex:1;min-height:220px">
-              <canvas id="chartJournalEquity"></canvas>
-            </div>
+      <!-- KPI ROW -->
+      <div class="jn-kpi-grid" id="jnKpiGrid"></div>
+
+      <!-- CALENDAR -->
+      <div class="dash-widget jn-cal-widget">
+        <div class="jn-cal-head">
+          <div class="jn-cal-month" id="jnCalMonthLabel">—</div>
+          <div class="jn-cal-nav">
+            <button class="jn-btn" onclick="jnCalNav(-1)">← Prev</button>
+            <button class="jn-btn jn-btn-accent" onclick="jnCalToday()">Today</button>
+            <button class="jn-btn" onclick="jnCalNav(1)">Next →</button>
           </div>
         </div>
+        <div class="jn-cal-dow-row" id="jnCalDow"></div>
+        <div class="jn-cal-grid" id="jnCalGrid"></div>
       </div>
 
       <!-- DAY DETAIL -->
@@ -1506,6 +1566,21 @@ select.field-sm option{background:#111827;color:var(--text)}
           <button onclick="jnCloseDayDetail()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px">✕</button>
         </div>
         <div id="jnDayDetailBody"></div>
+      </div>
+
+      <!-- EQUITY CURVE + STREAKS -->
+      <div class="jn-bottom-col">
+        <div class="dash-widget">
+          <div class="jn-panel-title"><span class="jn-panel-bar"></span>EQUITY CURVE</div>
+          <div style="position:relative;height:220px">
+            <canvas id="chartJournalEquity"></canvas>
+          </div>
+          <div class="jn-equity-total" id="jnEquityTotal"></div>
+        </div>
+        <div class="dash-widget">
+          <div class="jn-panel-title"><span class="jn-panel-bar"></span>STREAKS</div>
+          <div class="jn-streaks-grid" id="jnStreakBox"></div>
+        </div>
       </div>
 
     </div>
@@ -2291,18 +2366,23 @@ function renderTradeTable() {
 // ============================================
 // JOURNAL PAGE
 // ============================================
+let jnQuarter = 'q3';
 let jnCalYear = null, jnCalMonth = null; // 0-indexed month
 let jnCalInited = false;
 let jnSelectedDateKey = null;
 let jnEquityChart = null;
 
-async function loadJournalPage() {
-  if (anAllTrades.length === 0) {
+const JN_QUARTER_LABELS = { q1:'Q1 2026', q2:'Q2 2026', q3:'Q3 2026' };
+const JN_EXPORT_COLS = ['no','dateOpen','dateClose','dur','sym','pos','lot','order','enter','session','exit','tpsl','pnlPct','pnlUsd','grade','setup','entryPlan','chartEnter','chartExit','rrr','slPct','tpPct','exitExecution','wl','gradeFinal','note'];
+
+async function loadJournalPage(forceReload) {
+  if (anAllTrades.length === 0 || forceReload) {
+    jnSetSyncStatus('loading', '⏳ กำลังโหลด...');
     await loadAnalytics();
   }
   if (!jnCalInited) {
     jnCalInited = true;
-    const dates = anAllTrades.map(t => t.dateOpen).filter(Boolean).sort();
+    const dates = jnGetTrades().map(t => t.dateClose || t.dateOpen).filter(Boolean).sort();
     let seedDate = new Date();
     if (dates.length) {
       const last = new Date(dates[dates.length - 1]);
@@ -2311,7 +2391,32 @@ async function loadJournalPage() {
     jnCalYear = seedDate.getFullYear();
     jnCalMonth = seedDate.getMonth();
   }
+  jnLoadRules();
   renderJournalAll();
+  const n = jnGetTrades().length;
+  jnSetSyncStatus('ok', `✅ โหลดแล้ว ${n} รายการ`);
+}
+
+function jnGetTrades() {
+  return anAllTrades.filter(t => t._quarter === jnQuarter);
+}
+
+function jnSetSyncStatus(type, msg) {
+  const el = document.getElementById('jnSyncStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'jn-sync-status' + (type === 'err' ? ' jn-err' : '');
+}
+
+function jnSetQuarter(q, btnEl) {
+  jnQuarter = q;
+  document.querySelectorAll('.jn-tab').forEach(el => el.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  jnSelectedDateKey = null;
+  const panel = document.getElementById('jnDayDetail');
+  if (panel) panel.style.display = 'none';
+  renderJournalAll();
+  jnSetSyncStatus('ok', `✅ โหลดแล้ว ${jnGetTrades().length} รายการ`);
 }
 
 function renderJournalAll() {
@@ -2325,93 +2430,96 @@ function jnDateKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function jnParseRRR(str) {
-  if (!str) return null;
-  const s = String(str).trim();
-  const m = s.match(/^(\d+(?:\.\d+)?)\s*[:\/]\s*(\d+(?:\.\d+)?)$/);
-  if (m) { const a = parseFloat(m[1]), b = parseFloat(m[2]); return a ? b/a : null; }
-  const n = parseFloat(s);
-  return isNaN(n) ? null : n;
+function jnCleanDate(raw) {
+  if (!raw) return null;
+  const d = new Date(raw);
+  return isNaN(d) ? null : d;
+}
+
+function jnSymbolColor(sym) {
+  const palette = ['#3b82f6','#f0b429','#10b981','#7c3aed','#ea580c','#06b6d4','#ec4899','#84cc16','#f43f5e','#fb923c'];
+  let hash = 0;
+  for (let i=0;i<sym.length;i++) hash = (hash*31 + sym.charCodeAt(i))|0;
+  return palette[Math.abs(hash) % palette.length];
+}
+
+// ---- Stats ----
+function jnCalcStats(trades) {
+  const wins = trades.filter(t => t.wl === 'W');
+  const losses = trades.filter(t => t.wl === 'L');
+  const total = wins.length + losses.length;
+  const wr = total > 0 ? wins.length/total*100 : 0;
+  const gw = wins.reduce((s,t) => s + (parseFloat(t.pnlUsd)||0), 0);
+  const gl = Math.abs(losses.reduce((s,t) => s + (parseFloat(t.pnlUsd)||0), 0));
+  const pf = gl > 0 ? gw/gl : 0;
+  const pnl = trades.reduce((s,t) => s + (parseFloat(t.pnlUsd)||0), 0);
+  const avgWin = wins.length ? gw/wins.length : 0;
+  const avgLoss = losses.length ? losses.reduce((s,t)=>s+(parseFloat(t.pnlUsd)||0),0)/losses.length : 0;
+  return { wins:wins.length, losses:losses.length, total, wr, pf, pnl, avgWin, avgLoss };
+}
+
+function jnClosedByDay(trades) {
+  const map = {};
+  trades.forEach(t => {
+    const d = jnCleanDate(t.dateClose);
+    if (!d) return;
+    const key = jnDateKey(d);
+    if (!map[key]) map[key] = { pnl:0, syms:new Set(), trades:[] };
+    map[key].pnl += (parseFloat(t.pnlUsd)||0);
+    map[key].syms.add(t.sym);
+    map[key].trades.push(t);
+  });
+  return map;
+}
+
+function jnClosedSorted(trades) {
+  return trades.filter(t => jnCleanDate(t.dateClose) && (t.wl==='W'||t.wl==='L'||t.wl==='D'))
+    .sort((a,b) => new Date(a.dateClose) - new Date(b.dateClose));
 }
 
 function jnComputeStreaks(trades) {
-  const sorted = [...trades].filter(t => (t.wl==='W'||t.wl==='L') && t.dateOpen)
-    .sort((a,b) => new Date(a.dateOpen) - new Date(b.dateOpen));
-  let best = 0, cur = 0, curType = null;
-  sorted.forEach(t => {
-    if (t.wl === curType) cur++; else { curType = t.wl; cur = 1; }
-    if (curType === 'W' && cur > best) best = cur;
-  });
-  let bestLoss = 0; cur = 0; curType = null;
-  sorted.forEach(t => {
-    if (t.wl === curType) cur++; else { curType = t.wl; cur = 1; }
-    if (curType === 'L' && cur > bestLoss) bestLoss = cur;
-  });
-  let trailType = null, trailCount = 0;
-  for (let i = sorted.length - 1; i >= 0; i--) {
-    if (trailType === null) { trailType = sorted[i].wl; trailCount = 1; }
-    else if (sorted[i].wl === trailType) trailCount++;
+  const closed = trades.filter(t => jnCleanDate(t.dateClose) && (t.wl==='W'||t.wl==='L'))
+    .sort((a,b) => new Date(a.dateClose) - new Date(b.dateClose));
+  let current = 0, currentType = '';
+  for (let i = closed.length - 1; i >= 0; i--) {
+    if (i === closed.length - 1) { currentType = closed[i].wl; current = 1; }
+    else if (closed[i].wl === currentType) current++;
     else break;
   }
-  return { bestWinStreak: best, bestLossStreak: bestLoss, currentStreak: trailCount, currentType: trailType };
+  let longestWin = 0, longestLoss = 0, run = 0, runType = '';
+  closed.forEach(t => {
+    if (t.wl === runType) run++; else { run = 1; runType = t.wl; }
+    if (runType === 'W') longestWin = Math.max(longestWin, run);
+    if (runType === 'L') longestLoss = Math.max(longestLoss, run);
+  });
+  return { current, currentType, longestWin, longestLoss, hasData: closed.length > 0 };
 }
 
+// ---- KPI ----
 function renderJournalKPIs() {
   const el = document.getElementById('jnKpiGrid');
   if (!el) return;
-  const trades = anAllTrades;
-  const total = trades.length;
-  const wins = trades.filter(t => t.wl === 'W').length;
-  const losses = trades.filter(t => t.wl === 'L').length;
-  const decided = wins + losses;
-  const winRate = decided ? (wins/decided*100) : 0;
-  const wrGood = winRate >= 50;
-  const totalPct = trades.reduce((s,t) => s + (parseFloat(t.pnlPct)||0), 0);
-  const totalUsd = trades.reduce((s,t) => s + (parseFloat(t.pnlUsd)||0), 0);
-  const pnlGood = totalPct >= 0;
-  const rrrVals = trades.map(t => jnParseRRR(t.rrr)).filter(v => v !== null && isFinite(v));
-  const avgRRR = rrrVals.length ? (rrrVals.reduce((a,b)=>a+b,0)/rrrVals.length) : null;
-  const gradeACount = trades.filter(t => (t.gradeFinal||t.grade) === 'A').length;
-  const gradeARatio = total ? (gradeACount/total*100) : 0;
-  const { bestWinStreak, currentStreak, currentType } = jnComputeStreaks(trades);
+  const trades = jnGetTrades();
+  const s = jnCalcStats(trades);
+  const byDay = jnClosedByDay(trades);
+  const dayTotals = Object.values(byDay).map(d => d.pnl);
+  const bestDay = dayTotals.length ? Math.max(...dayTotals) : 0;
+  const worstDay = dayTotals.length ? Math.min(...dayTotals) : 0;
+  const sign = n => n >= 0 ? '+' : '-';
 
-  el.innerHTML = `
-    <div class="an-kpi-card" style="--liquid-glow:rgba(59,130,246,.4)">
-      <div class="an-kpi-accent" style="background:linear-gradient(90deg,#3b82f6,#818cf8)"></div>
-      <div class="an-kpi-top">
-        <div class="an-kpi-icon" style="background:rgba(59,130,246,.15)">📊</div>
-        <div class="an-kpi-label">Total Trades</div>
-      </div>
-      <div class="an-kpi-value">${total}</div>
-      <div class="an-kpi-sub">${wins}W / ${losses}L</div>
-    </div>
-    <div class="an-kpi-card" style="--liquid-glow:${wrGood?'rgba(16,185,129,.4)':'rgba(244,63,94,.4)'}">
-      <div class="an-kpi-accent" style="background:${wrGood?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#f43f5e,#fb7185)'}"></div>
-      <div class="an-kpi-top">
-        <div class="an-kpi-icon" style="background:${wrGood?'rgba(16,185,129,.15)':'rgba(244,63,94,.15)'}">🎯</div>
-        <div class="an-kpi-label">Win Rate</div>
-      </div>
-      <div class="an-kpi-value ${wrGood?'an-positive':'an-negative'}">${decided?winRate.toFixed(1):'0.0'}%</div>
-      <div class="an-kpi-sub">Grade A ${gradeARatio.toFixed(0)}%</div>
-    </div>
-    <div class="an-kpi-card" style="--liquid-glow:${pnlGood?'rgba(16,185,129,.4)':'rgba(244,63,94,.4)'}">
-      <div class="an-kpi-accent" style="background:${pnlGood?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#f43f5e,#fb7185)'}"></div>
-      <div class="an-kpi-top">
-        <div class="an-kpi-icon" style="background:${pnlGood?'rgba(16,185,129,.15)':'rgba(244,63,94,.15)'}">💰</div>
-        <div class="an-kpi-label">Total P&L</div>
-      </div>
-      <div class="an-kpi-value ${pnlGood?'an-positive':'an-negative'}">${totalUsd>=0?'+':'-'}$${Math.abs(totalUsd).toFixed(2)}</div>
-      <div class="an-kpi-sub">${totalPct>=0?'+':''}${totalPct.toFixed(1)}%</div>
-    </div>
-    <div class="an-kpi-card" style="--liquid-glow:rgba(240,180,41,.4)">
-      <div class="an-kpi-accent" style="background:linear-gradient(90deg,#f0b429,#fb923c)"></div>
-      <div class="an-kpi-top">
-        <div class="an-kpi-icon" style="background:rgba(240,180,41,.15)">⚖️</div>
-        <div class="an-kpi-label">Avg RRR</div>
-      </div>
-      <div class="an-kpi-value">${avgRRR ? '1:'+avgRRR.toFixed(2) : '—'}</div>
-      <div class="an-kpi-sub">Best streak ${bestWinStreak}W</div>
-    </div>`;
+  const cards = [
+    ['TOTAL TRADES', trades.length, ''],
+    ['WIN RATE', s.wr.toFixed(1)+'%', s.wr>=50?'pos':'neg'],
+    ['TOTAL P&L', sign(s.pnl)+'$'+Math.abs(s.pnl).toFixed(2), s.pnl>=0?'pos':'neg'],
+    ['BEST DAY', sign(bestDay)+'$'+Math.abs(bestDay).toFixed(2), 'pos'],
+    ['WORST DAY', (worstDay<0?'-':'+')+'$'+Math.abs(worstDay).toFixed(2), 'neg'],
+    ['AVG WIN', '+$'+Math.abs(s.avgWin).toFixed(2), 'pos'],
+    ['AVG LOSS', '-$'+Math.abs(s.avgLoss).toFixed(2), 'neg'],
+    ['PROFIT FACTOR', s.pf.toFixed(2)+'x', s.pf>=1?'pos':'neg'],
+  ];
+  el.innerHTML = cards.map(([label,val,cls]) =>
+    `<div class="jn-kpi"><div class="jn-kpi-label">${label}</div><div class="jn-kpi-value ${cls}">${val}</div></div>`
+  ).join('');
 }
 
 // ---- Calendar ----
@@ -2429,26 +2537,6 @@ function jnCalToday() {
   renderJournalCalendar();
 }
 
-function jnTradesByDay() {
-  const map = {};
-  anAllTrades.forEach(t => {
-    if (!t.dateOpen) return;
-    const d = new Date(t.dateOpen);
-    if (isNaN(d)) return;
-    const key = jnDateKey(d);
-    if (!map[key]) map[key] = [];
-    map[key].push(t);
-  });
-  return map;
-}
-
-function jnSymbolColor(sym) {
-  const palette = ['#3b82f6','#f0b429','#10b981','#7c3aed','#ea580c','#06b6d4','#ec4899','#84cc16','#f43f5e','#fb923c'];
-  let hash = 0;
-  for (let i=0;i<sym.length;i++) hash = (hash*31 + sym.charCodeAt(i))|0;
-  return palette[Math.abs(hash) % palette.length];
-}
-
 function renderJournalCalendar() {
   const dowRow = document.getElementById('jnCalDow');
   const grid = document.getElementById('jnCalGrid');
@@ -2461,7 +2549,7 @@ function renderJournalCalendar() {
   const dows = ['จ','อ','พ','พฤ','ศ','ส','อา'];
   dowRow.innerHTML = dows.map(d => `<div class="jn-cal-dow">${d}</div>`).join('');
 
-  const tradesByDay = jnTradesByDay();
+  const byDay = jnClosedByDay(jnGetTrades());
   const firstOfMonth = new Date(jnCalYear, jnCalMonth, 1);
   let startOffset = firstOfMonth.getDay() - 1; // Mon=0
   if (startOffset < 0) startOffset = 6;
@@ -2473,16 +2561,15 @@ function renderJournalCalendar() {
   for (let day = 1; day <= daysInMonth; day++) {
     const d = new Date(jnCalYear, jnCalMonth, day);
     const key = jnDateKey(d);
-    const dayTrades = tradesByDay[key] || [];
-    const pnlUsd = dayTrades.reduce((s,t) => s + (parseFloat(t.pnlUsd)||0), 0);
+    const dayData = byDay[key];
     let cls = 'jn-cal-cell';
     if (key === todayKey) cls += ' jn-today';
     if (key === jnSelectedDateKey) cls += ' jn-selected';
-    if (dayTrades.length) cls += pnlUsd >= 0 ? ' jn-pos' : ' jn-neg';
-    const pnlHtml = dayTrades.length
-      ? `<div class="jn-cal-pnl" style="color:${pnlUsd>=0?'var(--green)':'var(--red)'}">${pnlUsd>=0?'+':'-'}$${Math.abs(pnlUsd).toFixed(2)}</div>`
+    if (dayData) cls += dayData.pnl >= 0 ? ' jn-pos' : ' jn-neg';
+    const pnlHtml = dayData
+      ? `<div class="jn-cal-pnl" style="color:${dayData.pnl>=0?'var(--green)':'var(--red)'}">${dayData.pnl>=0?'+':'-'}$${Math.abs(dayData.pnl).toFixed(2)}</div>`
       : '';
-    const syms = [...new Set(dayTrades.map(t=>t.sym).filter(Boolean))];
+    const syms = dayData ? [...dayData.syms].filter(Boolean) : [];
     const tagsHtml = syms.length
       ? `<div class="jn-cal-tags">${syms.map(s => {
           const c = jnSymbolColor(s);
@@ -2501,23 +2588,24 @@ function renderJournalCalendar() {
 function jnSelectDay(key) {
   jnSelectedDateKey = key;
   renderJournalCalendar();
-  const tradesByDay = jnTradesByDay();
-  const dayTrades = (tradesByDay[key] || []).sort((a,b) => (a.no||0)-(b.no||0));
+  const byDay = jnClosedByDay(jnGetTrades());
+  const dayData = byDay[key];
   const panel = document.getElementById('jnDayDetail');
   const title = document.getElementById('jnDayDetailTitle');
   const body = document.getElementById('jnDayDetailBody');
   if (!panel || !title || !body) return;
 
-  if (dayTrades.length === 0) {
+  if (!dayData || dayData.trades.length === 0) {
     panel.style.display = 'none';
     return;
   }
+  const dayTrades = [...dayData.trades].sort((a,b) => (a.no||0)-(b.no||0));
   panel.style.display = 'block';
   const d = new Date(key);
   title.textContent = `📅 ${d.toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})} — ${dayTrades.length} เทรด`;
 
   body.innerHTML = dayTrades.map(t => {
-    const pnl = parseFloat(t.pnlPct) || 0;
+    const pnl = parseFloat(t.pnlUsd) || 0;
     const pnlColor = pnl > 0 ? 'var(--green)' : pnl < 0 ? 'var(--red)' : 'var(--text2)';
     const grade = t.gradeFinal || t.grade || '—';
     const gradeClass = grade==='A'?'an-pill-grade-a':grade==='B'?'an-pill-grade-b':grade==='C'?'an-pill-grade-c':'';
@@ -2530,7 +2618,7 @@ function jnSelectDay(key) {
         <span class="jn-tc-sym">${t.sym||'—'}</span>
         <span class="an-pill ${wlClass}">${t.wl||'—'}</span>
         <span class="an-pill ${gradeClass}">${grade}</span>
-        <span class="jn-tc-pnl" style="color:${pnlColor}">${pnl>=0?'+':''}${pnl.toFixed(2)}% ${t.pnlUsd!==undefined?`(${parseFloat(t.pnlUsd)>=0?'+':''}$${parseFloat(t.pnlUsd||0).toFixed(2)})`:''}</span>
+        <span class="jn-tc-pnl" style="color:${pnlColor}">${pnl>=0?'+':'-'}$${Math.abs(pnl).toFixed(2)} (${parseFloat(t.pnlPct||0)>=0?'+':''}${parseFloat(t.pnlPct||0).toFixed(2)}%)</span>
       </div>
       <div class="jn-tc-meta">
         <span><b>${t.pos||'—'}</b></span>
@@ -2562,50 +2650,155 @@ function jnCloseDayDetail() {
 function renderJournalStreaks() {
   const el = document.getElementById('jnStreakBox');
   if (!el) return;
-  const { bestWinStreak, bestLossStreak, currentStreak, currentType } = jnComputeStreaks(anAllTrades);
-  const curColor = currentType === 'W' ? 'var(--green)' : currentType === 'L' ? 'var(--red)' : 'var(--text)';
+  const { current, currentType, longestWin, longestLoss, hasData } = jnComputeStreaks(jnGetTrades());
+  const currentCls = currentType === 'W' ? 'pos' : currentType === 'L' ? 'neg' : '';
+  const currentLabel = !hasData ? '—' : `${current} ${currentType==='W'?'Win':'Loss'}`;
   el.innerHTML = `
-    <div class="jn-streak-row">
-      <span class="jn-streak-label">Current Streak</span>
-      <span class="jn-streak-value" style="color:${curColor}">${currentStreak || 0}${currentType || ''}</span>
-    </div>
-    <div class="jn-streak-row">
-      <span class="jn-streak-label">Best Win Streak</span>
-      <span class="jn-streak-value" style="color:var(--green)">${bestWinStreak}W</span>
-    </div>
-    <div class="jn-streak-row">
-      <span class="jn-streak-label">Worst Loss Streak</span>
-      <span class="jn-streak-value" style="color:var(--red)">${bestLossStreak}L</span>
-    </div>`;
+    <div class="jn-streak-box"><div class="jn-streak-label">Current</div><div class="jn-streak-value ${currentCls}">${currentLabel}</div></div>
+    <div class="jn-streak-box"><div class="jn-streak-label">Longest Win</div><div class="jn-streak-value pos">${longestWin}</div></div>
+    <div class="jn-streak-box"><div class="jn-streak-label">Longest Loss</div><div class="jn-streak-value neg">${longestLoss}</div></div>
+  `;
 }
 
 // ---- Equity Curve ----
 function renderJournalEquityChart() {
   if (jnEquityChart) { jnEquityChart.destroy(); jnEquityChart = null; }
-  const sorted = [...anAllTrades].filter(t => t.dateOpen).sort((a,b) => new Date(a.dateOpen)-new Date(b.dateOpen));
+  const closed = jnClosedSorted(jnGetTrades());
   let cumulative = 0;
-  const points = sorted.map(t => { cumulative += parseFloat(t.pnlPct)||0; return cumulative; });
-  const labels = sorted.map((t,i) => i+1);
+  const points = closed.map(t => { cumulative += (parseFloat(t.pnlUsd)||0); return Math.round(cumulative*100)/100; });
+  const labels = closed.map((t,i) => i+1);
   const ctx = document.getElementById('chartJournalEquity');
+  const totalEl = document.getElementById('jnEquityTotal');
+  if (totalEl) {
+    const last = points.length ? points[points.length-1] : 0;
+    totalEl.textContent = `${last>=0?'+':'-'}$${Math.abs(last).toFixed(2)}`;
+    totalEl.className = 'jn-equity-total ' + (last>=0?'pos':'neg');
+  }
   if (!ctx) return;
-  const isUp = points.length && points[points.length-1] >= 0;
+  if (!points.length) return;
   jnEquityChart = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets: [{
-      data: points, borderColor: isUp ? '#34d399' : '#f43f5e', backgroundColor: isUp ? 'rgba(52,211,153,.1)' : 'rgba(244,63,94,.1)',
-      borderWidth: 2, pointRadius: 0, tension: .25, fill: true,
+      data: points, borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,.12)',
+      borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor:'#2dd4bf',
+      tension: .25, fill: true,
     }] },
     options: { responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display:false }, tooltip: { callbacks: {
         title: c => `เทรดที่ ${c[0].label}`,
-        label: c => `สะสม: ${c.raw>=0?'+':''}${c.raw.toFixed(1)}%`
+        label: c => `สะสม: ${c.raw>=0?'+':''}$${c.raw.toFixed(2)}`
       }}},
       scales: {
-        y: { ticks: { color:'#6b7a9e', callback: v=>v+'%' }, grid: { color:'#1a2236' } },
+        y: { ticks: { color:'#6b7a9e', callback: v=>'$'+v }, grid: { color:'#1a2236' } },
         x: { ticks: { color:'#6b7a9e', maxTicksLimit:8 }, grid: { display:false } }
       }
     }
   });
+}
+
+// ---- MM Rules ----
+const JN_DEFAULT_RULES = ['Max Drawdown 30%','Max Risk/Trade 5%','Max Lot 0.10','Monthly Target +5%','Weekly Loss $20-30','Grade A–B Only','No FOMO','No Counter-Trend','No News Trading','1 Pair at a time'];
+
+function jnLoadRules() {
+  const saved = localStorage.getItem('jn_mm_rules');
+  const rules = saved ? JSON.parse(saved) : JN_DEFAULT_RULES;
+  jnRenderRules(rules);
+  const ta = document.getElementById('jnMmRulesText');
+  if (ta) ta.value = rules.join('\n');
+}
+function jnRenderRules(rules) {
+  const el = document.getElementById('jnMmRulesDisplay');
+  if (el) el.innerHTML = rules.map(r => `<span class="jn-mm-rule">${r}</span>`).join('');
+}
+function jnToggleMM() {
+  const body = document.getElementById('jnMmBody');
+  const chev = document.getElementById('jnMmChevron');
+  body.classList.toggle('open');
+  chev.textContent = body.classList.contains('open') ? '▾' : '▸';
+}
+function jnToggleEditRules() {
+  const editor = document.getElementById('jnMmRulesEditor');
+  const display = document.getElementById('jnMmRulesDisplay');
+  const btn = document.getElementById('jnEditRulesBtn');
+  const isEditing = editor.style.display !== 'none';
+  if (!document.getElementById('jnMmBody').classList.contains('open')) jnToggleMM();
+  editor.style.display = isEditing ? 'none' : 'block';
+  display.style.display = isEditing ? 'flex' : 'none';
+  btn.textContent = isEditing ? '✏ EDIT' : '✕ CLOSE';
+  if (!isEditing) {
+    const saved = localStorage.getItem('jn_mm_rules');
+    const rules = saved ? JSON.parse(saved) : JN_DEFAULT_RULES;
+    document.getElementById('jnMmRulesText').value = rules.join('\n');
+  }
+}
+function jnSaveRules() {
+  const text = document.getElementById('jnMmRulesText').value;
+  const rules = text.split(/[\n|]/).map(r=>r.trim()).filter(r=>r.length>0);
+  localStorage.setItem('jn_mm_rules', JSON.stringify(rules));
+  jnRenderRules(rules);
+  jnToggleEditRules();
+  showToast('✅ บันทึกกฎแล้ว');
+}
+
+// ---- Export / Import ----
+function jnCsvEscape(val) {
+  const s = (val === null || val === undefined) ? '' : String(val);
+  if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function jnDownloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function jnExportCSV() {
+  const trades = jnGetTrades();
+  if (!trades.length) { showToast('⚠ ไม่มีข้อมูลให้ export'); return; }
+  const header = JN_EXPORT_COLS.join(',');
+  const lines = trades.map(t => JN_EXPORT_COLS.map(c => jnCsvEscape(t[c])).join(','));
+  const csv = [header, ...lines].join('\n');
+  jnDownloadBlob(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }), `forex-journal-${jnQuarter}-${new Date().toISOString().slice(0,10)}.csv`);
+  showToast(`✅ Export ${trades.length} แถวเป็น CSV แล้ว`);
+}
+function jnExportJSON() {
+  const trades = jnGetTrades();
+  if (!trades.length) { showToast('⚠ ไม่มีข้อมูลให้ export'); return; }
+  const json = JSON.stringify(trades.map(t => { const {_row, _quarter, ...rest} = t; return rest; }), null, 2);
+  jnDownloadBlob(new Blob([json], { type: 'application/json' }), `forex-journal-${jnQuarter}-${new Date().toISOString().slice(0,10)}.json`);
+  showToast(`✅ Export ${trades.length} แถวเป็น JSON แล้ว`);
+}
+async function jnImportJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  let records;
+  try {
+    const text = await file.text();
+    records = JSON.parse(text);
+    if (!Array.isArray(records)) throw new Error('ไฟล์ต้องเป็น JSON array ของ trade');
+  } catch (err) {
+    showToast('❌ อ่านไฟล์ JSON ไม่สำเร็จ: ' + err.message);
+    return;
+  }
+  if (!confirm(`นำเข้า ${records.length} เทรดเข้า Google Sheets (quarter: ${JN_QUARTER_LABELS[jnQuarter]})?\n\n⚠ การกระทำนี้จะเขียนข้อมูลลง Google Sheet จริงโดยตรง`)) return;
+
+  let ok = 0, fail = 0;
+  for (let i = 0; i < records.length; i++) {
+    jnSetSyncStatus('loading', `⏳ กำลัง import ${i+1}/${records.length}...`);
+    try {
+      const res = await fetch(GS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'addTrade', quarter: jnQuarter, trade: records[i] })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      ok++;
+    } catch (err) { fail++; }
+  }
+  showToast(`✅ Import สำเร็จ ${ok} รายการ${fail ? `, ล้มเหลว ${fail}` : ''}`);
+  await loadJournalPage(true);
 }
 
 // ============================================
