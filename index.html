@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Trading OS">
 <meta name="theme-color" content="#0b0f1a">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -44,7 +44,7 @@
   --card-radius:14px;
   --card-shadow:0 4px 20px rgba(0,0,0,.35);
   --card-glow:0 0 0 1px rgba(59,130,246,.08);
-  --font-display:'Bebas Neue',sans-serif;
+  --font-display:'Sora',sans-serif;
   --font-mono:'DM Mono',monospace;
   --font-body:'DM Sans',sans-serif;
 }
@@ -120,7 +120,7 @@ body::before{
   border:1px solid rgba(255,255,255,.7);
 }
 .sidebar-logo{padding:22px 18px 18px;border-bottom:1px solid var(--sidebar-border)}
-.sidebar-logo-text{font-family:var(--font-display);font-size:24px;letter-spacing:.14em;color:var(--text);line-height:1}
+.sidebar-logo-text{font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:.02em;color:var(--text);line-height:1}
 .sidebar-logo-text span{
   background:linear-gradient(135deg,#f0b429,#ffd166);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
@@ -182,7 +182,7 @@ body::before{
   background:linear-gradient(180deg,rgba(240,244,255,.6),rgba(240,244,255,.5));
   border-bottom:1px solid rgba(255,255,255,.6);
 }
-.topbar-title{font-family:var(--font-display);font-size:17px;letter-spacing:.12em;color:var(--text)}
+.topbar-title{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:.03em;color:var(--text)}
 .topbar-right{display:flex;gap:8px;align-items:center}
 
 /* PAGE */
@@ -329,7 +329,7 @@ body::before{
   transform:translateY(-3px);
   box-shadow:0 12px 30px rgba(0,0,0,.4),0 0 0 1px rgba(59,130,246,.2),inset 0 1px 0 rgba(255,255,255,.16);
 }
-.dash-sym-name{font-family:var(--font-display);font-size:16px;letter-spacing:.08em;color:var(--text2);margin-bottom:4px}
+.dash-sym-name{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:0;color:var(--text2);margin-bottom:4px}
 .sym-icon-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:10px;font-weight:800;margin-right:7px;flex-shrink:0;vertical-align:middle;font-family:var(--font-mono);letter-spacing:0}
 .dash-sym-price{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--text);line-height:1}
 .dash-sym-change{font-family:var(--font-mono);font-size:11px;font-weight:700;margin-left:6px}
@@ -386,7 +386,7 @@ body::before{
 .an-kpi-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .an-kpi-icon{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .an-kpi-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
-.an-kpi-value{font-family:var(--font-display);font-size:28px;letter-spacing:.04em;line-height:1}
+.an-kpi-value{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:-.01em;line-height:1}
 .an-kpi-sub{font-size:11px;color:var(--text2);font-family:var(--font-mono);margin-top:5px}
 .an-positive{color:#10b981}
 .an-negative{color:#f43f5e}
@@ -402,7 +402,7 @@ body::before{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:26px;
 }
 .dash-widget-value{
-  font-family:var(--font-display);font-size:24px;letter-spacing:.03em;
+  font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:-.01em;
   color:var(--text);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .dash-widget-sub{
@@ -433,7 +433,7 @@ body::before{
 .jn-cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
 .jn-cal-dow{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-align:center;letter-spacing:.05em;text-transform:uppercase;padding-bottom:2px}
 .jn-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.jn-cal-cell{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 6px 5px;min-height:58px;cursor:pointer;transition:border-color .12s,transform .12s;display:flex;flex-direction:column;gap:3px}
+.jn-cal-cell{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 7px 6px;min-height:74px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
 .jn-cal-cell:hover{border-color:var(--border2)}
 .jn-cal-cell.jn-empty{background:transparent;border-color:transparent;cursor:default}
 .jn-cal-cell.jn-today{border-color:var(--gold)}
@@ -441,18 +441,19 @@ body::before{
 .jn-cal-cell.jn-pos{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3)}
 .jn-cal-cell.jn-neg{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.3)}
 .jn-cal-daynum{font-family:var(--font-mono);font-size:10px;color:var(--text3)}
-.jn-cal-pnl{font-family:var(--font-mono);font-size:11px;font-weight:700}
-.jn-cal-count{font-family:var(--font-mono);font-size:9px;color:var(--text2);margin-top:auto}
-@media(max-width:600px){.jn-cal-cell{min-height:44px;padding:4px}.jn-cal-pnl{font-size:9.5px}.jn-cal-count{display:none}}
+.jn-cal-pnl{font-family:var(--font-mono);font-size:12.5px;font-weight:700}
+.jn-cal-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
+.jn-cal-tag{font-family:var(--font-mono);font-size:8px;padding:1.5px 5px;border-radius:4px;line-height:1.5;white-space:nowrap}
+@media(max-width:600px){.jn-cal-cell{min-height:52px;padding:5px}.jn-cal-pnl{font-size:10px}.jn-cal-tags{display:none}}
 
 .jn-streak-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
 .jn-streak-row:last-child{border-bottom:none}
 .jn-streak-label{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase}
-.jn-streak-value{font-family:var(--font-display);font-size:22px;letter-spacing:.03em}
+.jn-streak-value{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:-.01em}
 
 .jn-trade-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
 .jn-tc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-.jn-tc-sym{font-family:var(--font-display);font-size:17px;letter-spacing:.04em}
+.jn-tc-sym{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:0}
 .jn-tc-pnl{font-family:var(--font-mono);font-size:14px;font-weight:700;margin-left:auto}
 .jn-tc-meta{font-family:var(--font-mono);font-size:10.5px;color:var(--text2);display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:8px}
 .jn-tc-meta span b{color:var(--text)}
@@ -488,7 +489,7 @@ body::before{
 /* PLACEHOLDER */
 .placeholder-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;color:var(--text3)}
 .placeholder-icon{font-size:52px;opacity:.3}
-.placeholder-title{font-family:var(--font-display);font-size:26px;letter-spacing:.12em;color:var(--text3)}
+.placeholder-title{font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:.02em;color:var(--text3)}
 .placeholder-sub{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--text3)}
 
 /* MOBILE */
@@ -560,7 +561,7 @@ body::before{
 .export-toolbar-count{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fb923c;letter-spacing:.03em}
 .readonly-badge{display:inline-block;background:rgba(251,146,60,.15);color:#fb923c;font-size:9px;font-family:var(--font-mono);padding:2px 8px;border-radius:10px;border:1px solid rgba(251,146,60,.3);font-weight:700;letter-spacing:.06em}
 .history-sym-card{background:rgba(17,24,39,.6);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
-.history-sym-name{font-family:var(--font-display);font-size:20px;letter-spacing:.08em;margin-bottom:8px}
+.history-sym-name{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:0;margin-bottom:8px}
 .history-day-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
 .history-day-tab{padding:3px 10px;border-radius:20px;font-size:10px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:600;letter-spacing:.04em;transition:all .15s}
 .history-day-tab.active{background:linear-gradient(135deg,#f0b429,#fb923c);color:#000;border-color:transparent}
@@ -590,8 +591,8 @@ body::before{
 
 /* MARKET OVERVIEW CARD */
 .overview-card{padding:20px 24px;margin-bottom:20px;position:relative}
-.overview-card::before{content:'OVERVIEW';position:absolute;right:20px;top:14px;font-family:var(--font-display);font-size:72px;color:rgba(0,0,0,.04);line-height:1;pointer-events:none}
-.section-tag{font-family:var(--font-display);font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:10px}
+.overview-card::before{content:'OVERVIEW';position:absolute;right:20px;top:14px;font-family:var(--font-display);font-weight:700;font-size:72px;color:rgba(0,0,0,.04);line-height:1;pointer-events:none}
+.section-tag{font-family:var(--font-display);font-weight:700;font-size:11px;letter-spacing:.08em;color:var(--gold);margin-bottom:10px}
 .overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .overview-field label{font-size:11px;color:var(--text);font-family:var(--font-mono);letter-spacing:.08em;font-weight:700;display:block;margin-bottom:5px}
 
@@ -641,7 +642,7 @@ textarea.field-input{min-height:80px;line-height:1.6}
 
 .sym-header{padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.10);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);gap:10px;flex-wrap:wrap}
 [data-theme="light"] .sym-header{background:#f5f7ff}
-.sym-name{font-family:var(--font-display);font-size:22px;letter-spacing:.08em}
+.sym-name{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:0}
 .sym-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .field-group label{font-size:11px;color:var(--text2);font-family:var(--font-mono);letter-spacing:.08em;font-weight:700;display:block;margin-bottom:5px;text-transform:uppercase}
@@ -851,9 +852,9 @@ select.field-sm option{background:#111827;color:var(--text)}
 .calc-field input:focus{border-color:rgba(240,180,41,.5)}
 .calc-result-mini{text-align:center;background:rgba(255,255,255,.03);border-radius:6px;padding:5px 2px}
 .calc-result-mini-label{font-family:var(--font-mono);font-size:6.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
-.calc-result-mini-value{font-family:var(--font-display);font-size:13px;color:var(--text);margin-top:2px}
+.calc-result-mini-value{font-family:var(--font-display);font-weight:700;font-size:13px;color:var(--text);margin-top:2px}
 .calc-result-main{margin-top:6px;text-align:center;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:8px 4px}
-.calc-result-main-value{font-family:var(--font-display);font-size:17px;color:#34d399;margin-top:2px}
+.calc-result-main-value{font-family:var(--font-display);font-weight:700;font-size:17px;color:#34d399;margin-top:2px}
 
 /* FOCUS ON WIDGET */
 .focus-card{
@@ -935,7 +936,7 @@ select.field-sm option{background:#111827;color:var(--text)}
 .summary-panel-title{font-family:var(--font-mono);font-size:9px;letter-spacing:.16em;color:var(--gold);margin-bottom:8px;text-transform:uppercase;text-align:center}
 .summary-sym-row{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;border-radius:8px;border:1px solid var(--border);margin-bottom:4px;cursor:pointer;transition:all .15s;text-align:center;background:rgba(255,255,255,.02)}
 .summary-sym-row:hover{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.06)}
-.summary-sym-row-name{font-family:var(--font-display);font-size:13px;letter-spacing:.06em;color:var(--text);line-height:1}
+.summary-sym-row-name{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:0;color:var(--text);line-height:1}
 .summary-bias-tag{display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.04em;width:100%}
 .bias-tag-LONG{background:rgba(16,185,129,.25);color:#34d399;box-shadow:0 1px 6px rgba(16,185,129,.2)}
 .bias-tag-SHORT{background:rgba(244,63,94,.25);color:#f87171;box-shadow:0 1px 6px rgba(244,63,94,.2)}
@@ -1013,7 +1014,7 @@ select.field-sm option{background:#111827;color:var(--text)}
 .login-icon{width:44px;height:44px;border-radius:12px;margin-bottom:22px;display:flex;align-items:center;justify-content:center;
   background:rgba(255,43,69,.1);border:1px solid rgba(255,43,69,.35);font-size:20px}
 .login-icon img{width:28px;height:28px}
-.login-logo{font-family:var(--font-display);font-size:32px;letter-spacing:.02em;color:#fff;line-height:1.05}
+.login-logo{font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing:-.01em;color:#fff;line-height:1.05}
 .login-logo span{color:#ff4d63;text-shadow:0 0 18px rgba(255,77,99,.4)}
 .login-sub{font-family:var(--font-mono);font-size:9px;letter-spacing:.2em;color:#5a6a8c;margin-top:6px;margin-bottom:26px;text-transform:uppercase}
 .login-msg{font-family:var(--font-body);font-size:13px;color:#9aa8c4;line-height:1.7;margin-bottom:26px;text-align:left}
@@ -1524,15 +1525,15 @@ select.field-sm option{background:#111827;color:var(--text)}
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
           <div style="text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
             <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Trades</div>
-            <div id="weekTotalTrades" style="font-family:var(--font-display);font-size:26px">—</div>
+            <div id="weekTotalTrades" style="font-family:var(--font-display);font-weight:700;font-size:26px">—</div>
           </div>
           <div style="text-align:center;padding:10px;border-radius:12px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15)">
             <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Win Rate</div>
-            <div id="weekWinRate" style="font-family:var(--font-display);font-size:26px;color:#34d399">—</div>
+            <div id="weekWinRate" style="font-family:var(--font-display);font-weight:700;font-size:26px;color:#34d399">—</div>
           </div>
           <div style="text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
             <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">W / L</div>
-            <div id="weekWL" style="font-family:var(--font-display);font-size:26px">—</div>
+            <div id="weekWL" style="font-family:var(--font-display);font-weight:700;font-size:26px">—</div>
           </div>
         </div>
 
@@ -2399,8 +2400,8 @@ function renderJournalKPIs() {
         <div class="an-kpi-icon" style="background:${pnlGood?'rgba(16,185,129,.15)':'rgba(244,63,94,.15)'}">💰</div>
         <div class="an-kpi-label">Total P&L</div>
       </div>
-      <div class="an-kpi-value ${pnlGood?'an-positive':'an-negative'}">${totalPct>=0?'+':''}${totalPct.toFixed(1)}%</div>
-      <div class="an-kpi-sub">${totalUsd>=0?'+':''}$${totalUsd.toFixed(2)}</div>
+      <div class="an-kpi-value ${pnlGood?'an-positive':'an-negative'}">${totalUsd>=0?'+':'-'}$${Math.abs(totalUsd).toFixed(2)}</div>
+      <div class="an-kpi-sub">${totalPct>=0?'+':''}${totalPct.toFixed(1)}%</div>
     </div>
     <div class="an-kpi-card" style="--liquid-glow:rgba(240,180,41,.4)">
       <div class="an-kpi-accent" style="background:linear-gradient(90deg,#f0b429,#fb923c)"></div>
@@ -2441,6 +2442,13 @@ function jnTradesByDay() {
   return map;
 }
 
+function jnSymbolColor(sym) {
+  const palette = ['#3b82f6','#f0b429','#10b981','#7c3aed','#ea580c','#06b6d4','#ec4899','#84cc16','#f43f5e','#fb923c'];
+  let hash = 0;
+  for (let i=0;i<sym.length;i++) hash = (hash*31 + sym.charCodeAt(i))|0;
+  return palette[Math.abs(hash) % palette.length];
+}
+
 function renderJournalCalendar() {
   const dowRow = document.getElementById('jnCalDow');
   const grid = document.getElementById('jnCalGrid');
@@ -2466,19 +2474,25 @@ function renderJournalCalendar() {
     const d = new Date(jnCalYear, jnCalMonth, day);
     const key = jnDateKey(d);
     const dayTrades = tradesByDay[key] || [];
-    const pnl = dayTrades.reduce((s,t) => s + (parseFloat(t.pnlPct)||0), 0);
+    const pnlUsd = dayTrades.reduce((s,t) => s + (parseFloat(t.pnlUsd)||0), 0);
     let cls = 'jn-cal-cell';
     if (key === todayKey) cls += ' jn-today';
     if (key === jnSelectedDateKey) cls += ' jn-selected';
-    if (dayTrades.length) cls += pnl >= 0 ? ' jn-pos' : ' jn-neg';
+    if (dayTrades.length) cls += pnlUsd >= 0 ? ' jn-pos' : ' jn-neg';
     const pnlHtml = dayTrades.length
-      ? `<div class="jn-cal-pnl" style="color:${pnl>=0?'var(--green)':'var(--red)'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div>`
+      ? `<div class="jn-cal-pnl" style="color:${pnlUsd>=0?'var(--green)':'var(--red)'}">${pnlUsd>=0?'+':'-'}$${Math.abs(pnlUsd).toFixed(2)}</div>`
       : '';
-    const countHtml = dayTrades.length ? `<div class="jn-cal-count">${dayTrades.length} เทรด</div>` : '';
+    const syms = [...new Set(dayTrades.map(t=>t.sym).filter(Boolean))];
+    const tagsHtml = syms.length
+      ? `<div class="jn-cal-tags">${syms.map(s => {
+          const c = jnSymbolColor(s);
+          return `<span class="jn-cal-tag" style="background:${c}22;color:${c}">${s}</span>`;
+        }).join('')}</div>`
+      : '';
     cells += `<div class="${cls}" onclick="jnSelectDay('${key}')">
       <div class="jn-cal-daynum">${day}</div>
       ${pnlHtml}
-      ${countHtml}
+      ${tagsHtml}
     </div>`;
   }
   grid.innerHTML = cells;
