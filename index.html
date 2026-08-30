@@ -426,83 +426,86 @@ body::before{
 
 /* ===== JOURNAL PAGE ===== */
 #page-journal{
-  background:#0a0e16;
+  background:#04060a;
   --jn-accent:#2dd4bf;--jn-accent2:#5eead4;--jn-accent-dark:#0f766e;
-  --jn-panel2:#171d2b;
-  --jn-border:#1e2638;--jn-border2:#2c3650;
+  --jn-panel2:#151a26;
+  --jn-border:#232c40;--jn-border2:#334160;
+  --jn-text:#f3f5f9;--jn-text-dim:#9aa7c4;
 }
 .jn-panel-box{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:14px;padding:16px 18px}
-.jn-panel-title-plain{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text)}
+.jn-panel-title-plain{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--jn-text)}
 
 .jn-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
 .jn-tabs{display:flex;gap:2px;background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:3px}
-.jn-tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);border:none;background:none;font-family:var(--font-body);transition:all .15s}
+.jn-tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--jn-text-dim);border:none;background:none;font-family:var(--font-body);transition:all .15s}
 .jn-tab.active{background:var(--jn-accent-dark);color:#99f6e4}
-.jn-tab:hover:not(.active){background:var(--jn-border);color:var(--text)}
+.jn-tab:hover:not(.active){background:var(--jn-border);color:var(--jn-text)}
 .jn-toolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .jn-sync-status{font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--jn-accent-dark);color:var(--jn-accent2);background:rgba(15,118,110,.12);font-family:var(--font-mono);white-space:nowrap}
 .jn-sync-status.jn-err{border-color:#b91c1c88;color:#f87171;background:rgba(69,10,10,.2)}
-.jn-btn{padding:6px 12px;height:30px;border:1px solid var(--jn-border2);border-radius:7px;background:var(--jn-panel2);color:var(--text);font-size:11px;font-family:var(--font-mono);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.jn-btn{padding:6px 12px;height:30px;border:1px solid var(--jn-border2);border-radius:7px;background:var(--jn-panel2);color:var(--jn-text);font-size:11px;font-family:var(--font-mono);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
 .jn-btn:hover{border-color:var(--jn-accent)}
 .jn-btn-accent{background:var(--jn-accent-dark);border-color:#14b8a6;color:#99f6e4}
 .jn-btn-accent:hover{background:#115e59}
 
 .jn-mm-banner{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:8px 14px;margin-bottom:14px}
 .jn-mm-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:10px}
-.jn-mm-title{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.jn-mm-title{font-family:var(--font-mono);font-size:10px;color:var(--jn-text-dim);letter-spacing:.08em;display:flex;align-items:center;gap:6px}
 .jn-mm-rules{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.jn-mm-rule{background:var(--jn-border);color:var(--text2);padding:2px 8px;border-radius:4px;font-size:11px;border:1px solid var(--jn-border2);font-family:var(--font-mono)}
+.jn-mm-rule{background:var(--jn-border);color:var(--jn-text);padding:2px 8px;border-radius:4px;font-size:11px;border:1px solid var(--jn-border2);font-family:var(--font-mono)}
 .jn-mm-body{display:none}
 .jn-mm-body.open{display:block}
-.jn-mm-edit-btn{font-size:10px;padding:2px 8px;background:var(--jn-border);border:1px solid var(--jn-border2);color:var(--text2);border-radius:4px;cursor:pointer;font-family:var(--font-mono)}
-.jn-mm-textarea{width:100%;background:var(--jn-border);border:1px solid var(--jn-border2);color:var(--text);font-size:11px;font-family:var(--font-body);padding:8px;border-radius:6px;resize:none;min-height:70px;outline:none}
+.jn-mm-edit-btn{font-size:10px;padding:2px 8px;background:var(--jn-border);border:1px solid var(--jn-border2);color:var(--jn-text-dim);border-radius:4px;cursor:pointer;font-family:var(--font-mono)}
+.jn-mm-textarea{width:100%;background:var(--jn-border);border:1px solid var(--jn-border2);color:var(--jn-text);font-size:11px;font-family:var(--font-body);padding:8px;border-radius:6px;resize:none;min-height:70px;outline:none}
 .jn-mm-textarea:focus{border-color:var(--jn-accent)}
 
 .jn-kpi-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:14px}
 @media(max-width:1200px){.jn-kpi-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:640px){.jn-kpi-grid{grid-template-columns:repeat(2,1fr)}}
 .jn-kpi{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:11px 12px}
-.jn-kpi-label{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;font-family:var(--font-mono)}
-.jn-kpi-value{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--text)}
+.jn-kpi-label{font-size:9px;color:var(--jn-text-dim);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;font-family:var(--font-mono)}
+.jn-kpi-value{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--jn-text)}
 .jn-kpi-value.pos{color:var(--green)}
 .jn-kpi-value.neg{color:var(--red)}
 
 .jn-cal-widget{margin-bottom:14px}
 .jn-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
-.jn-cal-month{font-family:var(--font-display);font-weight:700;font-size:16px}
+.jn-cal-month{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--jn-text)}
 .jn-cal-nav{display:flex;gap:6px}
 .jn-cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr) 1.1fr;gap:6px;margin-bottom:8px}
-.jn-cal-dow{font-family:var(--font-body);font-size:11px;font-weight:700;color:var(--text2);text-align:center;letter-spacing:.03em;text-transform:uppercase;padding-bottom:2px}
+.jn-cal-dow{font-family:var(--font-body);font-size:11px;font-weight:700;color:var(--jn-text-dim);text-align:center;letter-spacing:.03em;text-transform:uppercase;padding-bottom:2px}
 .jn-cal-dow.jn-week-dow{color:var(--jn-accent2)}
-.jn-cal-grid{display:grid;grid-template-columns:repeat(7,1fr) 1.1fr;gap:6px}
+.jn-cal-grid{display:flex;flex-direction:column;gap:6px}
+.jn-cal-week-row{display:grid;grid-template-columns:repeat(7,1fr) 1.1fr;gap:6px;border-radius:10px;transition:box-shadow .15s,background .15s}
+.jn-cal-week-row.jn-current-week{box-shadow:0 0 0 2px var(--jn-accent);background:rgba(45,212,191,.05);padding:3px;margin:-3px}
 .jn-cal-cell{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:7px 7px 6px;min-height:78px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
 .jn-cal-cell:hover{border-color:var(--jn-border2)}
 .jn-cal-cell.jn-empty{background:transparent;border-color:transparent;cursor:default}
 .jn-cal-cell.jn-today{border-color:var(--jn-accent)}
 .jn-cal-cell.jn-selected{border-color:var(--jn-accent);box-shadow:0 0 0 1px var(--jn-accent)}
-.jn-cal-cell.jn-pos{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.28)}
-.jn-cal-cell.jn-neg{background:rgba(244,63,94,.07);border-color:rgba(244,63,94,.28)}
+.jn-cal-cell.jn-pos{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3)}
+.jn-cal-cell.jn-neg{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.3)}
 .jn-cal-cell.jn-week-cell{cursor:default;background:var(--jn-border)}
-.jn-cal-cell.jn-week-cell.jn-pos{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3)}
-.jn-cal-cell.jn-week-cell.jn-neg{background:rgba(244,63,104,.1);border-color:rgba(244,63,94,.3)}
-.jn-cal-daynum{font-family:var(--font-mono);font-size:10px;color:var(--text3)}
+.jn-cal-cell.jn-week-cell.jn-pos{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.32)}
+.jn-cal-cell.jn-week-cell.jn-neg{background:rgba(244,63,104,.12);border-color:rgba(244,63,94,.32)}
+.jn-cal-daynum{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--jn-text-dim)}
 .jn-cal-week-label{font-family:var(--font-body);font-size:9px;font-weight:700;color:var(--jn-accent2);letter-spacing:.06em;text-transform:uppercase}
 .jn-cal-pnl{font-family:var(--font-mono);font-size:12.5px;font-weight:700}
 .jn-cal-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
-.jn-cal-tag{font-family:var(--font-body);font-size:8.5px;padding:1.5px 5px;border-radius:4px;line-height:1.5;white-space:nowrap;background:var(--jn-border);color:var(--text2);border:1px solid var(--jn-border2)}
+.jn-cal-tag{font-family:var(--font-body);font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;line-height:1.5;white-space:nowrap;background:rgba(255,255,255,.08);color:var(--jn-text);border:1px solid rgba(255,255,255,.14)}
 @media(max-width:600px){.jn-cal-cell{min-height:52px;padding:5px}.jn-cal-pnl{font-size:10px}.jn-cal-tags{display:none}}
 
 .jn-trade-card{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
 .jn-tc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.jn-tc-sym{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:0}
+.jn-tc-sym{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:0;color:var(--jn-text)}
 .jn-tc-pnl{font-family:var(--font-mono);font-size:15px;font-weight:700;margin-left:auto}
-.jn-tc-setup{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text);background:rgba(45,212,191,.08);border-left:3px solid var(--jn-accent);padding:7px 10px;border-radius:0 6px 6px 0;margin-bottom:10px;line-height:1.5}
+.jn-tc-setup{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--jn-text);background:rgba(45,212,191,.1);border-left:3px solid var(--jn-accent);padding:7px 10px;border-radius:0 6px 6px 0;margin-bottom:10px;line-height:1.5}
 .jn-tc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 12px;margin-bottom:10px}
 @media(max-width:640px){.jn-tc-grid{grid-template-columns:repeat(2,1fr)}}
-.jn-tc-field label{display:block;font-family:var(--font-mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
-.jn-tc-field div{font-family:var(--font-mono);font-size:13px;color:var(--text);font-weight:600}
-.jn-tc-entryplan{font-family:var(--font-body);font-size:11.5px;color:var(--text2);background:rgba(255,255,255,.03);border-left:2px solid var(--jn-border2);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
-.jn-tc-note{font-family:var(--font-body);font-size:11.5px;color:var(--text3);font-style:italic;margin-top:8px;line-height:1.6}
+.jn-tc-field label{display:block;font-family:var(--font-mono);font-size:9.5px;font-weight:700;color:var(--jn-text-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.jn-tc-field div{font-family:var(--font-mono);font-size:13px;color:var(--jn-text);font-weight:600}
+.jn-tc-entryplan{font-family:var(--font-body);font-size:11.5px;color:var(--jn-text-dim);background:rgba(255,255,255,.03);border-left:2px solid var(--jn-border2);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
+.jn-tc-note{font-family:var(--font-body);font-size:11.5px;color:var(--jn-text-dim);font-style:italic;margin-top:8px;line-height:1.6}
 .jn-tc-links{display:flex;gap:14px;margin-top:10px}
 .jn-tc-links a{font-family:var(--font-body);font-size:11.5px;color:var(--jn-accent2);text-decoration:none;font-weight:600}
 .jn-tc-links a:hover{text-decoration:underline}
@@ -516,7 +519,7 @@ body::before{
 .jn-equity-total.neg{color:var(--red)}
 .jn-streaks-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .jn-streak-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
-.jn-streak-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:var(--font-mono)}
+.jn-streak-label{font-size:9px;color:var(--jn-text-dim);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:var(--font-mono)}
 .jn-streak-value{font-family:var(--font-display);font-weight:700;font-size:16px}
 .jn-streak-value.pos{color:var(--green)}
 .jn-streak-value.neg{color:var(--red)}
@@ -1565,7 +1568,7 @@ select.field-sm option{background:#111827;color:var(--text)}
           <div class="jn-cal-month" id="jnCalMonthLabel">—</div>
           <div class="jn-cal-nav">
             <button class="jn-btn" onclick="jnCalNav(-1)">← Prev</button>
-            <button class="jn-btn jn-btn-accent" onclick="jnCalToday()">Today</button>
+            <button class="jn-btn jn-btn-accent" onclick="jnGoThisWeek()">This week</button>
             <button class="jn-btn" onclick="jnCalNav(1)">Next →</button>
           </div>
         </div>
@@ -1577,7 +1580,7 @@ select.field-sm option{background:#111827;color:var(--text)}
       <div class="jn-panel-box jn-day-detail" id="jnDayDetail" style="display:none;margin-top:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div class="jn-panel-title-plain" id="jnDayDetailTitle">—</div>
-          <button onclick="jnCloseDayDetail()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px">✕</button>
+          <button onclick="jnCloseDayDetail()" style="background:none;border:none;color:var(--jn-text-dim);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px">✕</button>
         </div>
         <div id="jnDayDetailBody"></div>
       </div>
@@ -2537,7 +2540,7 @@ function jnCalNav(dir) {
   renderJournalCalendar();
 }
 
-function jnCalToday() {
+function jnGoThisWeek() {
   const now = new Date();
   jnCalYear = now.getFullYear();
   jnCalMonth = now.getMonth();
@@ -2550,8 +2553,8 @@ function renderJournalCalendar() {
   const label = document.getElementById('jnCalMonthLabel');
   if (!grid || !dowRow || !label) return;
 
-  const monthNames = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-  label.textContent = `${monthNames[jnCalMonth]} ${jnCalYear + 543}`;
+  const monthNamesEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  label.textContent = `${monthNamesEN[jnCalMonth]} ${jnCalYear}`;
 
   const dows = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'];
   dowRow.innerHTML = dows.map(d => `<div class="jn-cal-dow">${d}</div>`).join('') + `<div class="jn-cal-dow jn-week-dow">WEEKLY</div>`;
@@ -2561,7 +2564,9 @@ function renderJournalCalendar() {
   let startOffset = firstOfMonth.getDay() - 1; // Mon=0
   if (startOffset < 0) startOffset = 6;
   const daysInMonth = new Date(jnCalYear, jnCalMonth + 1, 0).getDate();
-  const todayKey = jnDateKey(new Date());
+  const now = new Date();
+  const todayKey = jnDateKey(now);
+  const isCurrentMonthView = (jnCalYear === now.getFullYear() && jnCalMonth === now.getMonth());
 
   // Build a flat list of day cells (null = empty/padding)
   const cellList = [];
@@ -2576,8 +2581,10 @@ function renderJournalCalendar() {
   let html = '';
   for (let i = 0; i < cellList.length; i += 7) {
     const week = cellList.slice(i, i + 7);
+    const isCurrentWeek = isCurrentMonthView && week.some(c => c && c.key === todayKey);
+    let rowHtml = '';
     week.forEach(c => {
-      if (!c) { html += `<div class="jn-cal-cell jn-empty"></div>`; return; }
+      if (!c) { rowHtml += `<div class="jn-cal-cell jn-empty"></div>`; return; }
       const { day, key, data } = c;
       let cls = 'jn-cal-cell';
       if (key === todayKey) cls += ' jn-today';
@@ -2590,7 +2597,7 @@ function renderJournalCalendar() {
       const tagsHtml = syms.length
         ? `<div class="jn-cal-tags">${syms.map(s => `<span class="jn-cal-tag">${s}</span>`).join('')}</div>`
         : '';
-      html += `<div class="${cls}" onclick="jnSelectDay('${key}')">
+      rowHtml += `<div class="${cls}" onclick="jnSelectDay('${key}')">
         <div class="jn-cal-daynum">${day}</div>
         ${pnlHtml}
         ${tagsHtml}
@@ -2601,12 +2608,13 @@ function renderJournalCalendar() {
     week.forEach(c => { if (c && c.data) { weekPnl += c.data.pnl; weekDays++; } });
     let weekCls = 'jn-cal-cell jn-week-cell';
     if (weekDays) weekCls += weekPnl >= 0 ? ' jn-pos' : ' jn-neg';
-    const weekColor = weekDays ? (weekPnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--text3)';
-    html += `<div class="${weekCls}">
+    const weekColor = weekDays ? (weekPnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--jn-text-dim)';
+    rowHtml += `<div class="${weekCls}">
       <div class="jn-cal-week-label">WEEKLY</div>
       <div class="jn-cal-pnl" style="color:${weekColor}">${weekPnl>=0?'+':'-'}$${Math.abs(weekPnl).toFixed(2)}</div>
       <div class="jn-cal-tags"><span class="jn-cal-tag">${weekDays} day${weekDays!==1?'s':''}</span></div>
     </div>`;
+    html += `<div class="jn-cal-week-row${isCurrentWeek ? ' jn-current-week' : ''}">${rowHtml}</div>`;
   }
   grid.innerHTML = html;
 }
