@@ -486,8 +486,6 @@ body::before{
 .jn-cal-cell.jn-pos{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3)}
 .jn-cal-cell.jn-neg{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.3)}
 .jn-cal-cell.jn-week-cell{cursor:pointer;background:var(--jn-border)}
-.jn-cal-cell.jn-week-cell.jn-pos{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.32)}
-.jn-cal-cell.jn-week-cell.jn-neg{background:rgba(244,63,104,.12);border-color:rgba(244,63,94,.32)}
 .jn-cal-daynum{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--jn-text-dim)}
 .jn-cal-week-label{font-family:var(--font-body);font-size:9px;font-weight:700;color:var(--jn-accent2);letter-spacing:.06em;text-transform:uppercase}
 .jn-cal-pnl{font-family:var(--font-mono);font-size:12.5px;font-weight:700}
@@ -2567,6 +2565,8 @@ function jnCalNav(dir) {
   renderJournalCalendar();
 }
 
+const JN_MONTH_ABBR = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
 function jnGoThisWeek() {
   const now = new Date();
   jnCalYear = now.getFullYear();
@@ -2624,11 +2624,10 @@ function renderJournalCalendar() {
       return { day: dd.getDate(), key, data: byDay[key], open: openByDay[key] };
     });
     const hasAnyWeekday = weekdayCells.some(c => c !== null);
+    if (!hasAnyWeekday) continue; // only number weeks that actually contain a weekday of this month
 
     let weekPnl = 0, weekDays = 0;
     rowDates.forEach(dd => { const k = jnDateKey(dd); const d = byDay[k]; if (d) { weekPnl += d.pnl; weekDays++; } });
-
-    if (!hasAnyWeekday && weekDays === 0) continue; // nothing relevant to this month in this row at all
 
     weekNum++;
     const isFocusedWeek = jnFocusedWeekKey === rowMondayKey;
@@ -2657,14 +2656,15 @@ function renderJournalCalendar() {
       </div>`;
     });
 
-    // PNL$ cell (trailing, after Friday)
-    let weekCls = 'jn-cal-cell jn-week-cell';
-    if (weekDays) weekCls += weekPnl >= 0 ? ' jn-pos' : ' jn-neg';
+    // PNL$ cell (trailing, after Friday) — color via text only, no colored border/background
     const weekColor = weekDays ? (weekPnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--jn-text-dim)';
-    rowHtml += `<div class="${weekCls}" onclick="jnToggleWeekFocus('${rowMondayKey}')">
+    const presentDays = weekdayCells.filter(c => c).map(c => c.day);
+    const lo = Math.min(...presentDays), hi = Math.max(...presentDays);
+    const rangeLabel = lo === hi ? `${lo} ${JN_MONTH_ABBR[jnCalMonth]}` : `${lo}-${hi} ${JN_MONTH_ABBR[jnCalMonth]}`;
+    rowHtml += `<div class="jn-cal-cell jn-week-cell" onclick="jnToggleWeekFocus('${rowMondayKey}')">
       <div class="jn-cal-week-label">PNL$</div>
       <div class="jn-cal-pnl" style="color:${weekColor}">${weekPnl>=0?'+':'-'}$${Math.abs(weekPnl).toFixed(2)}</div>
-      <div class="jn-cal-week-range">WEEK ${weekNum}</div>
+      <div class="jn-cal-week-range">WEEK ${weekNum} · ${rangeLabel}</div>
     </div>`;
 
     html += `<div class="jn-cal-week-row${isFocusedWeek ? ' jn-current-week' : ''}">${rowHtml}</div>`;
