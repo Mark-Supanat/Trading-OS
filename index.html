@@ -472,11 +472,11 @@ body::before{
 .jn-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
 .jn-cal-month{font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--jn-text)}
 .jn-cal-nav{display:flex;gap:6px}
-.jn-cal-dow-row{display:grid;grid-template-columns:1.1fr repeat(7,1fr);gap:6px;margin-bottom:8px}
+.jn-cal-dow-row{display:grid;grid-template-columns:repeat(5,1fr) 1.2fr;gap:6px;margin-bottom:8px}
 .jn-cal-dow{font-family:var(--font-body);font-size:11px;font-weight:700;color:var(--jn-text-dim);text-align:center;letter-spacing:.03em;text-transform:uppercase;padding-bottom:2px}
 .jn-cal-dow.jn-week-dow{color:var(--jn-accent2)}
 .jn-cal-grid{display:flex;flex-direction:column;gap:6px}
-.jn-cal-week-row{display:grid;grid-template-columns:1.1fr repeat(7,1fr);gap:6px;border-radius:10px;transition:box-shadow .15s,background .15s}
+.jn-cal-week-row{display:grid;grid-template-columns:repeat(5,1fr) 1.2fr;gap:6px;border-radius:10px;transition:box-shadow .15s,background .15s}
 .jn-cal-week-row.jn-current-week{box-shadow:0 0 0 2px var(--jn-accent);background:rgba(45,212,191,.05);padding:3px;margin:-3px}
 .jn-cal-cell{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:7px 7px 6px;min-height:78px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
 .jn-cal-cell:hover{border-color:var(--jn-border2)}
@@ -494,6 +494,7 @@ body::before{
 .jn-cal-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
 .jn-cal-tag{font-family:var(--font-body);font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;line-height:1.5;white-space:nowrap;background:rgba(255,255,255,.08);color:var(--jn-text);border:1px solid rgba(255,255,255,.14)}
 .jn-cal-week-range{font-family:var(--font-mono);font-size:9px;font-weight:600;color:var(--jn-text-dim);margin-top:auto;line-height:1.35;letter-spacing:.01em}
+.jn-cal-open-badge{font-family:var(--font-mono);font-size:8px;font-weight:700;color:#fbbf24;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);padding:1px 5px;border-radius:4px;align-self:flex-start;letter-spacing:.03em}
 @media(max-width:600px){.jn-cal-cell{min-height:52px;padding:5px}.jn-cal-pnl{font-size:10px}.jn-cal-tags{display:none}}
 
 .jn-trade-card{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
@@ -2494,6 +2495,20 @@ function jnClosedByDay(trades) {
   return map;
 }
 
+function jnOpenByDay(trades) {
+  // trades that have an entry (dateOpen) but no close date yet — still running
+  const map = {};
+  trades.forEach(t => {
+    if (jnCleanDate(t.dateClose)) return; // already closed, handled by jnClosedByDay
+    const d = jnCleanDate(t.dateOpen);
+    if (!d) return;
+    const key = jnDateKey(d);
+    if (!map[key]) map[key] = [];
+    map[key].push(t);
+  });
+  return map;
+}
+
 function jnClosedSorted(trades) {
   return trades.filter(t => jnCleanDate(t.dateClose) && (t.wl==='W'||t.wl==='L'||t.wl==='D'))
     .sort((a,b) => new Date(a.dateClose) - new Date(b.dateClose));
@@ -2565,16 +2580,6 @@ function jnToggleWeekFocus(mondayKey) {
   renderJournalCalendar();
 }
 
-const JN_MONTH_ABBR = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-
-function jnWeekRangeLabel(monday, sunday) {
-  if (monday.getMonth() === sunday.getMonth() && monday.getFullYear() === sunday.getFullYear()) {
-    return `${monday.getDate()}-${sunday.getDate()} ${JN_MONTH_ABBR[monday.getMonth()]} ${monday.getFullYear()}`;
-  }
-  const yearPart = monday.getFullYear() === sunday.getFullYear() ? monday.getFullYear() : `${monday.getFullYear()}/${sunday.getFullYear()}`;
-  return `${monday.getDate()} ${JN_MONTH_ABBR[monday.getMonth()]}-${sunday.getDate()} ${JN_MONTH_ABBR[sunday.getMonth()]} ${yearPart}`;
-}
-
 function renderJournalCalendar() {
   const dowRow = document.getElementById('jnCalDow');
   const grid = document.getElementById('jnCalGrid');
@@ -2584,10 +2589,12 @@ function renderJournalCalendar() {
   const monthNamesEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   label.textContent = `${monthNamesEN[jnCalMonth]} ${jnCalYear}`;
 
-  const dows = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'];
-  dowRow.innerHTML = `<div class="jn-cal-dow jn-week-dow">WEEKLY</div>` + dows.map(d => `<div class="jn-cal-dow">${d}</div>`).join('');
+  const dows = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'];
+  dowRow.innerHTML = dows.map(d => `<div class="jn-cal-dow">${d}</div>`).join('') + `<div class="jn-cal-dow jn-week-dow">PNL$</div>`;
 
-  const byDay = jnClosedByDay(jnGetTrades());
+  const trades = jnGetTrades();
+  const byDay = jnClosedByDay(trades);
+  const openByDay = jnOpenByDay(trades);
   const firstOfMonth = new Date(jnCalYear, jnCalMonth, 1);
   let startOffset = firstOfMonth.getDay() - 1; // Mon=0
   if (startOffset < 0) startOffset = 6;
@@ -2596,44 +2603,40 @@ function renderJournalCalendar() {
 
   // calendarStart = the Monday shown in the very first row of the grid
   const calendarStart = new Date(jnCalYear, jnCalMonth, 1 - startOffset);
-
-  // Build a flat list of day cells (null = empty/padding)
-  const cellList = [];
-  for (let i = 0; i < startOffset; i++) cellList.push(null);
-  for (let day = 1; day <= daysInMonth; day++) {
-    const d = new Date(jnCalYear, jnCalMonth, day);
-    const key = jnDateKey(d);
-    cellList.push({ day, key, data: byDay[key] });
-  }
-  while (cellList.length % 7 !== 0) cellList.push(null);
+  const totalRows = Math.ceil((startOffset + daysInMonth) / 7);
 
   let html = '';
-  for (let i = 0; i < cellList.length; i += 7) {
-    const week = cellList.slice(i, i + 7);
+  let weekNum = 0;
+  for (let r = 0; r < totalRows; r++) {
     const rowMonday = new Date(calendarStart);
-    rowMonday.setDate(calendarStart.getDate() + i);
-    const rowSunday = new Date(rowMonday);
-    rowSunday.setDate(rowMonday.getDate() + 6);
+    rowMonday.setDate(calendarStart.getDate() + r * 7);
     const rowMondayKey = jnDateKey(rowMonday);
+
+    // full 7 dates (Mon..Sun) of this row — used for the PNL$ total even though
+    // Sat/Sun aren't shown as their own columns (crypto can still trade on weekends)
+    const rowDates = [];
+    for (let i = 0; i < 7; i++) { const dd = new Date(rowMonday); dd.setDate(rowMonday.getDate() + i); rowDates.push(dd); }
+
+    // weekday (Mon-Fri) cells that belong to the month currently being viewed
+    const weekdayCells = rowDates.slice(0, 5).map(dd => {
+      if (dd.getMonth() !== jnCalMonth || dd.getFullYear() !== jnCalYear) return null;
+      const key = jnDateKey(dd);
+      return { day: dd.getDate(), key, data: byDay[key], open: openByDay[key] };
+    });
+    const hasAnyWeekday = weekdayCells.some(c => c !== null);
+
+    let weekPnl = 0, weekDays = 0;
+    rowDates.forEach(dd => { const k = jnDateKey(dd); const d = byDay[k]; if (d) { weekPnl += d.pnl; weekDays++; } });
+
+    if (!hasAnyWeekday && weekDays === 0) continue; // nothing relevant to this month in this row at all
+
+    weekNum++;
     const isFocusedWeek = jnFocusedWeekKey === rowMondayKey;
 
     let rowHtml = '';
-    // weekly summary cell (first column)
-    let weekPnl = 0, weekDays = 0;
-    week.forEach(c => { if (c && c.data) { weekPnl += c.data.pnl; weekDays++; } });
-    let weekCls = 'jn-cal-cell jn-week-cell';
-    if (weekDays) weekCls += weekPnl >= 0 ? ' jn-pos' : ' jn-neg';
-    const weekColor = weekDays ? (weekPnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--jn-text-dim)';
-    const rangeLabel = jnWeekRangeLabel(rowMonday, rowSunday);
-    rowHtml += `<div class="${weekCls}" onclick="jnToggleWeekFocus('${rowMondayKey}')">
-      <div class="jn-cal-week-label">WEEKLY</div>
-      <div class="jn-cal-pnl" style="color:${weekColor}">${weekPnl>=0?'+':'-'}$${Math.abs(weekPnl).toFixed(2)}</div>
-      <div class="jn-cal-week-range">${rangeLabel}</div>
-    </div>`;
-    // day cells
-    week.forEach(c => {
+    weekdayCells.forEach(c => {
       if (!c) { rowHtml += `<div class="jn-cal-cell jn-empty"></div>`; return; }
-      const { day, key, data } = c;
+      const { day, key, data, open } = c;
       let cls = 'jn-cal-cell';
       if (key === todayKey) cls += ' jn-today';
       if (key === jnSelectedDateKey) cls += ' jn-selected';
@@ -2641,16 +2644,29 @@ function renderJournalCalendar() {
       const pnlHtml = data
         ? `<div class="jn-cal-pnl" style="color:${data.pnl>=0?'var(--green)':'var(--red)'}">${data.pnl>=0?'+':'-'}$${Math.abs(data.pnl).toFixed(2)}</div>`
         : '';
+      const openBadge = (open && open.length) ? `<div class="jn-cal-open-badge">${open.length} OPEN</div>` : '';
       const syms = data ? [...data.syms].filter(Boolean) : [];
       const tagsHtml = syms.length
         ? `<div class="jn-cal-tags">${syms.map(s => `<span class="jn-cal-tag">${s}</span>`).join('')}</div>`
         : '';
       rowHtml += `<div class="${cls}" onclick="jnSelectDay('${key}')">
         <div class="jn-cal-daynum">${day}</div>
+        ${openBadge}
         ${pnlHtml}
         ${tagsHtml}
       </div>`;
     });
+
+    // PNL$ cell (trailing, after Friday)
+    let weekCls = 'jn-cal-cell jn-week-cell';
+    if (weekDays) weekCls += weekPnl >= 0 ? ' jn-pos' : ' jn-neg';
+    const weekColor = weekDays ? (weekPnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--jn-text-dim)';
+    rowHtml += `<div class="${weekCls}" onclick="jnToggleWeekFocus('${rowMondayKey}')">
+      <div class="jn-cal-week-label">PNL$</div>
+      <div class="jn-cal-pnl" style="color:${weekColor}">${weekPnl>=0?'+':'-'}$${Math.abs(weekPnl).toFixed(2)}</div>
+      <div class="jn-cal-week-range">WEEK ${weekNum}</div>
+    </div>`;
+
     html += `<div class="jn-cal-week-row${isFocusedWeek ? ' jn-current-week' : ''}">${rowHtml}</div>`;
   }
   grid.innerHTML = html;
@@ -2659,47 +2675,55 @@ function renderJournalCalendar() {
 function jnSelectDay(key) {
   jnSelectedDateKey = key;
   renderJournalCalendar();
-  const byDay = jnClosedByDay(jnGetTrades());
-  const dayData = byDay[key];
+  const trades = jnGetTrades();
+  const byDay = jnClosedByDay(trades);
+  const openByDay = jnOpenByDay(trades);
+  const closedTrades = (byDay[key] && byDay[key].trades) || [];
+  const openTrades = openByDay[key] || [];
   const panel = document.getElementById('jnDayDetail');
   const title = document.getElementById('jnDayDetailTitle');
   const body = document.getElementById('jnDayDetailBody');
   if (!panel || !title || !body) return;
 
-  if (!dayData || dayData.trades.length === 0) {
+  const dayTrades = [...closedTrades, ...openTrades].sort((a,b) => (a.no||0)-(b.no||0));
+  if (dayTrades.length === 0) {
     panel.style.display = 'none';
     return;
   }
-  const dayTrades = [...dayData.trades].sort((a,b) => (a.no||0)-(b.no||0));
   panel.style.display = 'block';
   const d = new Date(key);
-  title.textContent = `📅 ${d.toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})} — ${dayTrades.length} เทรด`;
+  const openNote = openTrades.length ? ` (${openTrades.length} ยังไม่ปิด)` : '';
+  title.textContent = `📅 ${d.toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})} — ${dayTrades.length} เทรด${openNote}`;
 
   body.innerHTML = dayTrades.map(t => {
+    const isOpen = !jnCleanDate(t.dateClose);
     const pnl = parseFloat(t.pnlUsd) || 0;
     const pnlColor = pnl > 0 ? 'var(--green)' : pnl < 0 ? 'var(--red)' : 'var(--jn-text-dim)';
     const grade = t.gradeFinal || t.grade || '—';
     const gradeColor = grade==='A' ? '#eab308' : grade==='B' ? '#f97316' : grade==='C' ? '#ef4444' : 'var(--jn-text-dim)';
     const tpslVal = (t.tpsl||'').toUpperCase();
     const tpslClass = tpslVal==='TP' ? 'an-pill-win' : tpslVal==='SL' ? 'an-pill-loss' : '';
-    const wlAccent = t.wl==='W' ? 'var(--green)' : t.wl==='L' ? 'var(--red)' : 'var(--jn-accent)';
-    const wlAccentBg = t.wl==='W' ? 'rgba(52,211,153,.1)' : t.wl==='L' ? 'rgba(244,63,94,.1)' : 'rgba(45,212,191,.1)';
+    const wlAccent = isOpen ? '#fbbf24' : t.wl==='W' ? 'var(--green)' : t.wl==='L' ? 'var(--red)' : 'var(--jn-accent)';
+    const wlAccentBg = isOpen ? 'rgba(251,191,36,.1)' : t.wl==='W' ? 'rgba(52,211,153,.1)' : t.wl==='L' ? 'rgba(244,63,94,.1)' : 'rgba(45,212,191,.1)';
     const posVal = (t.pos||'').toUpperCase();
+    const posDisplay = posVal.startsWith('L') ? 'Long' : posVal.startsWith('S') ? 'Short' : (t.pos || '—');
     const posColor = posVal.startsWith('L') ? 'var(--green)' : posVal.startsWith('S') ? 'var(--red)' : 'var(--jn-text)';
     const exitTypeColor = tpslVal==='TP' ? 'var(--green)' : tpslVal==='SL' ? 'var(--red)' : 'var(--jn-text)';
     const links = [];
     if (t.chartEnter) links.push(`<a href="${t.chartEnter}" target="_blank" rel="noopener">🖼 Chart Enter</a>`);
     if (t.chartExit) links.push(`<a href="${t.chartExit}" target="_blank" rel="noopener">🖼 Chart Exit</a>`);
     const fields = [
-      ['Position', t.pos, posColor], ['Lot Size', t.lot, null], ['Order', t.order, null], ['Session', t.session, null],
-      ['Entry', t.enter, null], ['Exit', t.exit, null], ['Duration', t.dur, null], ['Exit Type', t.tpsl, exitTypeColor],
+      ['Position', posDisplay, posColor], ['Lot Size', t.lot, null], ['Order', t.order, null], ['Session', t.session, null],
+      ['Entry', t.enter, null], ['Exit', isOpen ? '—' : t.exit, null], ['Duration', t.dur, null], ['Exit Type', isOpen ? 'Open' : t.tpsl, isOpen ? '#fbbf24' : exitTypeColor],
       ['RRR', t.rrr, null], ['SL %', t.slPct, null], ['TP %', t.tpPct, null],
     ];
     return `<div class="jn-trade-card">
       <div class="jn-tc-head">
         <span class="jn-tc-sym">${t.sym||'—'}</span>
-        ${tpslVal ? `<span class="an-pill ${tpslClass}">${tpslVal}</span>` : ''}
-        <span class="jn-tc-pnl" style="color:${pnlColor}">${pnl>=0?'+':'-'}$${Math.abs(pnl).toFixed(2)} (${parseFloat(t.pnlPct||0)>=0?'+':''}${parseFloat(t.pnlPct||0).toFixed(2)}%)</span>
+        ${isOpen
+          ? `<span class="an-pill" style="background:rgba(251,191,36,.18);color:#fbbf24">OPEN</span>`
+          : (tpslVal ? `<span class="an-pill ${tpslClass}">${tpslVal}</span>` : '')}
+        <span class="jn-tc-pnl" style="color:${isOpen?'#fbbf24':pnlColor}">${isOpen ? '🟡 Position ยังเปิดอยู่' : `${pnl>=0?'+':'-'}$${Math.abs(pnl).toFixed(2)} (${parseFloat(t.pnlPct||0)>=0?'+':''}${parseFloat(t.pnlPct||0).toFixed(2)}%)`}</span>
       </div>
       ${t.setup ? `<div class="jn-tc-setup" style="border-left-color:${wlAccent};background:${wlAccentBg}">🎯 ${t.setup}${grade!=='—' ? ` <span style="color:${gradeColor};font-weight:800">· Grade ${grade}</span>` : ''}</div>` : ''}
       <div class="jn-tc-grid">
@@ -5155,45 +5179,4 @@ function exportData() {
     text += `${sym.name}\n`;
     DAYS.forEach(day => {
       const d = (data[sym.id]?.days || {})[day] || {};
-      const hasImg = (chartImages[currentWeek] || {})[`${sym.id}__${day}`] ? '[📷]' : '';
-      if (d.pattern || d.strategy || d.bias || d.risk || d.note) {
-        text += `  [${day}] ${hasImg} Pattern: ${d.pattern||'—'} | Strategy: ${d.strategy||'—'} | Bias: ${d.bias||'—'}\n`;
-        if (d.risk) text += `         Risk: ${d.risk}\n`;
-        if (d.note) text += `         Note: ${d.note}\n`;
-      }
-    });
-    text += '\n';
-  });
-  text += `SUMMARY: ${data.ov_summary}`;
-  const blob = new Blob([text], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `ActionPlan_${currentWeek.replace(/\s/g,'_')}.txt`;
-  a.click();
-  showToast('📋 Export สำเร็จ');
-}
-
-// ============================================
-// HELPERS
-// ============================================
-function setVal(id, val) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.value = val;
-}
-function getVal(id) {
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
-}
-
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
-}
-</script>
-</body>
-</html>
+      const hasImg = (chartImages[currentWeek] || {})[`${sym.i
