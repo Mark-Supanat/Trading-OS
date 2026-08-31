@@ -462,7 +462,8 @@ body::before{
 .jn-kpi-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:14px}
 @media(max-width:1200px){.jn-kpi-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:640px){.jn-kpi-grid{grid-template-columns:repeat(2,1fr)}}
-.jn-kpi{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:11px 12px}
+.jn-kpi{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:11px 12px;transition:border-color .12s}
+.jn-kpi[onclick]:hover{border-color:var(--jn-accent)}
 .jn-kpi-label{font-size:9px;color:var(--jn-text-dim);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;font-family:var(--font-mono)}
 .jn-kpi-value{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--jn-text)}
 .jn-kpi-value.pos{color:var(--green)}
@@ -477,7 +478,6 @@ body::before{
 .jn-cal-dow.jn-week-dow{color:var(--jn-accent2)}
 .jn-cal-grid{display:flex;flex-direction:column;gap:6px}
 .jn-cal-week-row{display:grid;grid-template-columns:repeat(5,1fr) 1.2fr;gap:6px;border-radius:10px;transition:box-shadow .15s,background .15s}
-.jn-cal-week-row.jn-current-week{box-shadow:0 0 0 2px var(--jn-accent);background:rgba(45,212,191,.05);padding:3px;margin:-3px}
 .jn-cal-cell{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:7px 7px 6px;min-height:78px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
 .jn-cal-cell:hover{border-color:var(--jn-border2)}
 .jn-cal-cell.jn-empty{background:transparent;border-color:transparent;cursor:default}
@@ -2389,7 +2389,6 @@ let jnQuarter = 'q3';
 let jnCalYear = null, jnCalMonth = null; // 0-indexed month
 let jnCalInited = false;
 let jnSelectedDateKey = null;
-let jnFocusedWeekKey = null; // dateKey of the Monday of the currently-highlighted week row
 let jnEquityChart = null;
 
 const JN_QUARTER_LABELS = { q1:'Q1 2026', q2:'Q2 2026', q3:'Q3 2026' };
@@ -2410,7 +2409,6 @@ async function loadJournalPage(forceReload) {
     }
     jnCalYear = seedDate.getFullYear();
     jnCalMonth = seedDate.getMonth();
-    jnFocusedWeekKey = jnMondayKeyOf(seedDate);
   }
   jnLoadRules();
   renderJournalAll();
@@ -2539,23 +2537,25 @@ function renderJournalKPIs() {
   const trades = jnGetTrades();
   const s = jnCalcStats(trades);
   const byDay = jnClosedByDay(trades);
-  const dayTotals = Object.values(byDay).map(d => d.pnl);
-  const bestDay = dayTotals.length ? Math.max(...dayTotals) : 0;
-  const worstDay = dayTotals.length ? Math.min(...dayTotals) : 0;
+  let bestDayKey = null, worstDayKey = null, bestDay = 0, worstDay = 0;
+  Object.entries(byDay).forEach(([key, d]) => {
+    if (bestDayKey === null || d.pnl > bestDay) { bestDay = d.pnl; bestDayKey = key; }
+    if (worstDayKey === null || d.pnl < worstDay) { worstDay = d.pnl; worstDayKey = key; }
+  });
   const sign = n => n >= 0 ? '+' : '-';
 
   const cards = [
-    ['TOTAL TRADES', trades.length, ''],
-    ['WIN RATE', s.wr.toFixed(1)+'%', s.wr>=50?'pos':'neg'],
-    ['TOTAL P&L', sign(s.pnl)+'$'+Math.abs(s.pnl).toFixed(2), s.pnl>=0?'pos':'neg'],
-    ['BEST DAY', sign(bestDay)+'$'+Math.abs(bestDay).toFixed(2), 'pos'],
-    ['WORST DAY', (worstDay<0?'-':'+')+'$'+Math.abs(worstDay).toFixed(2), 'neg'],
-    ['AVG WIN', '+$'+Math.abs(s.avgWin).toFixed(2), 'pos'],
-    ['AVG LOSS', '-$'+Math.abs(s.avgLoss).toFixed(2), 'neg'],
-    ['PROFIT FACTOR', s.pf.toFixed(2)+'x', s.pf>=1?'pos':'neg'],
+    ['TOTAL TRADES', trades.length, '', null],
+    ['WIN RATE', s.wr.toFixed(1)+'%', '', null],
+    ['TOTAL P&L', sign(s.pnl)+'$'+Math.abs(s.pnl).toFixed(2), s.pnl>=0?'pos':'neg', null],
+    ['BEST DAY', sign(bestDay)+'$'+Math.abs(bestDay).toFixed(2), 'pos', bestDayKey],
+    ['WORST DAY', (worstDay<0?'-':'+')+'$'+Math.abs(worstDay).toFixed(2), 'neg', worstDayKey],
+    ['AVG WIN', '+$'+Math.abs(s.avgWin).toFixed(2), '', null],
+    ['AVG LOSS', '-$'+Math.abs(s.avgLoss).toFixed(2), '', null],
+    ['PROFIT FACTOR', s.pf.toFixed(2)+'x', '', null],
   ];
-  el.innerHTML = cards.map(([label,val,cls]) =>
-    `<div class="jn-kpi"><div class="jn-kpi-label">${label}</div><div class="jn-kpi-value ${cls}">${val}</div></div>`
+  el.innerHTML = cards.map(([label,val,cls,goToKey]) =>
+    `<div class="jn-kpi"${goToKey ? ` style="cursor:pointer" onclick="jnGoToDate('${goToKey}')"` : ''}><div class="jn-kpi-label">${label}</div><div class="jn-kpi-value ${cls}">${val}</div></div>`
   ).join('');
 }
 
@@ -2573,13 +2573,18 @@ function jnGoThisWeek() {
   const now = new Date();
   jnCalYear = now.getFullYear();
   jnCalMonth = now.getMonth();
-  jnFocusedWeekKey = jnMondayKeyOf(now);
   renderJournalCalendar();
+  jnSelectDay(jnMondayKeyOf(now));
 }
 
-function jnToggleWeekFocus(mondayKey) {
-  jnFocusedWeekKey = (jnFocusedWeekKey === mondayKey) ? null : mondayKey;
+function jnGoToDate(key) {
+  if (!key) return;
+  const d = new Date(key);
+  if (isNaN(d)) return;
+  jnCalYear = d.getFullYear();
+  jnCalMonth = d.getMonth();
   renderJournalCalendar();
+  jnSelectDay(key);
 }
 
 function renderJournalCalendar() {
@@ -2633,7 +2638,6 @@ function renderJournalCalendar() {
     rowDates.forEach(dd => { const k = jnDateKey(dd); const d = byDay[k]; if (d) { weekPnl += d.pnl; weekDays++; } });
 
     weekNum++;
-    const isFocusedWeek = jnFocusedWeekKey === rowMondayKey;
 
     let rowHtml = '';
     weekdayCells.forEach(c => {
@@ -2665,13 +2669,13 @@ function renderJournalCalendar() {
     const rangeLabel = (first.month === last.month)
       ? `${first.day}-${last.day} ${JN_MONTH_ABBR[first.month]}`
       : `${first.day} ${JN_MONTH_ABBR[first.month]}-${last.day} ${JN_MONTH_ABBR[last.month]}`;
-    rowHtml += `<div class="jn-cal-cell jn-week-cell" onclick="jnToggleWeekFocus('${rowMondayKey}')">
+    rowHtml += `<div class="jn-cal-cell jn-week-cell" onclick="jnSelectDay('${rowMondayKey}')">
       <div class="jn-cal-week-label">PNL$</div>
       <div class="jn-cal-pnl" style="color:${weekColor}">${weekPnl>=0?'+':'-'}$${Math.abs(weekPnl).toFixed(2)}</div>
       <div class="jn-cal-week-range">WEEK ${weekNum} · ${rangeLabel}</div>
     </div>`;
 
-    html += `<div class="jn-cal-week-row${isFocusedWeek ? ' jn-current-week' : ''}">${rowHtml}</div>`;
+    html += `<div class="jn-cal-week-row">${rowHtml}</div>`;
   }
   grid.innerHTML = html;
 }
