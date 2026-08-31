@@ -481,6 +481,8 @@ body::before{
 .jn-cal-cell{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:7px 7px 6px;min-height:78px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
 .jn-cal-cell:hover{border-color:var(--jn-border2)}
 .jn-cal-cell.jn-empty{background:transparent;border-color:transparent;cursor:default}
+.jn-cal-cell.jn-other-month{opacity:.4}
+.jn-cal-cell.jn-other-month:hover{opacity:.7}
 .jn-cal-cell.jn-today{border-color:var(--jn-accent)}
 .jn-cal-cell.jn-selected{border-color:var(--jn-accent);box-shadow:0 0 0 1px var(--jn-accent)}
 .jn-cal-cell.jn-pos{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3)}
@@ -2617,14 +2619,15 @@ function renderJournalCalendar() {
     const rowDates = [];
     for (let i = 0; i < 7; i++) { const dd = new Date(rowMonday); dd.setDate(rowMonday.getDate() + i); rowDates.push(dd); }
 
-    // weekday (Mon-Fri) cells that belong to the month currently being viewed
+    // weekday (Mon-Fri) cells — always populated with real dates, even when they
+    // spill into the adjacent month, so every row is a complete 5-day week
     const weekdayCells = rowDates.slice(0, 5).map(dd => {
-      if (dd.getMonth() !== jnCalMonth || dd.getFullYear() !== jnCalYear) return null;
       const key = jnDateKey(dd);
-      return { day: dd.getDate(), key, data: byDay[key], open: openByDay[key] };
+      const otherMonth = (dd.getMonth() !== jnCalMonth || dd.getFullYear() !== jnCalYear);
+      return { day: dd.getDate(), month: dd.getMonth(), key, data: byDay[key], open: openByDay[key], otherMonth };
     });
-    const hasAnyWeekday = weekdayCells.some(c => c !== null);
-    if (!hasAnyWeekday) continue; // only number weeks that actually contain a weekday of this month
+    const hasCurrentMonthDay = weekdayCells.some(c => !c.otherMonth);
+    if (!hasCurrentMonthDay) continue; // only number weeks that touch the month being viewed
 
     let weekPnl = 0, weekDays = 0;
     rowDates.forEach(dd => { const k = jnDateKey(dd); const d = byDay[k]; if (d) { weekPnl += d.pnl; weekDays++; } });
@@ -2634,9 +2637,9 @@ function renderJournalCalendar() {
 
     let rowHtml = '';
     weekdayCells.forEach(c => {
-      if (!c) { rowHtml += `<div class="jn-cal-cell jn-empty"></div>`; return; }
-      const { day, key, data, open } = c;
+      const { day, key, data, open, otherMonth } = c;
       let cls = 'jn-cal-cell';
+      if (otherMonth) cls += ' jn-other-month';
       if (key === todayKey) cls += ' jn-today';
       if (key === jnSelectedDateKey) cls += ' jn-selected';
       if (data) cls += data.pnl >= 0 ? ' jn-pos' : ' jn-neg';
@@ -2658,9 +2661,10 @@ function renderJournalCalendar() {
 
     // PNL$ cell (trailing, after Friday) — color via text only, no colored border/background
     const weekColor = weekDays ? (weekPnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--jn-text-dim)';
-    const presentDays = weekdayCells.filter(c => c).map(c => c.day);
-    const lo = Math.min(...presentDays), hi = Math.max(...presentDays);
-    const rangeLabel = lo === hi ? `${lo} ${JN_MONTH_ABBR[jnCalMonth]}` : `${lo}-${hi} ${JN_MONTH_ABBR[jnCalMonth]}`;
+    const first = weekdayCells[0], last = weekdayCells[4];
+    const rangeLabel = (first.month === last.month)
+      ? `${first.day}-${last.day} ${JN_MONTH_ABBR[first.month]}`
+      : `${first.day} ${JN_MONTH_ABBR[first.month]}-${last.day} ${JN_MONTH_ABBR[last.month]}`;
     rowHtml += `<div class="jn-cal-cell jn-week-cell" onclick="jnToggleWeekFocus('${rowMondayKey}')">
       <div class="jn-cal-week-label">PNL$</div>
       <div class="jn-cal-pnl" style="color:${weekColor}">${weekPnl>=0?'+':'-'}$${Math.abs(weekPnl).toFixed(2)}</div>
