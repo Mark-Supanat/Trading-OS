@@ -432,6 +432,7 @@ body::before{
   --jn-border:#232c40;--jn-border2:#334160;
   --jn-text:#f3f5f9;--jn-text-dim:#9aa7c4;
 }
+#page-journal .page-inner{max-width:1920px;padding:20px 16px}
 .jn-panel-box{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:14px;padding:16px 18px}
 .jn-panel-title-plain{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--jn-text)}
 
@@ -478,7 +479,7 @@ body::before{
 .jn-cal-dow.jn-week-dow{color:var(--jn-accent2)}
 .jn-cal-grid{display:flex;flex-direction:column;gap:6px}
 .jn-cal-week-row{display:grid;grid-template-columns:repeat(5,1fr) 1.2fr;gap:6px;border-radius:10px;transition:box-shadow .15s,background .15s}
-.jn-cal-cell{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:7px 7px 6px;min-height:78px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
+.jn-cal-cell{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:9px 9px 8px;min-height:96px;cursor:pointer;transition:border-color .12s;display:flex;flex-direction:column;gap:4px}
 .jn-cal-cell:hover{border-color:var(--jn-border2)}
 .jn-cal-cell.jn-empty{background:transparent;border-color:transparent;cursor:default}
 .jn-cal-cell.jn-other-month{opacity:.4}
@@ -1591,7 +1592,7 @@ select.field-sm option{background:#111827;color:var(--text)}
       <div class="jn-bottom-col">
         <div class="jn-panel-box">
           <div class="jn-panel-title"><span class="jn-panel-bar"></span>EQUITY CURVE</div>
-          <div style="position:relative;height:220px">
+          <div style="position:relative;height:150px">
             <canvas id="chartJournalEquity"></canvas>
           </div>
           <div class="jn-equity-total" id="jnEquityTotal"></div>
@@ -2631,8 +2632,10 @@ function renderJournalCalendar() {
       const otherMonth = (dd.getMonth() !== jnCalMonth || dd.getFullYear() !== jnCalYear);
       return { day: dd.getDate(), month: dd.getMonth(), key, data: byDay[key], open: openByDay[key], otherMonth };
     });
-    const hasCurrentMonthDay = weekdayCells.some(c => !c.otherMonth);
-    if (!hasCurrentMonthDay) continue; // only number weeks that touch the month being viewed
+    // a boundary week belongs to whichever month has the majority of its 5 weekdays —
+    // this prevents the same week showing up (duplicated) on both adjacent months' pages
+    const currentMonthCount = weekdayCells.filter(c => !c.otherMonth).length;
+    if (currentMonthCount < 3) continue;
 
     let weekPnl = 0, weekDays = 0;
     rowDates.forEach(dd => { const k = jnDateKey(dd); const d = byDay[k]; if (d) { weekPnl += d.pnl; weekDays++; } });
