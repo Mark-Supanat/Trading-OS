@@ -2405,14 +2405,20 @@ async function loadJournalPage(forceReload) {
   }
   if (!jnCalInited) {
     jnCalInited = true;
-    const dates = jnGetTrades().map(t => t.dateClose || t.dateOpen).filter(Boolean).sort();
-    let seedDate = new Date();
-    if (dates.length) {
-      const last = new Date(dates[dates.length - 1]);
-      if (!isNaN(last)) seedDate = last;
+    const now = new Date();
+    const range = JN_QUARTER_MONTHS[jnQuarter];
+    if (range && now.getFullYear() === 2026 && range.includes(now.getMonth())) {
+      // today falls within the default quarter tab — open straight to today's month
+      jnCalYear = now.getFullYear();
+      jnCalMonth = now.getMonth();
+    } else if (range) {
+      // today isn't in this quarter — fall back to the quarter's own latest month
+      jnCalYear = 2026;
+      jnCalMonth = range[range.length - 1];
+    } else {
+      jnCalYear = now.getFullYear();
+      jnCalMonth = now.getMonth();
     }
-    jnCalYear = seedDate.getFullYear();
-    jnCalMonth = seedDate.getMonth();
   }
   jnLoadRules();
   renderJournalAll();
@@ -2597,7 +2603,7 @@ function jnGoThisWeek() {
   jnCalYear = now.getFullYear();
   jnCalMonth = now.getMonth();
   renderJournalCalendar();
-  jnSelectDay(jnMondayKeyOf(now));
+  jnSelectDay(jnMondayKeyOf(now), true);
 }
 
 function jnGoToDate(key) {
@@ -2711,14 +2717,28 @@ function renderJournalCalendar() {
   grid.innerHTML = html;
 }
 
-function jnSelectDay(key) {
+function jnSelectDay(key, includeAllOpen) {
   jnSelectedDateKey = key;
   renderJournalCalendar();
   const trades = jnGetTrades();
   const byDay = jnClosedByDay(trades);
   const openByDay = jnOpenByDay(trades);
   const closedTrades = (byDay[key] && byDay[key].trades) || [];
-  const openTrades = openByDay[key] || [];
+  let openTrades = openByDay[key] || [];
+
+  if (includeAllOpen) {
+    // also surface every currently-open position in this quarter's data,
+    // regardless of which week/month it was actually entered in
+    const seen = new Set(openTrades.map(t => t.no));
+    trades.forEach(t => {
+      if (jnCleanDate(t.dateClose)) return; // already closed
+      if (!jnCleanDate(t.dateOpen)) return;
+      if (seen.has(t.no)) return;
+      openTrades.push(t);
+      seen.add(t.no);
+    });
+  }
+
   const panel = document.getElementById('jnDayDetail');
   const title = document.getElementById('jnDayDetailTitle');
   const body = document.getElementById('jnDayDetailBody');
@@ -2732,7 +2752,10 @@ function jnSelectDay(key) {
   panel.style.display = 'block';
   const d = new Date(key);
   const openNote = openTrades.length ? ` (${openTrades.length} ยังไม่ปิด)` : '';
-  title.textContent = `📅 ${d.toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})} — ${dayTrades.length} เทรด${openNote}`;
+  const dayLabel = includeAllOpen
+    ? `📅 สัปดาห์นี้ (เริ่ม ${d.toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})}) — ${dayTrades.length} เทรด${openNote}`
+    : `📅 ${d.toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})} — ${dayTrades.length} เทรด${openNote}`;
+  title.textContent = dayLabel;
 
   body.innerHTML = dayTrades.map(t => {
     const isOpen = !jnCleanDate(t.dateClose);
