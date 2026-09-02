@@ -2807,10 +2807,19 @@ function jnSelectDay(key, includeAllOpen) {
     const pnl = parseFloat(t.pnlUsd) || 0;
     const pnlColor = pnl > 0 ? 'var(--green)' : pnl < 0 ? 'var(--red)' : 'var(--jn-text-dim)';
     const gradeColorOf = g => g==='A' ? '#eab308' : g==='B' ? '#f97316' : g==='C' ? '#ef4444' : 'var(--jn-text-dim)';
+    const resultGradeColorOf = g => {
+      if (!g || g==='—') return 'var(--jn-text-dim)';
+      if (g === 'B+') return 'var(--green)';
+      if (g === 'B-') return '#ef4444';
+      if (g.startsWith('A')) return '#eab308';
+      if (g.startsWith('B')) return '#f97316';
+      if (g.startsWith('C')) return '#ef4444';
+      return 'var(--jn-text-dim)';
+    };
     const entryGrade = t.grade || '—';
     const resultGrade = t.gradeFinal || '—';
     const entryGradeColor = gradeColorOf(entryGrade);
-    const resultGradeColor = gradeColorOf(resultGrade);
+    const resultGradeColor = resultGradeColorOf(resultGrade);
     const tpslVal = (t.tpsl||'').toUpperCase();
     const tpslClass = tpslVal==='TP' ? 'an-pill-win' : tpslVal==='SL' ? 'an-pill-loss' : '';
     const wlAccent = isOpen ? '#fbbf24' : t.wl==='W' ? 'var(--green)' : t.wl==='L' ? 'var(--red)' : 'var(--jn-accent)';
@@ -2846,7 +2855,7 @@ function jnSelectDay(key, includeAllOpen) {
       ['Position', posDisplay, posColor], ['Lot Size', t.lot, null], ['Order', t.order, null], ['Session', t.session, null],
       ['วันที่เข้า', fmtDT(t.dateOpen), null], ['Entry', t.enter, null],
       ['วันที่ออก', isOpen ? '—' : fmtDT(t.dateClose), null], ['Exit', isOpen ? '—' : t.exit, null],
-      ['Duration', t.dur, null], ['Exit Type', isOpen ? 'Open' : t.tpsl, isOpen ? '#fbbf24' : exitTypeColor],
+      ['Duration', t.dur, '#fb923c'], ['Exit Type', isOpen ? 'Open' : t.tpsl, isOpen ? '#fbbf24' : exitTypeColor],
       ['Grade ผล (Result)', resultGrade, resultGradeColor],
       ['RRR', t.rrr, null], ['SL %', t.slPct, null], ['TP %', t.tpPct, null],
     ];
@@ -2858,11 +2867,10 @@ function jnSelectDay(key, includeAllOpen) {
           : (tpslVal ? `<span class="an-pill ${tpslClass}">${tpslVal}</span>` : '')}
         <span class="jn-tc-pnl" style="color:${isOpen?'#fbbf24':pnlColor}">${isOpen ? '🟡 Position ยังเปิดอยู่' : `${pnl>=0?'+':'-'}$${Math.abs(pnl).toFixed(2)} (${parseFloat(t.pnlPct||0)>=0?'+':''}${parseFloat(t.pnlPct||0).toFixed(2)}%)`}</span>
       </div>
-      ${t.setup ? `<div class="jn-tc-setup" style="border-left-color:${wlAccent};background:${wlAccentBg}">🎯 ${t.setup}${entryGrade!=='—' ? ` <span style="color:${entryGradeColor};font-weight:800">· Grade ${entryGrade}</span>` : ''}</div>` : ''}
+      ${t.setup ? `<div class="jn-tc-setup" style="border-left-color:${wlAccent};background:${wlAccentBg}">🎯 ${t.setup}${entryGrade!=='—' ? ` <span style="color:${entryGradeColor};font-weight:800">· Grade ${entryGrade}</span>` : ''}${entryInfo.tf ? ` <span style="color:var(--jn-accent2);font-weight:700">· TF: ${entryInfo.tf}</span>` : ''}</div>` : ''}
       <div class="jn-tc-grid">
         ${fields.map(([label,val,color]) => `<div class="jn-tc-field"><label>${label}</label><div${color?` style="color:${color}"`:''}>${val||'—'}</div></div>`).join('')}
       </div>
-      ${entryInfo.tf ? `<div class="jn-tc-tf">⏱ TF เข้า: ${entryInfo.tf}</div>` : ''}
       ${entryInfo.reason ? `<div class="jn-tc-entryplan">📥 เหตุผลที่เข้า: ${entryInfo.reason}</div>` : ''}
       ${entryInfo.risk ? `<div class="jn-tc-risk">⚠️ Risk: ${entryInfo.risk}</div>` : ''}
       ${t.exitExecution ? `<div class="jn-tc-exit-reason">🚪 เหตุผลที่ออก: ${t.exitExecution}</div>` : ''}
