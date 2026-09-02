@@ -2802,8 +2802,11 @@ function jnSelectDay(key, includeAllOpen) {
     const isOpen = !jnCleanDate(t.dateClose);
     const pnl = parseFloat(t.pnlUsd) || 0;
     const pnlColor = pnl > 0 ? 'var(--green)' : pnl < 0 ? 'var(--red)' : 'var(--jn-text-dim)';
-    const grade = t.gradeFinal || t.grade || '—';
-    const gradeColor = grade==='A' ? '#eab308' : grade==='B' ? '#f97316' : grade==='C' ? '#ef4444' : 'var(--jn-text-dim)';
+    const gradeColorOf = g => g==='A' ? '#eab308' : g==='B' ? '#f97316' : g==='C' ? '#ef4444' : 'var(--jn-text-dim)';
+    const entryGrade = t.grade || '—';
+    const resultGrade = t.gradeFinal || '—';
+    const entryGradeColor = gradeColorOf(entryGrade);
+    const resultGradeColor = gradeColorOf(resultGrade);
     const tpslVal = (t.tpsl||'').toUpperCase();
     const tpslClass = tpslVal==='TP' ? 'an-pill-win' : tpslVal==='SL' ? 'an-pill-loss' : '';
     const wlAccent = isOpen ? '#fbbf24' : t.wl==='W' ? 'var(--green)' : t.wl==='L' ? 'var(--red)' : 'var(--jn-accent)';
@@ -2812,12 +2815,22 @@ function jnSelectDay(key, includeAllOpen) {
     const posDisplay = posVal.startsWith('L') ? 'Long' : posVal.startsWith('S') ? 'Short' : (t.pos || '—');
     const posColor = posVal.startsWith('L') ? 'var(--green)' : posVal.startsWith('S') ? 'var(--red)' : 'var(--jn-text)';
     const exitTypeColor = tpslVal==='TP' ? 'var(--green)' : tpslVal==='SL' ? 'var(--red)' : 'var(--jn-text)';
+    const fmtDT = raw => {
+      const dd = jnCleanDate(raw);
+      if (!dd) return '—';
+      const hasTime = dd.getHours() || dd.getMinutes();
+      const datePart = dd.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
+      return hasTime ? `${datePart} ${dd.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}` : datePart;
+    };
     const links = [];
     if (t.chartEnter) links.push(`<a href="${t.chartEnter}" target="_blank" rel="noopener">🖼 Chart Enter</a>`);
     if (t.chartExit) links.push(`<a href="${t.chartExit}" target="_blank" rel="noopener">🖼 Chart Exit</a>`);
     const fields = [
       ['Position', posDisplay, posColor], ['Lot Size', t.lot, null], ['Order', t.order, null], ['Session', t.session, null],
-      ['Entry', t.enter, null], ['Exit', isOpen ? '—' : t.exit, null], ['Duration', t.dur, null], ['Exit Type', isOpen ? 'Open' : t.tpsl, isOpen ? '#fbbf24' : exitTypeColor],
+      ['วันที่เข้า', fmtDT(t.dateOpen), null], ['Entry', t.enter, null],
+      ['วันที่ออก', isOpen ? '—' : fmtDT(t.dateClose), null], ['Exit', isOpen ? '—' : t.exit, null],
+      ['Duration', t.dur, null], ['Exit Type', isOpen ? 'Open' : t.tpsl, isOpen ? '#fbbf24' : exitTypeColor],
+      ['Grade ผล (Result)', resultGrade, resultGradeColor],
       ['RRR', t.rrr, null], ['SL %', t.slPct, null], ['TP %', t.tpPct, null],
     ];
     return `<div class="jn-trade-card">
@@ -2828,7 +2841,7 @@ function jnSelectDay(key, includeAllOpen) {
           : (tpslVal ? `<span class="an-pill ${tpslClass}">${tpslVal}</span>` : '')}
         <span class="jn-tc-pnl" style="color:${isOpen?'#fbbf24':pnlColor}">${isOpen ? '🟡 Position ยังเปิดอยู่' : `${pnl>=0?'+':'-'}$${Math.abs(pnl).toFixed(2)} (${parseFloat(t.pnlPct||0)>=0?'+':''}${parseFloat(t.pnlPct||0).toFixed(2)}%)`}</span>
       </div>
-      ${t.setup ? `<div class="jn-tc-setup" style="border-left-color:${wlAccent};background:${wlAccentBg}">🎯 ${t.setup}${grade!=='—' ? ` <span style="color:${gradeColor};font-weight:800">· Grade ${grade}</span>` : ''}</div>` : ''}
+      ${t.setup ? `<div class="jn-tc-setup" style="border-left-color:${wlAccent};background:${wlAccentBg}">🎯 ${t.setup}${entryGrade!=='—' ? ` <span style="color:${entryGradeColor};font-weight:800">· Grade ${entryGrade}</span>` : ''}</div>` : ''}
       <div class="jn-tc-grid">
         ${fields.map(([label,val,color]) => `<div class="jn-tc-field"><label>${label}</label><div${color?` style="color:${color}"`:''}>${val||'—'}</div></div>`).join('')}
       </div>
