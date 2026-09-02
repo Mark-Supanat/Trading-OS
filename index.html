@@ -511,6 +511,9 @@ body::before{
 .jn-tc-field label{display:block;font-family:var(--font-mono);font-size:9.5px;font-weight:700;color:var(--jn-text-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
 .jn-tc-field div{font-family:var(--font-mono);font-size:13px;color:var(--jn-text);font-weight:600}
 .jn-tc-entryplan{font-family:var(--font-body);font-size:11.5px;color:var(--jn-text-dim);background:rgba(255,255,255,.03);border-left:2px solid var(--jn-border2);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
+.jn-tc-tf{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--jn-accent2);background:rgba(59,130,246,.1);display:inline-block;padding:4px 9px;border-radius:6px;margin-bottom:8px}
+.jn-tc-risk{font-family:var(--font-body);font-size:11.5px;color:#fca5a5;background:rgba(244,63,94,.08);border-left:2px solid var(--red);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
+.jn-tc-exit-reason{font-family:var(--font-body);font-size:11.5px;color:var(--jn-text-dim);background:rgba(255,255,255,.03);border-left:2px solid #fb923c;padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
 .jn-tc-note{font-family:var(--font-body);font-size:11.5px;color:var(--jn-text-dim);font-style:italic;margin-top:8px;line-height:1.6}
 .jn-tc-links{display:flex;gap:14px;margin-top:10px}
 .jn-tc-links a{font-family:var(--font-body);font-size:11.5px;color:var(--jn-accent2);text-decoration:none;font-weight:600}
@@ -2818,10 +2821,23 @@ function jnSelectDay(key, includeAllOpen) {
     const fmtDT = raw => {
       const dd = jnCleanDate(raw);
       if (!dd) return '—';
-      const hasTime = dd.getHours() || dd.getMinutes();
-      const datePart = dd.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
-      return hasTime ? `${datePart} ${dd.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}` : datePart;
+      // ค.ศ. (Gregorian) เสมอ ไม่เอาเวลาต่อท้าย
+      return dd.toLocaleDateString('th-TH-u-ca-gregory',{day:'2-digit',month:'short',year:'numeric'});
     };
+    // แยกข้อความคอลัมน์ entryPlan (Q) ออกเป็น TF ที่ใช้เข้า / เหตุผลที่เข้า / Risk
+    const parseEntryPlan = raw => {
+      const text = (raw || '').trim();
+      if (!text) return { tf: '', reason: '', risk: '' };
+      const riskMatch = text.match(/RISK\s*[:：]\s*([\s\S]*)$/i);
+      const risk = riskMatch ? riskMatch[1].trim() : '';
+      let beforeRisk = riskMatch ? text.slice(0, riskMatch.index) : text;
+      const tfMatch = beforeRisk.match(/TF\s*([A-Za-z0-9]+(?:-[A-Za-z0-9]+)?|Day)/i);
+      const tf = tfMatch ? tfMatch[1].trim() : '';
+      const reason = (tfMatch ? beforeRisk.slice(0, tfMatch.index) + beforeRisk.slice(tfMatch.index + tfMatch[0].length) : beforeRisk)
+        .replace(/\s{2,}/g, ' ').trim();
+      return { tf, reason, risk };
+    };
+    const entryInfo = parseEntryPlan(t.entryPlan);
     const links = [];
     if (t.chartEnter) links.push(`<a href="${t.chartEnter}" target="_blank" rel="noopener">🖼 Chart Enter</a>`);
     if (t.chartExit) links.push(`<a href="${t.chartExit}" target="_blank" rel="noopener">🖼 Chart Exit</a>`);
@@ -2845,8 +2861,10 @@ function jnSelectDay(key, includeAllOpen) {
       <div class="jn-tc-grid">
         ${fields.map(([label,val,color]) => `<div class="jn-tc-field"><label>${label}</label><div${color?` style="color:${color}"`:''}>${val||'—'}</div></div>`).join('')}
       </div>
-      ${t.entryPlan ? `<div class="jn-tc-entryplan">${t.entryPlan}</div>` : ''}
-      ${t.exitExecution ? `<div class="jn-tc-note">🚪 Exit: ${t.exitExecution}</div>` : ''}
+      ${entryInfo.tf ? `<div class="jn-tc-tf">⏱ TF เข้า: ${entryInfo.tf}</div>` : ''}
+      ${entryInfo.reason ? `<div class="jn-tc-entryplan">📥 เหตุผลที่เข้า: ${entryInfo.reason}</div>` : ''}
+      ${entryInfo.risk ? `<div class="jn-tc-risk">⚠️ Risk: ${entryInfo.risk}</div>` : ''}
+      ${t.exitExecution ? `<div class="jn-tc-exit-reason">🚪 เหตุผลที่ออก: ${t.exitExecution}</div>` : ''}
       ${t.note ? `<div class="jn-tc-note">📝 ${t.note}</div>` : ''}
       ${links.length ? `<div class="jn-tc-links">${links.join('')}</div>` : ''}
     </div>`;
