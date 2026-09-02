@@ -2795,10 +2795,11 @@ function jnSelectDay(key, includeAllOpen) {
   }
   panel.style.display = 'block';
   const d = new Date(key);
+  const dTitle = d.toLocaleDateString('th-TH-u-ca-gregory',{day:'2-digit',month:'long',year:'numeric'});
   const openNote = openTrades.length ? ` (${openTrades.length} ยังไม่ปิด)` : '';
   const dayLabel = includeAllOpen
-    ? `📅 สัปดาห์นี้ (เริ่ม ${d.toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})}) — ${dayTrades.length} เทรด${openNote}`
-    : `📅 ${d.toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})} — ${dayTrades.length} เทรด${openNote}`;
+    ? `📅 สัปดาห์นี้ (เริ่ม ${dTitle}) — ${dayTrades.length} เทรด${openNote}`
+    : `📅 ${dTitle} — ${dayTrades.length} เทรด${openNote}`;
   title.textContent = dayLabel;
 
   body.innerHTML = dayTrades.map(t => {
