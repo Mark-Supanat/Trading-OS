@@ -424,6 +424,62 @@ body::before{
 .an-pill-grade-b{background:rgba(240,180,41,.15);color:#f0b429}
 .an-pill-grade-c{background:rgba(244,63,94,.15);color:#f43f5e}
 
+/* ============================================
+   ANALYTICS THEME v2 — Trade-Journal-matched dark navy
+   (scoped to #page-analytics only, doesn't affect other pages)
+   ============================================ */
+#page-analytics{
+  --an2-bg:#0b1220; --an2-card:#141d2e; --an2-border:#1e2740;
+  --an2-text:#e6ebf5; --an2-text2:#8a94a6; --an2-text3:#6b7688;
+  --an2-accent:#f5a623; --an2-accent-fg:#3a2400;
+  --an2-good-bg:#1e6f5c; --an2-good-fg:#7ee6c4;
+  --an2-warn-bg:#5a4a1e; --an2-warn-fg:#f5c56a;
+  --an2-bad-bg:#5a2a2a; --an2-bad-fg:#f0a0a0;
+  --an2-muted-bg:#1a2436; --an2-muted-fg:#6b7688;
+  --an2-sym-bg:#1e6f5c; --an2-sym-fg:#7ee6c4;
+}
+#page-analytics .page-inner{background:var(--an2-bg);border-radius:14px;padding:16px}
+#page-analytics .dash-widget,
+#page-analytics .an-kpi-card{
+  background:var(--an2-card) !important;border:none !important;box-shadow:none !important;
+  backdrop-filter:none !important;
+}
+#page-analytics .dash-widget::after,
+#page-analytics .an-kpi-card::after{display:none !important}
+#page-analytics .dash-widget-title{color:var(--an2-text3)}
+#page-analytics .an-kpi-label{color:var(--an2-text3)}
+#page-analytics .an-kpi-accent{display:none}
+
+.an2-tabbar{display:flex;gap:4px;margin:14px 0 14px;border-bottom:1px solid var(--an2-border);flex-wrap:wrap}
+.an2-tab{padding:9px 16px;font-size:12px;color:var(--an2-text3);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-weight:500;font-family:var(--font-body)}
+.an2-tab:hover:not(.active):not(.an2-tab-disabled){color:var(--an2-text)}
+.an2-tab.active{color:var(--an2-accent);border-bottom-color:var(--an2-accent)}
+.an2-tab-disabled{color:#3a4258;cursor:not-allowed;padding:9px 16px;font-size:12px}
+
+.an2-chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.an2-chip-label{font-size:10px;letter-spacing:.08em;color:var(--an2-text3);text-transform:uppercase;margin-bottom:6px;display:block}
+.an2-chip{padding:5px 12px;border-radius:14px;font-size:11px;border:none;background:var(--an2-muted-bg);color:var(--an2-text2);cursor:pointer;font-weight:500;font-family:var(--font-body);white-space:nowrap}
+.an2-chip.active{background:var(--an2-accent);color:var(--an2-accent-fg);font-weight:600}
+.an2-chip-sym.active{background:var(--an2-sym-bg);color:var(--an2-sym-fg)}
+
+.an2-card{background:var(--an2-card);border-radius:10px;padding:14px}
+.an2-insight{background:var(--an2-good-bg);color:var(--an2-good-fg);border-radius:10px;padding:10px 12px;font-size:12px;margin-bottom:14px}
+.an2-heat-table{width:100%;border-collapse:collapse;font-size:12px;color:var(--an2-text)}
+.an2-heat-table th{padding:4px 6px;color:var(--an2-text3);font-weight:500;text-align:center}
+.an2-heat-table th:first-child{text-align:left}
+.an2-heat-table td{padding:6px}
+.an2-heat-cell{border-radius:6px;padding:5px 4px;text-align:center}
+.an2-heat-cell .wr{font-weight:600}
+.an2-heat-cell .n{font-size:9px}
+.an2-best-card{border-radius:10px;padding:10px 12px}
+.an2-rank-row{display:flex;align-items:center;gap:10px;padding:10px 4px}
+.an2-rank-bar{width:4px;height:32px;border-radius:2px;flex-shrink:0}
+.an2-rank-label{flex:1;min-width:90px;font-size:13px;font-weight:600;color:var(--an2-text)}
+.an2-rank-sample{font-size:10px;color:var(--an2-warn-fg)}
+.an2-rank-stat{text-align:right;min-width:55px}
+.an2-rank-stat-label{font-size:10px;color:var(--an2-text3)}
+.an2-rank-stat-value{font-size:13px;font-weight:600;color:var(--an2-text)}
+
 /* ===== JOURNAL PAGE ===== */
 #page-journal{
   background:#04060a;
@@ -1677,67 +1733,120 @@ select.field-sm option{background:#111827;color:var(--text)}
         </div>
       </div>
 
-      <!-- KPI CARDS -->
-      <div class="an-kpi-grid" id="anKpiGrid">
-        <div class="an-kpi-card"><div class="an-kpi-label">กำลังโหลด...</div></div>
+      <!-- SUB-TAB NAV -->
+      <div class="an2-tabbar">
+        <button class="an2-tab active" onclick="switchAnTab('overview',this)">Overview</button>
+        <button class="an2-tab" onclick="switchAnTab('model',this)">Model &amp; Symbol</button>
+        <button class="an2-tab" onclick="switchAnTab('session',this)">Session</button>
+        <button class="an2-tab" onclick="switchAnTab('tf',this)">Timeframe</button>
+        <button class="an2-tab" onclick="switchAnTab('dur',this)">Duration</button>
+        <span class="an2-tab-disabled">Behavior (เร็วๆ นี้)</span>
       </div>
 
-      <!-- CHARTS ROW -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
-        <div class="dash-widget an-chart-widget">
-          <div class="dash-widget-title"><span class="an-chart-icon">🎯</span>Win Rate by Symbol</div>
-          <canvas id="chartSymbol" height="220"></canvas>
+      <!-- ===== TAB: OVERVIEW ===== -->
+      <div id="anView-overview">
+        <!-- KPI CARDS -->
+        <div class="an-kpi-grid" id="anKpiGrid">
+          <div class="an-kpi-card"><div class="an-kpi-label">กำลังโหลด...</div></div>
         </div>
-        <div class="dash-widget an-chart-widget">
-          <div class="dash-widget-title"><span class="an-chart-icon">🕒</span>Win Rate by Session</div>
-          <canvas id="chartSession" height="220"></canvas>
-        </div>
-      </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
-        <div class="dash-widget an-chart-widget">
-          <div class="dash-widget-title"><span class="an-chart-icon">🏅</span>Grade Distribution</div>
-          <canvas id="chartGrade" height="220"></canvas>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div class="dash-widget an-chart-widget">
+            <div class="dash-widget-title"><span class="an-chart-icon">🎯</span>Win Rate by Symbol</div>
+            <canvas id="chartSymbol" height="220"></canvas>
+          </div>
+          <div class="dash-widget an-chart-widget">
+            <div class="dash-widget-title"><span class="an-chart-icon">🏅</span>Grade Distribution</div>
+            <canvas id="chartGrade" height="220"></canvas>
+          </div>
         </div>
-        <div class="dash-widget an-chart-widget">
-          <div class="dash-widget-title"><span class="an-chart-icon">📈</span>Monthly P&L (%)</div>
-          <canvas id="chartMonthly" height="220"></canvas>
-        </div>
-      </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
-        <div class="dash-widget an-chart-widget">
-          <div class="dash-widget-title"><span class="an-chart-icon">🎖️</span>Win Rate by Grade</div>
-          <canvas id="chartWinByGrade" height="220"></canvas>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div class="dash-widget an-chart-widget">
+            <div class="dash-widget-title"><span class="an-chart-icon">📈</span>Monthly P&L (%)</div>
+            <canvas id="chartMonthly" height="220"></canvas>
+          </div>
+          <div class="dash-widget an-chart-widget">
+            <div class="dash-widget-title"><span class="an-chart-icon">🎖️</span>Win Rate by Grade</div>
+            <canvas id="chartWinByGrade" height="220"></canvas>
+          </div>
         </div>
-        <div class="dash-widget an-chart-widget">
+
+        <div class="dash-widget" style="margin-top:14px">
           <div class="dash-widget-title"><span class="an-chart-icon">💹</span>Equity Curve (Cumulative P&L %)</div>
           <canvas id="chartEquity" height="220"></canvas>
         </div>
+
+        <!-- TRADE TABLE -->
+        <div class="dash-widget" style="margin-top:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div class="dash-widget-title" style="margin-bottom:0">Recent Trades</div>
+            <input id="anSearch" placeholder="ค้นหา Symbol..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:11px;padding:4px 10px;border-radius:6px;outline:none;width:160px" oninput="renderTradeTable()">
+          </div>
+          <div class="an-table-wrap" style="max-height:420px;overflow-y:auto">
+            <table id="anTradeTable" style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--font-mono)">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border);color:var(--text3)">
+                  <th style="padding:8px">Date</th>
+                  <th style="padding:8px">Symbol</th>
+                  <th style="padding:8px">Pos</th>
+                  <th style="padding:8px">Session</th>
+                  <th style="padding:8px">Setup</th>
+                  <th style="padding:8px">Grade</th>
+                  <th style="padding:8px;text-align:right">P&L%</th>
+                  <th style="padding:8px">W/L</th>
+                </tr>
+              </thead>
+              <tbody id="anTradeBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <!-- TRADE TABLE -->
-      <div class="dash-widget" style="margin-top:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div class="dash-widget-title" style="margin-bottom:0">Recent Trades</div>
-          <input id="anSearch" placeholder="ค้นหา Symbol..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:11px;padding:4px 10px;border-radius:6px;outline:none;width:160px" oninput="renderTradeTable()">
-        </div>
-        <div class="an-table-wrap" style="max-height:420px;overflow-y:auto">
-          <table id="anTradeTable" style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--font-mono)">
-            <thead>
-              <tr style="border-bottom:1px solid var(--border);color:var(--text3)">
-                <th style="padding:8px">Date</th>
-                <th style="padding:8px">Symbol</th>
-                <th style="padding:8px">Pos</th>
-                <th style="padding:8px">Session</th>
-                <th style="padding:8px">Setup</th>
-                <th style="padding:8px">Grade</th>
-                <th style="padding:8px;text-align:right">P&L%</th>
-                <th style="padding:8px">W/L</th>
-              </tr>
-            </thead>
-            <tbody id="anTradeBody"></tbody>
+      <!-- ===== TAB: MODEL & SYMBOL ===== -->
+      <div id="anView-model" style="display:none">
+        <div id="anModelBestCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px"></div>
+        <div class="an2-card">
+          <table class="an2-heat-table">
+            <thead><tr id="anModelHeatHead"></tr></thead>
+            <tbody id="anModelHeatBody"></tbody>
           </table>
+        </div>
+        <div style="font-size:11px;color:var(--an2-text3);margin-top:10px">
+          เทรดที่มีมากกว่า 1 Model ถูกจัดเป็น "Mixed" แยกต่างหาก ไม่นับรวมกับ Model เดี่ยว · ช่อง n&lt;5 หมายถึง sample ยังน้อย
+        </div>
+      </div>
+
+      <!-- ===== TABS: SESSION / TIMEFRAME / DURATION (share Model+Symbol filter) ===== -->
+      <div id="anView-cross" style="display:none">
+        <span class="an2-chip-label">Model</span>
+        <div class="an2-chip-row" id="anCrossModelChips"></div>
+        <span class="an2-chip-label">Symbol</span>
+        <div class="an2-chip-row" id="anCrossSymbolChips"></div>
+
+        <!-- Session -->
+        <div id="anCrossContent-session">
+          <div class="an2-insight" id="anSessionInsight"></div>
+          <div class="an2-card" id="anSessionList"></div>
+        </div>
+
+        <!-- Timeframe -->
+        <div id="anCrossContent-tf" style="display:none">
+          <div class="an2-card">
+            <table class="an2-heat-table">
+              <thead><tr id="anTfHead"></tr></thead>
+              <tbody id="anTfBody"></tbody>
+            </table>
+          </div>
+          <div style="font-size:11px;color:var(--an2-text3);margin-top:10px">
+            "ไม่ระบุ" คือเทรดที่ไม่มี TF พิมพ์ไว้ในแผนเข้าเทรด — แสดงไว้เพื่อความโปร่งใส ไม่ถูกตัดออก
+          </div>
+        </div>
+
+        <!-- Duration -->
+        <div id="anCrossContent-dur" style="display:none">
+          <div class="an2-insight" id="anDurationInsight"></div>
+          <div class="an2-card" id="anDurationList"></div>
         </div>
       </div>
 
@@ -2111,6 +2220,280 @@ function getFilteredTrades() {
   return trades;
 }
 
+// ============================================
+// ANALYTICS v2 — parsing helpers (Model / TF / Duration)
+// ============================================
+function extractEntryPlanInfo(raw) {
+  const text = (raw || '').trim();
+  if (!text) return { tf: '', reason: '', risk: '' };
+  const riskMatch = text.match(/RISK\s*[:：]\s*([\s\S]*)$/i);
+  const risk = riskMatch ? riskMatch[1].trim() : '';
+  let beforeRisk = riskMatch ? text.slice(0, riskMatch.index) : text;
+  const tfMatch = beforeRisk.match(/TF\s*([A-Za-z0-9]+(?:-[A-Za-z0-9]+)?|Day)/i);
+  const tf = tfMatch ? tfMatch[1].trim() : '';
+  const reason = (tfMatch ? beforeRisk.slice(0, tfMatch.index) + beforeRisk.slice(tfMatch.index + tfMatch[0].length) : beforeRisk)
+    .replace(/\s{2,}/g, ' ').trim();
+  return { tf, reason, risk };
+}
+
+// แยกข้อความ setup ออกเป็น primaryModel / approach (Follow-Reversal) / isMixed (พูดถึงมากกว่า 1 Model)
+function parseModelInfo(setupRaw) {
+  const text = (setupRaw || '').trim();
+  if (!text) return { primaryModel: null, approach: null, isMixed: false, modelKey: 'unknown' };
+  const modelMatches = [...text.matchAll(/model\s*(\d+)/gi)].map(m => m[1]);
+  const uniqueModels = [...new Set(modelMatches)];
+  const isMixed = uniqueModels.length > 1;
+  const primaryModel = uniqueModels.length ? uniqueModels[0] : null;
+  let approach = null;
+  if (/reversal/i.test(text)) approach = 'Reversal';
+  else if (/follow/i.test(text)) approach = 'Follow';
+  const modelKey = isMixed ? 'mixed' : (primaryModel ? 'm' + primaryModel : 'unknown');
+  return { primaryModel, approach, isMixed, modelKey, modelsFound: uniqueModels };
+}
+
+// รวมเวลาถือ (dur) เป็นนาที รองรับหลายหน่วยปนกัน เช่น "1d 3h", "45m", "2 ชม.", ตัวเลขเปล่าถือเป็นชั่วโมง
+function parseDurationMinutes(durRaw) {
+  const text = String(durRaw || '').trim();
+  if (!text) return null;
+  const re = /(\d+(?:\.\d+)?)\s*(d|day|days|วัน|h|hr|hrs|hour|hours|ชม|ชั่วโมง|m|min|mins|minute|minutes|นาที)/gi;
+  let match, total = 0, found = false;
+  while ((match = re.exec(text)) !== null) {
+    found = true;
+    const val = parseFloat(match[1]);
+    const unit = match[2].toLowerCase();
+    if (unit.startsWith('d') || unit === 'วัน') total += val * 1440;
+    else if (unit.startsWith('h') || unit.startsWith('ชม') || unit.startsWith('ชั่วโมง')) total += val * 60;
+    else total += val;
+  }
+  if (!found) {
+    const plain = parseFloat(text);
+    return isNaN(plain) ? null : plain * 60; // สมมติตัวเลขเปล่า = ชั่วโมง
+  }
+  return total;
+}
+
+function durationBucket(minutes) {
+  if (minutes === null || minutes === undefined || isNaN(minutes)) return 'ไม่ระบุ';
+  if (minutes < 1440) return '<1 วัน';
+  if (minutes < 4320) return '1-3 วัน';
+  if (minutes < 10080) return '4-7 วัน (1 สัปดาห์)';
+  return '>1 สัปดาห์';
+}
+
+function enrichTrade(t) {
+  if (t._enriched) return t;
+  const modelInfo = parseModelInfo(t.setup);
+  const entryInfo = extractEntryPlanInfo(t.entryPlan);
+  const durMin = parseDurationMinutes(t.dur);
+  t._modelKey = modelInfo.modelKey;
+  t._approach = modelInfo.approach;
+  t._isMixed = modelInfo.isMixed;
+  t._tf = entryInfo.tf || 'ไม่ระบุ';
+  t._durBucket = durationBucket(durMin);
+  t._enriched = true;
+  return t;
+}
+
+function anModelColLabel(key) { return key === 'mixed' ? 'Mixed' : 'Model ' + key.slice(1); }
+
+function anModelColsFromTrades(trades) {
+  const keysSet = new Set(trades.map(t => t._modelKey).filter(k => k && k !== 'unknown'));
+  const numeric = [...keysSet].filter(k => k.startsWith('m')).sort((a,b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+  return keysSet.has('mixed') ? [...numeric, 'mixed'] : numeric;
+}
+
+function anWinRate(trades) {
+  const decided = trades.filter(t => t.wl === 'W' || t.wl === 'L');
+  const wr = decided.length ? Math.round(decided.filter(t => t.wl === 'W').length / decided.length * 100) : 0;
+  return { wr, n: trades.length };
+}
+
+function anCellColor(wr, n) {
+  if (n === 0) return { bg: 'var(--an2-muted-bg)', fg: 'var(--an2-muted-fg)' };
+  if (n < 5) return { bg: 'var(--an2-warn-bg)', fg: 'var(--an2-warn-fg)' };
+  if (wr >= 60) return { bg: 'var(--an2-good-bg)', fg: 'var(--an2-good-fg)' };
+  if (wr >= 45) return { bg: 'var(--an2-warn-bg)', fg: 'var(--an2-warn-fg)' };
+  return { bg: 'var(--an2-bad-bg)', fg: 'var(--an2-bad-fg)' };
+}
+
+function anCellHtml(wr, n) {
+  if (n === 0) return '<span style="color:var(--an2-text3)">—</span>';
+  const c = anCellColor(wr, n);
+  return `<div class="an2-heat-cell" style="background:${c.bg};color:${c.fg}"><div class="wr">${wr}%</div><div class="n">n=${n}</div></div>`;
+}
+
+// ---- Model & Symbol tab ----
+function renderModelSymbolTab(trades) {
+  const symbols = [...new Set(trades.map(t => t.sym).filter(Boolean))].sort();
+  const cols = anModelColsFromTrades(trades);
+
+  const headEl = document.getElementById('anModelHeatHead');
+  const bodyEl = document.getElementById('anModelHeatBody');
+  if (!headEl || !bodyEl) return;
+
+  headEl.innerHTML = `<th>Symbol</th>` + cols.map(c => `<th>${anModelColLabel(c)}</th>`).join('');
+  bodyEl.innerHTML = symbols.map(sym => {
+    const cells = cols.map(col => {
+      const ct = trades.filter(t => t.sym === sym && t._modelKey === col);
+      const { wr, n } = anWinRate(ct);
+      return `<td>${anCellHtml(wr, n)}</td>`;
+    }).join('');
+    return `<tr><td style="font-weight:600">${sym}</td>${cells}</tr>`;
+  }).join('');
+
+  // Best-per-symbol cards (ต้องมี n>=3 ถึงจะกล้าสรุป)
+  let cardsHtml = '';
+  symbols.forEach(sym => {
+    let best = null;
+    cols.forEach(col => {
+      const ct = trades.filter(t => t.sym === sym && t._modelKey === col);
+      if (ct.length < 3) return;
+      const { wr, n } = anWinRate(ct);
+      if (!best || wr > best.wr) best = { col, wr, n };
+    });
+    if (best) {
+      const good = best.wr >= 55;
+      cardsHtml += `<div class="an2-best-card" style="background:${good ? 'var(--an2-good-bg)' : 'var(--an2-warn-bg)'}">
+        <div style="font-size:10px;color:${good ? 'var(--an2-good-fg)' : 'var(--an2-warn-fg)'}">${sym} ทำได้ดีสุด</div>
+        <div style="font-size:15px;font-weight:600;margin-top:2px;color:var(--an2-text)">${anModelColLabel(best.col)}</div>
+        <div style="font-size:11px;color:var(--an2-text3)">${best.wr}% WR · n=${best.n}</div>
+      </div>`;
+    }
+  });
+  const cardsEl = document.getElementById('anModelBestCards');
+  if (cardsEl) cardsEl.innerHTML = cardsHtml || '<div style="font-size:12px;color:var(--an2-text3)">ข้อมูลยังไม่พอสรุป</div>';
+}
+
+// ---- Session / Timeframe / Duration tabs (share Model+Symbol filter) ----
+let anCrossModel = 'all';
+let anCrossSymbol = 'all';
+let anActiveSubTab = 'overview';
+let anLastCrossTrades = [];
+
+function anCrossFilteredTrades(baseTrades) {
+  let t = baseTrades;
+  if (anCrossModel !== 'all') t = t.filter(x => x._modelKey === anCrossModel);
+  if (anCrossSymbol !== 'all') t = t.filter(x => x.sym === anCrossSymbol);
+  return t;
+}
+
+function anCrossStats(trades) {
+  const decided = trades.filter(t => t.wl === 'W' || t.wl === 'L');
+  const wr = decided.length ? Math.round(decided.filter(t => t.wl === 'W').length / decided.length * 100) : 0;
+  const n = trades.length;
+  const totalPnl = trades.reduce((s,t) => s + (parseFloat(t.pnlPct) || 0), 0);
+  const avgPnl = n ? Math.round((totalPnl/n)*10)/10 : 0;
+  return { wr, n, avgPnl };
+}
+
+function anRankListHtml(rows) {
+  if (!rows.length) return '<div style="padding:12px;font-size:12px;color:var(--an2-text3)">ไม่มีข้อมูล</div>';
+  return rows.map((r,i) => {
+    const color = r.avgPnl >= 1 ? 'var(--an2-good-fg)' : r.avgPnl >= 0 ? 'var(--an2-warn-fg)' : 'var(--an2-bad-fg)';
+    const low = r.n < 5;
+    return `<div class="an2-rank-row" style="${i < rows.length-1 ? 'border-bottom:1px solid var(--an2-border)' : ''}">
+      <div class="an2-rank-bar" style="background:${color}"></div>
+      <div class="an2-rank-label">${r.label}${low ? '<div class="an2-rank-sample">sample น้อย</div>' : ''}</div>
+      <div class="an2-rank-stat"><div class="an2-rank-stat-label">WR</div><div class="an2-rank-stat-value">${r.wr}%</div></div>
+      <div class="an2-rank-stat" style="min-width:65px"><div class="an2-rank-stat-label">AVG P&L</div><div class="an2-rank-stat-value" style="color:${color}">${r.avgPnl>0?'+':''}${r.avgPnl}%</div></div>
+      <div class="an2-rank-stat" style="min-width:35px"><div class="an2-rank-stat-label">N</div><div class="an2-rank-stat-value">${r.n}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderCrossChips(trades) {
+  const cols = anModelColsFromTrades(trades);
+  const modelBar = document.getElementById('anCrossModelChips');
+  if (modelBar) {
+    modelBar.innerHTML = `<button class="an2-chip ${anCrossModel==='all'?'active':''}" onclick="setAnCrossModel('all')">ทั้งหมด</button>` +
+      cols.map(c => `<button class="an2-chip ${anCrossModel===c?'active':''}" onclick="setAnCrossModel('${c}')">${anModelColLabel(c)}</button>`).join('');
+  }
+  const symbols = [...new Set(trades.map(t => t.sym).filter(Boolean))].sort();
+  const symBar = document.getElementById('anCrossSymbolChips');
+  if (symBar) {
+    symBar.innerHTML = `<button class="an2-chip an2-chip-sym ${anCrossSymbol==='all'?'active':''}" onclick="setAnCrossSymbol('all')">ทั้งหมด</button>` +
+      symbols.map(s => `<button class="an2-chip an2-chip-sym ${anCrossSymbol===s?'active':''}" onclick="setAnCrossSymbol('${s}')">${s}</button>`).join('');
+  }
+}
+
+function renderSessionTab(trades) {
+  const filtered = anCrossFilteredTrades(trades);
+  const sessionsPresent = [...new Set(trades.map(t => t.session).filter(Boolean))];
+  const knownOrder = ['ASIA','LONDON','US'];
+  const sessions = knownOrder.filter(s => sessionsPresent.includes(s)).concat(sessionsPresent.filter(s => !knownOrder.includes(s)));
+  let rows = sessions.map(s => ({ label: s, ...anCrossStats(filtered.filter(t => t.session === s)) })).filter(r => r.n > 0);
+  rows.sort((a,b) => b.avgPnl - a.avgPnl);
+  const listEl = document.getElementById('anSessionList');
+  if (listEl) listEl.innerHTML = anRankListHtml(rows);
+  const insightEl = document.getElementById('anSessionInsight');
+  if (insightEl) insightEl.innerHTML = rows.length
+    ? `Session ที่ให้ผลตอบแทนดีที่สุด: <b>${rows[0].label}</b> — Avg P&L ${rows[0].avgPnl>0?'+':''}${rows[0].avgPnl}% · WR ${rows[0].wr}% · n=${rows[0].n}`
+    : 'ยังไม่มีข้อมูลเพียงพอสำหรับ filter นี้';
+}
+
+function renderTfTab(trades) {
+  const filtered = anCrossSymbol !== 'all' ? trades.filter(t => t.sym === anCrossSymbol) : trades;
+  const tfCounts = {};
+  filtered.forEach(t => { tfCounts[t._tf] = (tfCounts[t._tf]||0) + 1; });
+  let tfList = Object.keys(tfCounts).filter(k => k !== 'ไม่ระบุ').sort((a,b) => tfCounts[b]-tfCounts[a]);
+  if (tfList.length > 6) tfList = tfList.slice(0,6);
+  if (tfCounts['ไม่ระบุ']) tfList.push('ไม่ระบุ');
+
+  const cols = anModelColsFromTrades(filtered);
+  const headEl = document.getElementById('anTfHead');
+  const bodyEl = document.getElementById('anTfBody');
+  if (!headEl || !bodyEl) return;
+  headEl.innerHTML = `<th>TF</th>` + cols.map(c => `<th>${anModelColLabel(c)}</th>`).join('');
+  bodyEl.innerHTML = tfList.map(tf => {
+    const cells = cols.map(col => {
+      const ct = filtered.filter(t => t._tf === tf && t._modelKey === col);
+      const { wr, n } = anWinRate(ct);
+      return `<td>${anCellHtml(wr, n)}</td>`;
+    }).join('');
+    return `<tr><td style="font-weight:600">${tf}</td>${cells}</tr>`;
+  }).join('');
+}
+
+function renderDurationTab(trades) {
+  const filtered = anCrossFilteredTrades(trades);
+  const order = ['<1 วัน','1-3 วัน','4-7 วัน (1 สัปดาห์)','>1 สัปดาห์','ไม่ระบุ'];
+  let rows = order.map(label => ({ label, ...anCrossStats(filtered.filter(t => t._durBucket === label)) })).filter(r => r.n > 0);
+  const sorted = [...rows].sort((a,b) => b.avgPnl - a.avgPnl);
+  const listEl = document.getElementById('anDurationList');
+  if (listEl) listEl.innerHTML = anRankListHtml(rows);
+  const insightEl = document.getElementById('anDurationInsight');
+  if (insightEl) insightEl.innerHTML = sorted.length
+    ? `ระยะถือที่ให้ผลตอบแทนดีที่สุด: <b>${sorted[0].label}</b> — Avg P&L ${sorted[0].avgPnl>0?'+':''}${sorted[0].avgPnl}% · WR ${sorted[0].wr}% · n=${sorted[0].n}`
+    : 'ยังไม่มีข้อมูลเพียงพอสำหรับ filter นี้';
+}
+
+function renderCrossTabs(trades) {
+  anLastCrossTrades = trades;
+  renderCrossChips(trades);
+  renderSessionTab(trades);
+  renderTfTab(trades);
+  renderDurationTab(trades);
+}
+
+function setAnCrossModel(m) { anCrossModel = m; renderCrossTabs(anLastCrossTrades); }
+function setAnCrossSymbol(s) { anCrossSymbol = s; renderCrossTabs(anLastCrossTrades); }
+
+function switchAnTab(tab, btn) {
+  anActiveSubTab = tab;
+  document.querySelectorAll('.an2-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('anView-overview').style.display = tab === 'overview' ? '' : 'none';
+  document.getElementById('anView-model').style.display = tab === 'model' ? '' : 'none';
+  const crossTabs = ['session','tf','dur'];
+  const crossEl = document.getElementById('anView-cross');
+  crossEl.style.display = crossTabs.includes(tab) ? '' : 'none';
+  if (crossTabs.includes(tab)) {
+    document.getElementById('anCrossContent-session').style.display = tab === 'session' ? '' : 'none';
+    document.getElementById('anCrossContent-tf').style.display = tab === 'tf' ? '' : 'none';
+    document.getElementById('anCrossContent-dur').style.display = tab === 'dur' ? '' : 'none';
+  }
+}
+
 function setAnQuarter(q, btn) {
   anQuarter = q;
   document.querySelectorAll('.an-tab').forEach(b => b.classList.remove('active'));
@@ -2124,7 +2507,7 @@ function setAnSymbol(sym) {
 }
 
 function renderAnalytics() {
-  const trades = getFilteredTrades();
+  const trades = getFilteredTrades().map(enrichTrade);
 
   // Build symbol filter pills
   const allSyms = [...new Set(anAllTrades.map(t=>t.sym).filter(Boolean))].sort();
@@ -2140,12 +2523,13 @@ function renderAnalytics() {
   }
   renderKPIs(trades);
   renderSymbolChart(trades);
-  renderSessionChart(trades);
   renderGradeChart(trades);
   renderMonthlyChart(trades);
   renderWinByGradeChart(trades);
   renderEquityChart(trades);
   renderTradeTable();
+  renderModelSymbolTab(trades);
+  renderCrossTabs(trades);
 }
 
 function calcWinRate(trades) {
