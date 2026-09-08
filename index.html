@@ -2703,7 +2703,7 @@ function renderSymbolChart(trades) {
   anCharts['chartSymbol'] = new Chart(ctx, {
     type:'bar',
     data:{ labels:syms, datasets:[{ data, backgroundColor:'#3b82f6', borderRadius:4, maxBarThickness:44 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Win Rate: ${c.raw}%`}}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } } }
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Win Rate: ${c.raw}%`}}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#a8b3c9', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#a8b3c9'}, grid:{display:false} } } }
   });
 }
 
@@ -2719,7 +2719,7 @@ function renderSessionChart(trades) {
   anCharts['chartSession'] = new Chart(ctx, {
     type:'bar',
     data:{ labels:sessions, datasets:[{ data, backgroundColor:data.map(getPerfColor), borderRadius:6, maxBarThickness:60 }] },
-    options:{ responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Win Rate: ${c.raw}%`}}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } } }
+    options:{ responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Win Rate: ${c.raw}%`}}}, scales:{ y:{ min:0, max:100, ticks:{ color:'#a8b3c9', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#a8b3c9'}, grid:{display:false} } } }
   });
 }
 
@@ -2732,7 +2732,7 @@ function renderGradeChart(trades) {
   anCharts['chartGrade'] = new Chart(ctx, {
     type:'doughnut',
     data:{ labels:grades, datasets:[{ data, backgroundColor:['#10b981','#f0b429','#f43f5e'], borderWidth:0 }] },
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', rotation:-90, plugins:{ legend:{ position:'bottom', labels:{ color:'#6b7a9e', padding:12 } } } }
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', rotation:-90, plugins:{ legend:{ position:'bottom', labels:{ color:'#a8b3c9', padding:12 } } } }
   });
 }
 
@@ -2753,7 +2753,7 @@ function renderMonthlyChart(trades) {
   anCharts['chartMonthly'] = new Chart(ctx, {
     type:'bar',
     data:{ labels, datasets:[{ data, backgroundColor: data.map(v => v>=0 ? '#10b981' : '#f43f5e'), borderRadius:6, maxBarThickness:44 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw>=0?'+':'-'}$${Math.abs(c.raw).toFixed(2)}`}}}, scales:{ y:{ ticks:{ color:'#6b7a9e', callback:v=>'$'+v }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e',maxRotation:45}, grid:{display:false} } } }
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw>=0?'+':'-'}$${Math.abs(c.raw).toFixed(2)}`}}}, scales:{ y:{ ticks:{ color:'#a8b3c9', callback:v=>'$'+v }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#a8b3c9',maxRotation:45}, grid:{display:false} } } }
   });
 }
 
@@ -2775,7 +2775,7 @@ function renderWinByGradeChart(trades) {
         label:c=>`Win Rate: ${c.raw}%`,
         afterLabel:c=>`(${counts[c.dataIndex]} เทรด)`
       }}},
-      scales:{ y:{ min:0, max:100, ticks:{ color:'#6b7a9e', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#6b7a9e'}, grid:{display:false} } }
+      scales:{ y:{ min:0, max:100, ticks:{ color:'#a8b3c9', callback:v=>v+'%' }, grid:{ color:'#1a2236' } }, x:{ ticks:{color:'#a8b3c9'}, grid:{display:false} } }
     }
   });
 }
@@ -2794,9 +2794,9 @@ function renderPositionStats(trades) {
   };
   const L = stat(trades.filter(isLong));
   const S = stat(trades.filter(isShort));
-  const block = (label, icon, s) => `
+  const block = (label, icon, color, s) => `
     <div style="text-align:center;padding:14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
-      <div style="font-size:11px;color:var(--an2-label);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">${icon} ${label}</div>
+      <div style="font-size:11px;color:${color};text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;font-weight:700">${icon} ${label}</div>
       <div style="font-size:26px;font-weight:700;color:var(--an2-text)">${s.n ? s.wr+'%' : '—'}</div>
       <div style="font-size:12px;margin-top:4px">
         <span style="color:#4ade80;font-weight:600">${s.wins}W</span>
@@ -2805,7 +2805,7 @@ function renderPositionStats(trades) {
         <span style="color:var(--an2-label)"> · ${s.n} เทรด</span>
       </div>
     </div>`;
-  el.innerHTML = block('Long', '📈', L) + block('Short', '📉', S);
+  el.innerHTML = block('Long', '📈', '#4ade80', L) + block('Short', '📉', '#f87171', S);
 }
 
 function renderEquityChart(trades) {
@@ -2846,8 +2846,8 @@ function renderEquityChart(trades) {
         }
       }},
       scales:{
-        y:{ ticks:{ color:'#6b7a9e', callback:v=>'$'+v }, grid:{ color: c => c.tick.value===0 ? '#3b4664' : '#1a2236' } },
-        x:{ ticks:{ color:'#6b7a9e', maxTicksLimit:10 }, grid:{display:false}, title:{display:true,text:'ช่วงเวลา',color:'#6b7a9e',font:{size:10}} }
+        y:{ ticks:{ color:'#a8b3c9', callback:v=>'$'+v }, grid:{ color: c => c.tick.value===0 ? '#3b4664' : '#1a2236' } },
+        x:{ ticks:{ color:'#a8b3c9', maxTicksLimit:10 }, grid:{display:false}, title:{display:true,text:'ช่วงเวลา',color:'#a8b3c9',font:{size:10}} }
       }
     }
   });
