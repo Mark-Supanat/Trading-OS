@@ -4353,10 +4353,19 @@ async function checkAuthAndInit() {
   }
 }
 
+let appInitialized = false; // กัน initApp() รันซ้ำตอนสลับแท็บ/กลับมาโฟกัสหน้าเว็บ
+
 sbAuth.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN') checkAuthAndInit();
+  if (event === 'SIGNED_IN') {
+    if (!appInitialized) {
+      checkAuthAndInit();
+    } else if (session) {
+      // แค่กลับมาโฟกัสแท็บ/สลับแท็บ ไม่ใช่ล็อกอินใหม่ → อัปเดต token เฉยๆ ไม่ต้องรีเซ็ตหน้า
+      currentAccessToken = session.access_token;
+    }
+  }
   if (event === 'TOKEN_REFRESHED' && session) currentAccessToken = session.access_token;
-  if (event === 'SIGNED_OUT') { currentAccessToken = null; showLoginGate(); }
+  if (event === 'SIGNED_OUT') { currentAccessToken = null; appInitialized = false; showLoginGate(); }
 });
 
 // Upload รูปขึ้น Storage → return public URL
@@ -4522,6 +4531,8 @@ async function initApp() {
 
   // Global paste listener
   document.addEventListener('paste', handleGlobalPaste);
+
+  appInitialized = true; // โหลดแอปครบแล้ว — SIGNED_IN ครั้งต่อไป (เช่น กลับมาโฟกัสแท็บ) จะไม่รีเซ็ตหน้าอีก
 }
 
 // ============================================
