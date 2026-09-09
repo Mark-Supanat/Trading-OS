@@ -857,6 +857,10 @@ select.field-sm option{background:#111827;color:var(--text)}
 .chart-img-btn{padding:3px 10px;background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--text2);font-size:10px;font-family:var(--font-mono);border-radius:6px;cursor:pointer;transition:all .15s}
 .chart-img-btn:hover{color:var(--text);border-color:var(--text3)}
 .chart-img-btn.danger:hover{color:#f87171;border-color:#f43f5e}
+.undo-redo-group{display:flex;gap:4px}
+.undo-redo-group .chart-img-btn{padding:2px 8px;font-size:13px;line-height:1.4;font-family:inherit}
+.undo-redo-group .chart-img-btn:disabled{opacity:.3;cursor:not-allowed;color:var(--text2);border-color:var(--border2)}
+.undo-redo-group .chart-img-btn:disabled:hover{color:var(--text2);border-color:var(--border2)}
 .chart-paste-hint{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-left:auto}
 [data-theme="dark"] .toast{background:#14532d;color:#4ade80;border-color:#16a34a55}
 
@@ -1500,8 +1504,14 @@ select.field-sm option{background:#111827;color:var(--text)}
 
     <div style="margin-top:12px">
       <div class="overview-field ov-box ov-box-analysis">
-        <label>📊 MARKET ANALYSIS (DXY / OVERALL BIAS)</label>
-        <textarea class="field-input" id="ov_analysis" placeholder="วิเคราะห์ภาพรวม อิง DXY เป็นหลัก..." rows="5" oninput="autoSave()"></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <label style="margin-bottom:0">📊 MARKET ANALYSIS (DXY / OVERALL BIAS)</label>
+          <div class="undo-redo-group" id="analysisUndoGroup">
+            <button type="button" class="chart-img-btn" id="analysisUndoBtn" title="ย้อนกลับ (Ctrl+Z)" onclick="analysisUndo()">↶</button>
+            <button type="button" class="chart-img-btn" id="analysisRedoBtn" title="ไปข้างหน้า (Ctrl+Shift+Z)" onclick="analysisRedo()">↷</button>
+          </div>
+        </div>
+        <textarea class="field-input" id="ov_analysis" placeholder="วิเคราะห์ภาพรวม อิง DXY เป็นหลัก..." rows="5" oninput="onAnalysisInput()" onkeydown="onAnalysisKeydown(event)"></textarea>
       </div>
     </div>
     <div class="dxy-bar">
@@ -5635,6 +5645,7 @@ function loadWeekData() {
   setVal('ov_risk', data.ov_risk || '');
   setVal('ov_analysis', data.ov_analysis || '');
   setVal('ov_summary', data.ov_summary || '');
+  initAnalysisHistory(data.ov_analysis || '');
 
   if (data.dxy_bias) restoreBias('dxy', data.dxy_bias);
 
@@ -5682,6 +5693,7 @@ function clearAllFields() {
   setVal('ov_risk', '');
   setVal('ov_analysis', '');
   setVal('ov_summary', '');
+  initAnalysisHistory('');
 
   document.querySelectorAll('.bias-pill').forEach(b => b.className = 'bias-pill');
   document.querySelectorAll('.tf-pill').forEach(b => b.classList.remove('tf-active'));
@@ -5887,6 +5899,80 @@ function exportData() {
   a.download = `ActionPlan_${currentWeek.replace(/\s/g,'_')}.txt`;
   a.click();
   showToast('📋 Export สำเร็จ');
+}
+
+// ============================================
+// MARKET ANALYSIS UNDO/REDO
+// ============================================
+let analysisHistory = [''];
+let analysisHistoryIndex = 0;
+let analysisPushTimer;
+const ANALYSIS_HISTORY_LIMIT = 50;
+
+function initAnalysisHistory(value) {
+  analysisHistory = [value || ''];
+  analysisHistoryIndex = 0;
+  updateAnalysisUndoButtons();
+}
+
+function pushAnalysisHistory(value) {
+  if (analysisHistory[analysisHistoryIndex] === value) return;
+  // ตัดของที่อยู่หลัง index ปัจจุบันทิ้ง (กรณีพิมพ์ต่อหลัง undo)
+  analysisHistory = analysisHistory.slice(0, analysisHistoryIndex + 1);
+  analysisHistory.push(value);
+  if (analysisHistory.length > ANALYSIS_HISTORY_LIMIT) {
+    analysisHistory.shift();
+  }
+  analysisHistoryIndex = analysisHistory.length - 1;
+  updateAnalysisUndoButtons();
+}
+
+function onAnalysisInput() {
+  autoSave();
+  clearTimeout(analysisPushTimer);
+  const val = getVal('ov_analysis');
+  analysisPushTimer = setTimeout(() => pushAnalysisHistory(val), 600);
+}
+
+function onAnalysisKeydown(e) {
+  const isUndo = (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z';
+  const isRedo = ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z') ||
+                 ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y');
+  if (isUndo) { e.preventDefault(); analysisUndo(); }
+  else if (isRedo) { e.preventDefault(); analysisRedo(); }
+}
+
+function analysisUndo() {
+  clearTimeout(analysisPushTimer);
+  // เก็บค่าปัจจุบันที่ยังไม่ทัน push ก่อน undo
+  const current = getVal('ov_analysis');
+  pushAnalysisHistory(current);
+  if (analysisHistoryIndex <= 0) return;
+  analysisHistoryIndex--;
+  applyAnalysisHistory('↶ ย้อนกลับแล้ว');
+}
+
+function analysisRedo() {
+  if (analysisHistoryIndex >= analysisHistory.length - 1) return;
+  analysisHistoryIndex++;
+  applyAnalysisHistory('↷ ไปข้างหน้าแล้ว');
+}
+
+function applyAnalysisHistory(toastMsg) {
+  const val = analysisHistory[analysisHistoryIndex];
+  setVal('ov_analysis', val);
+  updateAnalysisUndoButtons();
+  allData[currentWeek] = collectData();
+  localStorage.setItem('forex_action_plan', JSON.stringify(allData));
+  cloudSave(allData);
+  showToast(toastMsg);
+}
+
+function updateAnalysisUndoButtons() {
+  const undoBtn = document.getElementById('analysisUndoBtn');
+  const redoBtn = document.getElementById('analysisRedoBtn');
+  if (undoBtn) undoBtn.disabled = analysisHistoryIndex <= 0;
+  if (redoBtn) redoBtn.disabled = analysisHistoryIndex >= analysisHistory.length - 1;
 }
 
 // ============================================
