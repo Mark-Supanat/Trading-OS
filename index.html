@@ -857,10 +857,6 @@ select.field-sm option{background:#111827;color:var(--text)}
 .chart-img-btn{padding:3px 10px;background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--text2);font-size:10px;font-family:var(--font-mono);border-radius:6px;cursor:pointer;transition:all .15s}
 .chart-img-btn:hover{color:var(--text);border-color:var(--text3)}
 .chart-img-btn.danger:hover{color:#f87171;border-color:#f43f5e}
-.undo-redo-group{display:flex;gap:4px}
-.undo-redo-group .chart-img-btn{padding:2px 8px;font-size:13px;line-height:1.4;font-family:inherit}
-.undo-redo-group .chart-img-btn:disabled{opacity:.3;cursor:not-allowed;color:var(--text2);border-color:var(--border2)}
-.undo-redo-group .chart-img-btn:disabled:hover{color:var(--text2);border-color:var(--border2)}
 .chart-paste-hint{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-left:auto}
 [data-theme="dark"] .toast{background:#14532d;color:#4ade80;border-color:#16a34a55}
 
@@ -912,10 +908,6 @@ select.field-sm option{background:#111827;color:var(--text)}
 /* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:10px;font-size:12px;font-family:var(--font-mono);z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3);box-shadow:0 4px 20px rgba(0,0,0,.4);backdrop-filter:blur(12px);transform:translateY(8px)}
 .toast.show{opacity:1;transform:translateY(0)}
-.undo-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);display:flex;align-items:center;gap:14px;padding:10px 12px 10px 16px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;background:#1a2333;color:#e5e9f0;border:1px solid var(--border2);box-shadow:0 8px 28px rgba(0,0,0,.5)}
-.undo-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
-.undo-toast-btn{background:none;border:1px solid var(--gold-border);color:var(--gold2);padding:4px 12px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
-.undo-toast-btn:hover{background:var(--gold-bg)}
 
 /* PRINT */
 @media print{
@@ -1177,10 +1169,6 @@ select.field-sm option{background:#111827;color:var(--text)}
 <body>
 
 <div class="toast" id="toast"></div>
-<div class="undo-toast" id="undoToast">
-  <span id="undoToastMsg"></span>
-  <button type="button" id="undoToastBtn" class="undo-toast-btn">↶ Undo</button>
-</div>
 
 <!-- ============ LOGIN GATE ============ -->
 <div id="loginGate">
@@ -1512,14 +1500,8 @@ select.field-sm option{background:#111827;color:var(--text)}
 
     <div style="margin-top:12px">
       <div class="overview-field ov-box ov-box-analysis">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <label style="margin-bottom:0">📊 MARKET ANALYSIS (DXY / OVERALL BIAS)</label>
-          <div class="undo-redo-group" id="analysisUndoGroup">
-            <button type="button" class="chart-img-btn" id="analysisUndoBtn" title="ย้อนกลับ (Ctrl+Z)" onclick="analysisUndo()">↶</button>
-            <button type="button" class="chart-img-btn" id="analysisRedoBtn" title="ไปข้างหน้า (Ctrl+Shift+Z)" onclick="analysisRedo()">↷</button>
-          </div>
-        </div>
-        <textarea class="field-input" id="ov_analysis" placeholder="วิเคราะห์ภาพรวม อิง DXY เป็นหลัก..." rows="5" oninput="onAnalysisInput()" onkeydown="onAnalysisKeydown(event)"></textarea>
+        <label>📊 MARKET ANALYSIS (DXY / OVERALL BIAS)</label>
+        <textarea class="field-input" id="ov_analysis" placeholder="วิเคราะห์ภาพรวม อิง DXY เป็นหลัก..." rows="5" oninput="autoSave()"></textarea>
       </div>
     </div>
     <div class="dxy-bar">
@@ -4455,12 +4437,6 @@ async function cloudLoad() {
         localStorage.setItem('forex_action_plan_imgs', JSON.stringify(chartImages));
         delete d._imgs;
       }
-      // restore chart trash queue (รูปที่รอลบจริงหลังหมดระยะ grace period)
-      if (d._trash) {
-        chartTrash = d._trash;
-        localStorage.setItem('forex_chart_trash', JSON.stringify(chartTrash));
-        delete d._trash;
-      }
       return d;
     }
   } catch(e) { console.warn('Cloud load failed:', e); }
@@ -4469,7 +4445,7 @@ async function cloudLoad() {
 
 async function cloudSave(payload) {
   try {
-    await sbFetch('POST', { id: SB_RECORD_ID, data: { ...payload, _imgs: chartImages, _trash: chartTrash } });
+    await sbFetch('POST', { id: SB_RECORD_ID, data: { ...payload, _imgs: chartImages } });
   } catch(e) { console.warn('Cloud save failed:', e); }
 }
 
@@ -5406,8 +5382,6 @@ function readImageFile(file, symId, day) {
     const imgEl = document.getElementById(`chartimg_${symId}_${day}`);
     const wrap = document.getElementById(`imgwrap_${symId}_${day}`);
     const dropzone = document.getElementById(`dropzone_${symId}_${day}`);
-    const key = `${symId}__${day}`;
-    const oldValue = (chartImages[currentWeek] || {})[key] || '';
     imgEl.src = base64;
     wrap.classList.add('show');
     dropzone.style.display = 'none';
@@ -5415,22 +5389,20 @@ function readImageFile(file, symId, day) {
     touchDay(symId, day);
 
     showToast('☁ กำลังอัปโหลดรูป...');
-    // ใช้ path ไม่ซ้ำทุกครั้ง (มี timestamp) เพื่อไม่ทับรูปเก่า - เผื่อกด Undo ย้อนกลับได้ในช่วงสั้นๆ
-    const path = `${currentWeek}/${symId}__${day}__${Date.now()}.png`.replace(/\s/g,'_');
+    const path = `${currentWeek}/${symId}__${day}.png`.replace(/\s/g,'_');
     const url = await uploadBase64(base64, path);
     if (url) {
       if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
-      chartImages[currentWeek][key] = url;
+      chartImages[currentWeek][`${symId}__${day}`] = url;
       imgEl.src = url;
       saveImages();
       autoSave();
-      notifyImageChanged(symId, day, oldValue, url);
+      showToast('🖼 อัปโหลดรูปสำเร็จ ☁');
     } else {
       // fallback เก็บ base64 local
       if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
-      chartImages[currentWeek][key] = base64;
+      chartImages[currentWeek][`${symId}__${day}`] = base64;
       saveImages();
-      notifyImageChanged(symId, day, oldValue, base64);
       showToast('⚠ บันทึกรูปเฉพาะ Local');
     }
   };
@@ -5438,9 +5410,8 @@ function readImageFile(file, symId, day) {
 }
 
 function setChartImage(symId, day, base64) {
-  const key = `${symId}__${day}`;
-  const oldValue = (chartImages[currentWeek] || {})[key] || '';
   if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
+  const key = `${symId}__${day}`;
   chartImages[currentWeek][key] = base64;
 
   document.getElementById(`chartimg_${symId}_${day}`).src = base64;
@@ -5450,13 +5421,12 @@ function setChartImage(symId, day, base64) {
   updateDayTabDots(symId);
   touchDay(symId, day);
   saveImages();
-  notifyImageChanged(symId, day, oldValue, base64);
 }
 
 async function removeChartImage(symId, day) {
   if (!confirm('ลบรูปนี้?')) return;
   const key = `${symId}__${day}`;
-  const oldValue = (chartImages[currentWeek] || {})[key] || '';
+  const path = `${currentWeek}/${key}.png`.replace(/\s/g,'_');
   if (chartImages[currentWeek]) delete chartImages[currentWeek][key];
 
   document.getElementById(`chartimg_${symId}_${day}`).src = '';
@@ -5466,7 +5436,8 @@ async function removeChartImage(symId, day) {
   updateDayTabDots(symId);
   touchDay(symId, day);
   saveImages();
-  notifyImageChanged(symId, day, oldValue, '');
+  await deleteImage(path);
+  showToast('🗑 ลบรูปแล้ว');
 }
 
 function openChartFullscreen(symId, day) {
@@ -5664,7 +5635,6 @@ function loadWeekData() {
   setVal('ov_risk', data.ov_risk || '');
   setVal('ov_analysis', data.ov_analysis || '');
   setVal('ov_summary', data.ov_summary || '');
-  initAnalysisHistory(data.ov_analysis || '');
 
   if (data.dxy_bias) restoreBias('dxy', data.dxy_bias);
 
@@ -5712,7 +5682,6 @@ function clearAllFields() {
   setVal('ov_risk', '');
   setVal('ov_analysis', '');
   setVal('ov_summary', '');
-  initAnalysisHistory('');
 
   document.querySelectorAll('.bias-pill').forEach(b => b.className = 'bias-pill');
   document.querySelectorAll('.tf-pill').forEach(b => b.classList.remove('tf-active'));
@@ -5921,160 +5890,6 @@ function exportData() {
 }
 
 // ============================================
-// MARKET ANALYSIS UNDO/REDO
-// ============================================
-let analysisHistory = [''];
-let analysisHistoryIndex = 0;
-let analysisPushTimer;
-const ANALYSIS_HISTORY_LIMIT = 50;
-
-function initAnalysisHistory(value) {
-  analysisHistory = [value || ''];
-  analysisHistoryIndex = 0;
-  updateAnalysisUndoButtons();
-}
-
-function pushAnalysisHistory(value) {
-  if (analysisHistory[analysisHistoryIndex] === value) return;
-  // ตัดของที่อยู่หลัง index ปัจจุบันทิ้ง (กรณีพิมพ์ต่อหลัง undo)
-  analysisHistory = analysisHistory.slice(0, analysisHistoryIndex + 1);
-  analysisHistory.push(value);
-  if (analysisHistory.length > ANALYSIS_HISTORY_LIMIT) {
-    analysisHistory.shift();
-  }
-  analysisHistoryIndex = analysisHistory.length - 1;
-  updateAnalysisUndoButtons();
-}
-
-function onAnalysisInput() {
-  autoSave();
-  clearTimeout(analysisPushTimer);
-  const val = getVal('ov_analysis');
-  analysisPushTimer = setTimeout(() => pushAnalysisHistory(val), 600);
-}
-
-function onAnalysisKeydown(e) {
-  const isUndo = (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z';
-  const isRedo = ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z') ||
-                 ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y');
-  if (isUndo) { e.preventDefault(); analysisUndo(); }
-  else if (isRedo) { e.preventDefault(); analysisRedo(); }
-}
-
-function analysisUndo() {
-  clearTimeout(analysisPushTimer);
-  // เก็บค่าปัจจุบันที่ยังไม่ทัน push ก่อน undo
-  const current = getVal('ov_analysis');
-  pushAnalysisHistory(current);
-  if (analysisHistoryIndex <= 0) return;
-  analysisHistoryIndex--;
-  applyAnalysisHistory('↶ ย้อนกลับแล้ว');
-}
-
-function analysisRedo() {
-  if (analysisHistoryIndex >= analysisHistory.length - 1) return;
-  analysisHistoryIndex++;
-  applyAnalysisHistory('↷ ไปข้างหน้าแล้ว');
-}
-
-function applyAnalysisHistory(toastMsg) {
-  const val = analysisHistory[analysisHistoryIndex];
-  setVal('ov_analysis', val);
-  updateAnalysisUndoButtons();
-  allData[currentWeek] = collectData();
-  localStorage.setItem('forex_action_plan', JSON.stringify(allData));
-  cloudSave(allData);
-  showToast(toastMsg);
-}
-
-function updateAnalysisUndoButtons() {
-  const undoBtn = document.getElementById('analysisUndoBtn');
-  const redoBtn = document.getElementById('analysisRedoBtn');
-  if (undoBtn) undoBtn.disabled = analysisHistoryIndex <= 0;
-  if (redoBtn) redoBtn.disabled = analysisHistoryIndex >= analysisHistory.length - 1;
-}
-
-// ============================================
-// CHART IMAGE UNDO (Toast แบบ Gmail "Undo Send" - session เดียว ไม่เก็บข้ามรีเฟรช)
-// ============================================
-const IMAGE_UNDO_SECONDS = 12; // ระยะเวลาที่กด Undo ได้หลังแปะ/ลบรูป
-let pendingImageUndo = null; // { symId, day, oldValue, newValue, timerId }
-
-function urlToPath(url) {
-  if (!url || typeof url !== 'string' || !url.startsWith('http')) return null; // base64 ไม่มี path จริงให้ลบ
-  const marker = `/public/${SB_BUCKET}/`;
-  const idx = url.indexOf(marker);
-  if (idx === -1) return null;
-  const path = url.slice(idx + marker.length).split('?')[0];
-  return path || null;
-}
-
-// เรียกทุกครั้งที่รูปในช่องใดช่องหนึ่งเปลี่ยน (แปะใหม่/แทนที่/ลบ)
-// oldValue = รูปก่อนหน้า (อาจเป็น '' ถ้าช่องว่างอยู่แล้ว), newValue = รูปปัจจุบันหลังเปลี่ยน (อาจเป็น '' ถ้าลบ)
-function notifyImageChanged(symId, day, oldValue, newValue) {
-  // ถ้ามี toast รออยู่จากการเปลี่ยนรูปช่องอื่น/ครั้งก่อน ให้ finalize ของเก่าไปก่อน (ยืนยันว่าเก็บของใหม่ล่าสุด)
-  finalizePendingImageUndo();
-
-  const isReplace = !!oldValue; // มีรูปเดิมอยู่ก่อน = แทนที่/ลบ, ไม่มี = แปะรูปลงช่องว่าง
-  const label = newValue
-    ? (isReplace ? '🖼 แทนที่รูปแล้ว' : '🖼 เพิ่มรูปแล้ว')
-    : '🗑 ลบรูปแล้ว';
-
-  const timerId = setTimeout(() => {
-    finalizePendingImageUndo();
-  }, IMAGE_UNDO_SECONDS * 1000);
-
-  pendingImageUndo = { symId, day, oldValue, newValue, timerId };
-  showUndoToast(label, () => imageUndo(symId, day));
-}
-
-// ผู้ใช้กด Undo ใน toast ภายในเวลาที่กำหนด
-function imageUndo(symId, day) {
-  if (!pendingImageUndo || pendingImageUndo.symId !== symId || pendingImageUndo.day !== day) return;
-  const { oldValue, newValue, timerId } = pendingImageUndo;
-  clearTimeout(timerId);
-  pendingImageUndo = null;
-
-  const key = `${symId}__${day}`;
-  if (!chartImages[currentWeek]) chartImages[currentWeek] = {};
-  if (oldValue) chartImages[currentWeek][key] = oldValue;
-  else delete chartImages[currentWeek][key];
-
-  const img = document.getElementById(`chartimg_${symId}_${day}`);
-  const wrap = document.getElementById(`imgwrap_${symId}_${day}`);
-  const dropzone = document.getElementById(`dropzone_${symId}_${day}`);
-  if (oldValue) {
-    img.src = oldValue;
-    wrap.classList.add('show');
-    dropzone.style.display = 'none';
-  } else {
-    img.src = '';
-    wrap.classList.remove('show');
-    dropzone.style.display = '';
-  }
-  updateDayTabDots(symId);
-  touchDay(symId, day);
-  saveImages();
-
-  // รูปใหม่ที่แปะผิด (newValue) ไม่ใช้แล้ว ลบออกจาก Storage จริงทันที
-  const newPath = urlToPath(newValue);
-  if (newPath) deleteImage(newPath);
-
-  hideUndoToast();
-  showToast(oldValue ? '↶ กู้คืนรูปเดิมแล้ว' : '↶ ย้อนกลับ (ไม่มีรูป)');
-}
-
-// หมดเวลาโดยไม่กด Undo หรือมีการเปลี่ยนรูปช่องอื่นแทรก -> ถือว่ารูปปัจจุบันเป็นตัวจริงแล้ว ลบรูปเก่าออกจริง
-function finalizePendingImageUndo() {
-  if (!pendingImageUndo) return;
-  const { oldValue, timerId } = pendingImageUndo;
-  clearTimeout(timerId);
-  pendingImageUndo = null;
-  const oldPath = urlToPath(oldValue);
-  if (oldPath) deleteImage(oldPath);
-}
-
-// ============================================
 // HELPERS
 // ============================================
 function setVal(id, val) {
@@ -6094,26 +5909,6 @@ function showToast(msg) {
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-let undoToastTimer;
-function showUndoToast(msg, onUndoClick) {
-  const el = document.getElementById('undoToast');
-  document.getElementById('undoToastMsg').textContent = msg;
-  el.classList.add('show');
-  clearTimeout(undoToastTimer);
-  undoToastTimer = setTimeout(() => el.classList.remove('show'), IMAGE_UNDO_SECONDS * 1000);
-  const btn = document.getElementById('undoToastBtn');
-  btn.onclick = () => {
-    el.classList.remove('show');
-    clearTimeout(undoToastTimer);
-    onUndoClick();
-  };
-}
-
-function hideUndoToast() {
-  clearTimeout(undoToastTimer);
-  document.getElementById('undoToast').classList.remove('show');
 }
 </script>
 </body>
