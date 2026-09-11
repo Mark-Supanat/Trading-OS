@@ -2902,6 +2902,7 @@ function anBuildTradeCardHtml(t) {
   return `<div class="jn-trade-card">
     <div class="jn-tc-head">
       <span class="jn-tc-sym">${t.sym||'—'}</span>
+      ${posDisplay!=='—' ? `<span class="an-pill" style="background:${posVal.startsWith('L')?'rgba(52,211,153,.18)':'rgba(244,63,94,.18)'};color:${posColor}">${posDisplay}</span>` : ''}
       ${isOpen
         ? `<span class="an-pill" style="background:rgba(251,191,36,.18);color:#fbbf24">OPEN</span>`
         : (tpslVal ? `<span class="an-pill ${tpslClass}">${tpslVal}</span>` : '')}
@@ -3358,6 +3359,7 @@ function jnRenderTradeCard(t) {
     return `<div class="jn-trade-card">
       <div class="jn-tc-head">
         <span class="jn-tc-sym">${t.sym||'—'}</span>
+        ${posDisplay!=='—' ? `<span class="an-pill" style="background:${posVal.startsWith('L')?'rgba(52,211,153,.18)':'rgba(244,63,94,.18)'};color:${posColor}">${posDisplay}</span>` : ''}
         ${isOpen
           ? `<span class="an-pill" style="background:rgba(251,191,36,.18);color:#fbbf24">OPEN</span>`
           : (tpslVal ? `<span class="an-pill ${tpslClass}">${tpslVal}</span>` : '')}
