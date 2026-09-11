@@ -2781,11 +2781,12 @@ function renderWinByGradeChart(trades) {
 }
 
 // Win Rate แยกตามฝั่ง Long/Short — ใช้ convention เดียวกับหน้า Journal (pos ขึ้นต้นด้วย L/S)
+// รวม Buy = Long และ Sell = Short เข้ากับ Long/Short ปกติด้วย
 function renderPositionStats(trades) {
   const el = document.getElementById('anPositionStats');
   if (!el) return;
-  const isLong = t => (t.pos||'').toUpperCase().startsWith('L');
-  const isShort = t => (t.pos||'').toUpperCase().startsWith('S');
+  const isLong = t => { const p = (t.pos||'').toUpperCase(); return p.startsWith('L') || p.startsWith('BUY'); };
+  const isShort = t => { const p = (t.pos||'').toUpperCase(); return p.startsWith('S') || p.startsWith('SELL'); };
   const stat = arr => {
     const decided = arr.filter(t => t.wl==='W' || t.wl==='L');
     const wins = decided.filter(t => t.wl==='W').length;
