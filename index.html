@@ -3184,7 +3184,7 @@ function jnGoThisWeek() {
   jnCalYear = now.getFullYear();
   jnCalMonth = now.getMonth();
   renderJournalCalendar();
-  jnSelectDay(jnMondayKeyOf(now), true);
+  jnSelectWeek(jnMondayKeyOf(now));
 }
 
 function jnGoToDate(key) {
@@ -3287,7 +3287,7 @@ function renderJournalCalendar() {
     const rangeLabel = (first.month === last.month)
       ? `${first.day}-${last.day} ${JN_MONTH_ABBR[first.month]}`
       : `${first.day} ${JN_MONTH_ABBR[first.month]}-${last.day} ${JN_MONTH_ABBR[last.month]}`;
-    rowHtml += `<div class="jn-cal-cell jn-week-cell" onclick="jnSelectDay('${rowMondayKey}')">
+    rowHtml += `<div class="jn-cal-cell jn-week-cell" onclick="jnSelectWeek('${rowMondayKey}')">
       <div class="jn-cal-week-label">PNL$</div>
       <div class="jn-cal-pnl" style="color:${weekColor}">${weekPnl>=0?'+':'-'}$${Math.abs(weekPnl).toFixed(2)}</div>
       <div class="jn-cal-week-range">WEEK ${weekNum} · ${rangeLabel}</div>
@@ -3298,48 +3298,7 @@ function renderJournalCalendar() {
   grid.innerHTML = html;
 }
 
-function jnSelectDay(key, includeAllOpen) {
-  jnSelectedDateKey = key;
-  renderJournalCalendar();
-  const trades = jnGetTrades();
-  const byDay = jnClosedByDay(trades);
-  const openByDay = jnOpenByDay(trades);
-  const closedTrades = (byDay[key] && byDay[key].trades) || [];
-  let openTrades = openByDay[key] || [];
-
-  if (includeAllOpen) {
-    // also surface every currently-open position in this quarter's data,
-    // regardless of which week/month it was actually entered in
-    const seen = new Set(openTrades.map(t => t.no));
-    trades.forEach(t => {
-      if (jnCleanDate(t.dateClose)) return; // already closed
-      if (!jnCleanDate(t.dateOpen)) return;
-      if (seen.has(t.no)) return;
-      openTrades.push(t);
-      seen.add(t.no);
-    });
-  }
-
-  const panel = document.getElementById('jnDayDetail');
-  const title = document.getElementById('jnDayDetailTitle');
-  const body = document.getElementById('jnDayDetailBody');
-  if (!panel || !title || !body) return;
-
-  const dayTrades = [...closedTrades, ...openTrades].sort((a,b) => (a.no||0)-(b.no||0));
-  if (dayTrades.length === 0) {
-    panel.style.display = 'none';
-    return;
-  }
-  panel.style.display = 'block';
-  const d = new Date(key);
-  const dTitle = d.toLocaleDateString('th-TH-u-ca-gregory',{day:'2-digit',month:'long',year:'numeric'});
-  const openNote = openTrades.length ? ` (${openTrades.length} ยังไม่ปิด)` : '';
-  const dayLabel = includeAllOpen
-    ? `📅 สัปดาห์นี้ (เริ่ม ${dTitle}) — ${dayTrades.length} เทรด${openNote}`
-    : `📅 ${dTitle} — ${dayTrades.length} เทรด${openNote}`;
-  title.textContent = dayLabel;
-
-  body.innerHTML = dayTrades.map(t => {
+function jnRenderTradeCard(t) {
     const isOpen = !jnCleanDate(t.dateClose);
     const pnl = parseFloat(t.pnlUsd) || 0;
     const pnlColor = pnl > 0 ? 'var(--green)' : pnl < 0 ? 'var(--red)' : 'var(--jn-text-dim)';
@@ -3414,7 +3373,75 @@ function jnSelectDay(key, includeAllOpen) {
       ${t.note ? `<div class="jn-tc-note">📝 ${t.note}</div>` : ''}
       ${links.length ? `<div class="jn-tc-links">${links.join('')}</div>` : ''}
     </div>`;
-  }).join('');
+}
+
+function jnSelectDay(key) {
+  jnSelectedDateKey = key;
+  renderJournalCalendar();
+  const trades = jnGetTrades();
+  const byDay = jnClosedByDay(trades);
+  const openByDay = jnOpenByDay(trades);
+  const closedTrades = (byDay[key] && byDay[key].trades) || [];
+  const openTrades = openByDay[key] || [];
+
+  const panel = document.getElementById('jnDayDetail');
+  const title = document.getElementById('jnDayDetailTitle');
+  const body = document.getElementById('jnDayDetailBody');
+  if (!panel || !title || !body) return;
+
+  const dayTrades = [...closedTrades, ...openTrades].sort((a,b) => (a.no||0)-(b.no||0));
+  if (dayTrades.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
+  const d = new Date(key);
+  const dTitle = d.toLocaleDateString('th-TH-u-ca-gregory',{day:'2-digit',month:'long',year:'numeric'});
+  const openNote = openTrades.length ? ` (${openTrades.length} ยังไม่ปิด)` : '';
+  title.textContent = `📅 ${dTitle} — ${dayTrades.length} เทรด${openNote}`;
+
+  body.innerHTML = dayTrades.map(jnRenderTradeCard).join('');
+}
+
+function jnSelectWeek(mondayKey) {
+  jnSelectedDateKey = mondayKey;
+  renderJournalCalendar();
+  const trades = jnGetTrades();
+
+  // the 7 calendar days (Mon..Sun) that belong to this week
+  const monday = new Date(mondayKey);
+  const weekKeys = [];
+  for (let i = 0; i < 7; i++) {
+    const dd = new Date(monday);
+    dd.setDate(monday.getDate() + i);
+    weekKeys.push(jnDateKey(dd));
+  }
+
+  // every currently-open position (still running now), regardless of which week it was entered
+  const openTrades = trades.filter(t => !jnCleanDate(t.dateClose) && jnCleanDate(t.dateOpen));
+
+  // every trade that CLOSED sometime during this week, oldest first
+  const closedTrades = trades
+    .filter(t => { const d = jnCleanDate(t.dateClose); return d && weekKeys.includes(jnDateKey(d)); })
+    .sort((a,b) => new Date(a.dateClose) - new Date(b.dateClose));
+
+  const panel = document.getElementById('jnDayDetail');
+  const title = document.getElementById('jnDayDetailTitle');
+  const body = document.getElementById('jnDayDetailBody');
+  if (!panel || !title || !body) return;
+
+  // open positions first, then the week's closed-trade history right after
+  const weekTrades = [...openTrades, ...closedTrades];
+  if (weekTrades.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
+  const dTitle = monday.toLocaleDateString('th-TH-u-ca-gregory',{day:'2-digit',month:'long',year:'numeric'});
+  const openNote = openTrades.length ? ` (${openTrades.length} ยังไม่ปิด)` : '';
+  title.textContent = `📅 สัปดาห์นี้ (เริ่ม ${dTitle}) — ${weekTrades.length} เทรด${openNote}`;
+
+  body.innerHTML = weekTrades.map(jnRenderTradeCard).join('');
 }
 
 function jnCloseDayDetail() {
