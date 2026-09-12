@@ -1693,7 +1693,10 @@ select.field-sm option{background:#111827;color:var(--text)}
             <button class="an-tab" id="an-tab-q4" onclick="setAnQuarter('q4',this)">Q4</button>
             <button class="an-tab" id="btnToggleWeek" onclick="toggleWeekSummary()">📅 สรุปสัปดาห์นี้ ▾</button>
           </div>
-          <button class="btn-save" id="anRefreshBtn" onclick="loadAnalytics()" style="font-size:11px;padding:5px 14px">🔄 Refresh</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn-save" id="anExportBtn" onclick="anExportCSV()" style="font-size:11px;padding:5px 14px">⬇ Export CSV</button>
+            <button class="btn-save" id="anRefreshBtn" onclick="loadAnalytics()" style="font-size:11px;padding:5px 14px">🔄 Refresh</button>
+          </div>
         </div>
         <!-- Symbol Filter -->
         <div id="anSymbolBar" style="display:flex;gap:5px;flex-wrap:wrap;padding:8px 12px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)">
@@ -2227,6 +2230,18 @@ function getFilteredTrades() {
   let trades = anQuarter === 'all' ? anAllTrades : anAllTrades.filter(t => t._quarter === anQuarter);
   if (anSymbol !== 'all') trades = trades.filter(t => t.sym === anSymbol);
   return trades;
+}
+
+function anExportCSV() {
+  const trades = getFilteredTrades();
+  if (!trades.length) { showToast('⚠ ไม่มีข้อมูลให้ export'); return; }
+  const header = JN_EXPORT_COLS.join(',');
+  const lines = trades.map(t => JN_EXPORT_COLS.map(c => jnCsvEscape(t[c])).join(','));
+  const csv = [header, ...lines].join('\n');
+  const qLabel = anQuarter === 'all' ? 'all' : anQuarter;
+  const symLabel = anSymbol === 'all' ? 'all' : anSymbol;
+  jnDownloadBlob(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }), `forex-analytics-${qLabel}-${symLabel}-${new Date().toISOString().slice(0,10)}.csv`);
+  showToast(`✅ Export ${trades.length} แถว (Analytics) เป็น CSV แล้ว`);
 }
 
 // ============================================
