@@ -1608,6 +1608,7 @@ select.field-sm option{background:#111827;color:var(--text)}
           <div class="jn-sync-status" id="jnSyncStatus">⏳ กำลังโหลด...</div>
           <button class="jn-btn" onclick="jnExportCSV()">⬇ Export CSV</button>
           <button class="jn-btn" onclick="jnExportJSON()">⬇ Export JSON</button>
+          <button class="jn-btn" onclick="jnExportThisWeekCSV()">⬇ Export สัปดาห์นี้</button>
           <button class="jn-btn" onclick="document.getElementById('jnImportFileInput').click()">⬆ Import JSON</button>
           <input type="file" id="jnImportFileInput" accept="application/json" style="display:none" onchange="jnImportJSON(event)">
           <button class="jn-btn" onclick="loadJournalPage(true)">↻ Reload</button>
@@ -3558,6 +3559,29 @@ function jnDownloadBlob(blob, filename) {
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+function jnExportThisWeekCSV() {
+  const now = new Date();
+  const mondayKey = jnMondayKeyOf(now);
+  const monday = new Date(mondayKey);
+  const weekKeys = [];
+  for (let i = 0; i < 7; i++) {
+    const dd = new Date(monday);
+    dd.setDate(monday.getDate() + i);
+    weekKeys.push(jnDateKey(dd));
+  }
+  const trades = jnGetTrades();
+  const openTrades = trades.filter(t => !jnCleanDate(t.dateClose) && jnCleanDate(t.dateOpen));
+  const closedTrades = trades
+    .filter(t => { const d = jnCleanDate(t.dateClose); return d && weekKeys.includes(jnDateKey(d)); })
+    .sort((a,b) => new Date(a.dateClose) - new Date(b.dateClose));
+  const weekTrades = [...openTrades, ...closedTrades];
+  if (!weekTrades.length) { showToast('⚠ ไม่มีเทรดในสัปดาห์นี้ให้ export'); return; }
+  const header = JN_EXPORT_COLS.join(',');
+  const lines = weekTrades.map(t => JN_EXPORT_COLS.map(c => jnCsvEscape(t[c])).join(','));
+  const csv = [header, ...lines].join('\n');
+  jnDownloadBlob(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }), `forex-journal-week-${mondayKey}.csv`);
+  showToast(`✅ Export ${weekTrades.length} แถว (สัปดาห์นี้) เป็น CSV แล้ว`);
 }
 function jnExportCSV() {
   const trades = jnGetTrades();
