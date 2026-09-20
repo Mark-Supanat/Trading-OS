@@ -359,6 +359,15 @@ body::before{
 .routine-row:not(.checkable){cursor:default}
 .routine-row:not(.checkable) .routine-text{font-style:italic;color:var(--text2);font-size:12px}
 .routine-tag{font-family:var(--font-mono);font-size:8px;letter-spacing:.05em;color:var(--text3);padding:2px 6px;border-radius:5px;background:rgba(255,255,255,.05);text-transform:uppercase}
+.routine-actions{display:flex;gap:2px;flex-shrink:0;opacity:0;transition:opacity .15s}
+.routine-row:hover .routine-actions{opacity:1}
+.routine-icon-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:3px 5px;border-radius:4px;transition:all .15s;flex-shrink:0}
+.routine-icon-btn:hover{color:var(--text);background:rgba(255,255,255,.08)}
+.routine-add-row{color:var(--text3)}
+.routine-add-row .routine-text{color:var(--text3)}
+.routine-add-row:hover .routine-text{color:var(--text2)}
+.routine-edit-input{flex:1;min-width:0;background:rgba(255,255,255,.05);border:1px solid var(--border2);border-radius:5px;padding:4px 8px;color:var(--text);font-family:var(--font-body);font-size:12.5px;outline:none}
+.routine-edit-input:focus{border-color:#f0b429}
 [data-theme="light"] .dash-day-label{color:#4b5f8a}
 
 /* MARKET PULSE BULLETS */
@@ -687,6 +696,8 @@ body::before{
 .history-export-btn-ghost{color:var(--text3);background:rgba(255,255,255,.04);border-color:var(--border)}
 .history-export-btn-ghost:hover{background:rgba(255,255,255,.08)}
 .history-week-checkbox{width:15px;height:15px;accent-color:#fb923c;cursor:pointer;flex-shrink:0}
+.history-delete-btn{font-size:13px;background:none;border:none;color:var(--text3);cursor:pointer;padding:3px 6px;border-radius:6px;transition:all .15s}
+.history-delete-btn:hover{color:#f87171;background:rgba(248,113,113,.14)}
 .export-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;margin-bottom:12px;background:rgba(255,255,255,.03);border:1px dashed var(--border);border-radius:10px;flex-wrap:wrap}
 .export-toolbar-hint{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.03em}
 .export-toolbar-count{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fb923c;letter-spacing:.03em}
@@ -1037,6 +1048,10 @@ select.field-sm option{background:#111827;color:var(--text)}
   width:18px;height:18px;border-radius:50%;background:rgba(147,197,253,.3);color:#0b0f1a;
   display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;
 }
+.dash-focus-pill.bias-f-LONG{background:rgba(16,185,129,.18);border-color:rgba(16,185,129,.45);color:#34d399}
+.dash-focus-pill.bias-f-SHORT{background:rgba(244,63,94,.18);border-color:rgba(244,63,94,.45);color:#f87171}
+.dash-focus-pill.bias-f-NEUTRAL{background:rgba(129,140,248,.18);border-color:rgba(129,140,248,.45);color:#a5b4fc}
+.dash-focus-pill.bias-f-WAIT{background:rgba(251,146,60,.18);border-color:rgba(251,146,60,.45);color:#fb923c;animation:pulse-wait 2s infinite}
 
 /* NEWS WARNING BANNER */
 .news-banner{
@@ -1341,8 +1356,8 @@ select.field-sm option{background:#111827;color:var(--text)}
         <!-- Market Pulse -->
         <div class="dash-widget" style="display:flex;flex-direction:column;height:480px">
 
-          <!-- Market Pulse (60%) -->
-          <div style="display:flex;flex-direction:column;flex:6 6 0;min-height:0">
+          <!-- Market Pulse (80%) -->
+          <div style="display:flex;flex-direction:column;flex:8 8 0;min-height:0">
             <div class="dash-widget-title" style="color:#f0b429;flex-shrink:0">MARKET PULSE</div>
             <div id="dashPulse" style="margin-top:4px;display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;overflow-y:auto;padding-right:6px">
               <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px">เขียน Market Analysis ใน Action Plan ก่อน</div>
@@ -1352,8 +1367,8 @@ select.field-sm option{background:#111827;color:var(--text)}
 
           <div class="dash-divider" style="flex-shrink:0"></div>
 
-          <!-- Quick Note (40%) -->
-          <div style="display:flex;flex-direction:column;flex:4 4 0;min-height:0">
+          <!-- Quick Note (20%) -->
+          <div style="display:flex;flex-direction:column;flex:2 2 0;min-height:0">
             <div class="dash-widget-title" style="margin-bottom:6px;flex-shrink:0">QUICK NOTE</div>
             <textarea id="dashNote" placeholder="จดไว้ก่อน — Key level วันนี้, สิ่งที่ต้องระวัง..." style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;resize:none;flex:1;min-height:0;line-height:1.7" oninput="saveDashNote()"></textarea>
           </div>
@@ -3868,12 +3883,12 @@ function renderHolidayLine(now) {
 
 function updateDashboard() {
   const now = new Date();
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const days = ['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัส','วันศุกร์','วันเสาร์'];
 
   // Date
   const el = document.getElementById('dashDate');
-  if (el) el.textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()+543}`;
+  if (el) el.textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
   const elDay = document.getElementById('dashDay');
   if (elDay) elDay.textContent = days[now.getDay()];
   renderHolidayLine(now);
@@ -4229,7 +4244,11 @@ function renderDashFocusLine() {
   if (!focusList.length) { el.innerHTML = ''; return; }
   const pills = focusList.map((id, i) => {
     const sym = SYMBOLS.find(s => s.id === id);
-    return sym ? `<span class="dash-focus-pill"><span class="dash-focus-rank">${i+1}</span>${shortSymName(sym)}</span>` : '';
+    if (!sym) return '';
+    const activeDay = activeDayState[sym.id] || 'PLAN';
+    const bias = ((biasState[sym.id] || {})[activeDay]) || '';
+    const biasCls = bias ? `bias-f-${bias}` : '';
+    return `<span class="dash-focus-pill ${biasCls}"><span class="dash-focus-rank">${i+1}</span>${shortSymName(sym)}</span>`;
   }).filter(Boolean).join('');
   el.innerHTML = `<div class="dash-focus-label">🎯 FOCUS ON</div><div class="dash-focus-pills">${pills}</div>`;
 }
@@ -4245,17 +4264,46 @@ function saveDashNote() {
 // DAILY ROUTINE — synced to Supabase (same `action_plan` table, row id='routine')
 // ============================================
 const SB_ROUTINE_ID = 'routine';
-let routineData = {}; // { 'YYYY-MM-DD': { meditate:bool, gm:bool, exercise:bool, meals:bool } }
+const SB_ROUTINE_ITEMS_ID = 'routine_items';
+let routineData = {}; // { 'YYYY-MM-DD': { <itemKey>:bool, ... } }
 let dashNoteCloudText = '';
 let focusList = []; // array of symbol ids, in priority order
 let routineSaveTimer = null;
+let routineEditKey = null; // key of routine item currently being edited inline, or null
+let routineAdding = false; // whether the "add new routine" input row is showing
 
-const ROUTINE_ITEMS = [
+const DEFAULT_ROUTINE_ITEMS = [
   { key:'meditate', emoji:'🧘', label:'นั่งสมาธิ อย่างน้อย 5 นาที' },
   { key:'gm',       emoji:'☀️', label:'GM กับ ChatGPT ช่วงเช้า' },
   { key:'exercise', emoji:'🏋️', label:'ออกกำลังกาย (เวท/เทนนิส)' },
   { key:'meals',    emoji:'🍽️', label:'กินข้าวครบ 3 มื้อ' },
 ];
+let routineItems = DEFAULT_ROUTINE_ITEMS.slice();
+
+async function loadRoutineItemsCloud() {
+  try {
+    const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_ROUTINE_ITEMS_ID}&select=data`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
+    });
+    const rows = await res.json();
+    return (rows && rows[0] && rows[0].data && rows[0].data.length) ? rows[0].data : DEFAULT_ROUTINE_ITEMS.slice();
+  } catch(e) { console.warn('Routine items load failed:', e); return DEFAULT_ROUTINE_ITEMS.slice(); }
+}
+
+async function saveRoutineItemsCloud() {
+  try {
+    await fetch(`${SB_URL}/action_plan`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ id: SB_ROUTINE_ITEMS_ID, data: routineItems }),
+    });
+  } catch(e) { console.warn('Routine items save failed:', e); }
+}
 
 function todayKey() {
   const d = new Date();
@@ -4293,17 +4341,85 @@ function renderRoutine() {
   if (!list) return;
   const today = routineData[todayKey()] || {};
 
-  list.innerHTML = ROUTINE_ITEMS.map(item => {
+  const rows = routineItems.map(item => {
+    if (routineEditKey === item.key) {
+      return `<div class="routine-row">
+        <div style="width:24px;flex-shrink:0"></div>
+        <input type="text" class="routine-edit-input" id="routineEditInput" value="${escAttr(item.label)}" onkeydown="if(event.key==='Enter')saveRoutineEdit('${item.key}');if(event.key==='Escape')cancelRoutineEdit();">
+        <button class="routine-icon-btn" onclick="saveRoutineEdit('${item.key}')" title="บันทึก">✓</button>
+        <button class="routine-icon-btn" onclick="cancelRoutineEdit()" title="ยกเลิก">✕</button>
+      </div>`;
+    }
     const done = !!today[item.key];
-    return `<div class="routine-row ${done?'done':''} checkable" onclick="toggleRoutineItem('${item.key}')">
-      <div class="routine-check">✓</div>
-      <div class="routine-emoji">${item.emoji}</div>
-      <div class="routine-text">${item.label}</div>
+    return `<div class="routine-row ${done?'done':''} checkable">
+      <div class="routine-check" onclick="toggleRoutineItem('${item.key}')">✓</div>
+      <div class="routine-emoji" onclick="toggleRoutineItem('${item.key}')">${item.emoji}</div>
+      <div class="routine-text" onclick="toggleRoutineItem('${item.key}')">${item.label}</div>
+      <div class="routine-actions">
+        <button class="routine-icon-btn" onclick="event.stopPropagation();startRoutineEdit('${item.key}')" title="แก้ไข">✎</button>
+        <button class="routine-icon-btn" onclick="event.stopPropagation();deleteRoutineItem('${item.key}')" title="ลบ">🗑</button>
+      </div>
     </div>`;
   }).join('');
 
-  const doneCount = ROUTINE_ITEMS.filter(i => today[i.key]).length;
-  if (countEl) countEl.textContent = `${doneCount} / ${ROUTINE_ITEMS.length} วันนี้`;
+  const addRow = routineAdding
+    ? `<div class="routine-row">
+        <div style="width:24px;flex-shrink:0"></div>
+        <input type="text" class="routine-edit-input" id="routineAddInput" placeholder="ชื่อ Routine ใหม่..." onkeydown="if(event.key==='Enter')confirmAddRoutine();if(event.key==='Escape')cancelAddRoutine();">
+        <button class="routine-icon-btn" onclick="confirmAddRoutine()" title="เพิ่ม">✓</button>
+        <button class="routine-icon-btn" onclick="cancelAddRoutine()" title="ยกเลิก">✕</button>
+      </div>`
+    : `<div class="routine-row routine-add-row" onclick="startAddRoutine()">
+        <div style="width:24px;flex-shrink:0"></div>
+        <div class="routine-emoji">➕</div>
+        <div class="routine-text">เพิ่ม Routine</div>
+      </div>`;
+
+  list.innerHTML = rows + addRow;
+
+  const doneCount = routineItems.filter(i => today[i.key]).length;
+  if (countEl) countEl.textContent = `${doneCount} / ${routineItems.length} วันนี้`;
+
+  if (routineEditKey) { const inp = document.getElementById('routineEditInput'); if (inp) { inp.focus(); inp.select(); } }
+  if (routineAdding) { const inp = document.getElementById('routineAddInput'); if (inp) inp.focus(); }
+}
+
+function startRoutineEdit(key) { routineEditKey = key; routineAdding = false; renderRoutine(); }
+function cancelRoutineEdit() { routineEditKey = null; renderRoutine(); }
+
+function saveRoutineEdit(key) {
+  const inp = document.getElementById('routineEditInput');
+  const val = inp ? inp.value.trim() : '';
+  if (val) {
+    const item = routineItems.find(i => i.key === key);
+    if (item) { item.label = val; saveRoutineItemsCloud(); }
+  }
+  routineEditKey = null;
+  renderRoutine();
+}
+
+function deleteRoutineItem(key) {
+  const item = routineItems.find(i => i.key === key);
+  if (!item) return;
+  if (!confirm(`ลบ Routine "${item.label}" ทิ้ง?`)) return;
+  routineItems = routineItems.filter(i => i.key !== key);
+  saveRoutineItemsCloud();
+  renderRoutine();
+}
+
+function startAddRoutine() { routineAdding = true; routineEditKey = null; renderRoutine(); }
+function cancelAddRoutine() { routineAdding = false; renderRoutine(); }
+
+function confirmAddRoutine() {
+  const inp = document.getElementById('routineAddInput');
+  const val = inp ? inp.value.trim() : '';
+  if (val) {
+    const key = 'item_' + Date.now();
+    routineItems.push({ key, emoji: '✅', label: val });
+    saveRoutineItemsCloud();
+  }
+  routineAdding = false;
+  renderRoutine();
 }
 
 function toggleRoutineItem(key) {
@@ -4580,6 +4696,7 @@ async function initApp() {
   showToast('☁ กำลังโหลดข้อมูล...');
   const cloudData = await cloudLoad();
   routineData = await loadRoutineCloud();
+  routineItems = await loadRoutineItemsCloud();
   dashNoteCloudText = await loadNoteCloud();
   focusList = await loadFocusCloud();
   if (!focusList.length) {
@@ -4759,16 +4876,24 @@ function renderHistoryPanel() {
 // จัดกลุ่ม weeks ตามเดือน (ใช้ archivedAt เป็นตัวตัดสิน ไม่พึ่ง label เพราะ format ไม่คงที่)
 function groupWeeksByMonth(weeks) {
   const groups = {};
-  const order = [];
   weeks.forEach((w, wi) => {
     const d = new Date(w.archivedAt);
     const monthKey = isNaN(d) ? 'unknown' : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     if (!groups[monthKey]) {
       const monthLabel = isNaN(d) ? 'ไม่ทราบเดือน' : d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
       groups[monthKey] = { monthKey, monthLabel, items: [] };
-      order.push(monthKey);
     }
     groups[monthKey].items.push({ w, wi });
+  });
+  // เรียงสัปดาห์ในแต่ละเดือน ใหม่สุดก่อน
+  Object.values(groups).forEach(g => {
+    g.items.sort((a, b) => new Date(b.w.archivedAt) - new Date(a.w.archivedAt));
+  });
+  // เรียงเดือน ใหม่สุดก่อน ('unknown' ไปท้ายสุดเสมอ)
+  const order = Object.keys(groups).sort((a, b) => {
+    if (a === 'unknown') return 1;
+    if (b === 'unknown') return -1;
+    return b.localeCompare(a);
   });
   return order.map(k => groups[k]);
 }
@@ -4785,10 +4910,11 @@ function renderGroupedHistory(scope) {
         <div style="display:flex;align-items:center;gap:8px">
           <span class="history-month-count">${g.items.length} สัปดาห์</span>
           <button class="history-export-btn" id="exportBtn_${scope}_${g.monthKey}" onclick="event.stopPropagation(); exportMonthData('${g.monthKey}','${g.monthLabel.replace(/'/g, "\\'")}', '${scope}_${g.monthKey}')">⬇ EXPORT เดือนนี้</button>
-          <span id="mchevron_${scope}_${g.monthKey}">${gi === 0 ? '▲' : '▼'}</span>
+          <button class="history-delete-btn" onclick="event.stopPropagation(); deleteHistoryMonth('${g.monthKey}','${g.monthLabel.replace(/'/g, "\\'")}')" title="ลบทั้งเดือนนี้">🗑️</button>
+          <span id="mchevron_${scope}_${g.monthKey}">▼</span>
         </div>
       </div>
-      <div class="history-month-body${gi === 0 ? ' open' : ''}" id="mbody_${scope}_${g.monthKey}">
+      <div class="history-month-body" id="mbody_${scope}_${g.monthKey}">
         ${g.items.map(({ w, wi }) => `
           <div class="history-week-item">
             <div class="history-week-header" onclick="toggleHistoryWeek(${wi},'${scope}')">
@@ -4799,6 +4925,7 @@ function renderGroupedHistory(scope) {
               </div>
               <div style="display:flex;align-items:center;gap:8px">
                 <span class="history-week-meta">${new Date(w.archivedAt).toLocaleDateString('th-TH')}</span>
+                <button class="history-delete-btn" onclick="event.stopPropagation(); deleteHistoryWeek('${w.archivedAt}','${w.label.replace(/'/g, "\\'")}')" title="ลบสัปดาห์นี้">🗑️</button>
                 <span id="hchevron_${scope}_${wi}">▼</span>
               </div>
             </div>
@@ -4810,6 +4937,34 @@ function renderGroupedHistory(scope) {
       </div>
     </div>
   `).join('');
+}
+
+async function deleteHistoryWeek(archivedAt, label) {
+  if (!confirm(`🗑️ ลบสัปดาห์ "${label}" ทิ้งถาวร?\n\nข้อมูลจะหายไปและกู้คืนไม่ได้`)) return;
+  archiveData.weeks = archiveData.weeks.filter(w => w.archivedAt !== archivedAt);
+  selectedWeeksForExport.delete(archivedAt);
+  await saveArchive();
+  renderHistoryPanel();
+  renderHistoryPageContent();
+  showToast('🗑️ ลบสัปดาห์แล้ว');
+}
+
+async function deleteHistoryMonth(monthKey, monthLabel) {
+  if (!confirm(`🗑️ ลบทั้งเดือน "${monthLabel}" ทิ้งถาวร?\n\nทุกสัปดาห์ในเดือนนี้จะหายไปและกู้คืนไม่ได้`)) return;
+  archiveData.weeks.forEach(w => {
+    const d = new Date(w.archivedAt);
+    const wk = isNaN(d) ? 'unknown' : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (wk === monthKey) selectedWeeksForExport.delete(w.archivedAt);
+  });
+  archiveData.weeks = archiveData.weeks.filter(w => {
+    const d = new Date(w.archivedAt);
+    const wk = isNaN(d) ? 'unknown' : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    return wk !== monthKey;
+  });
+  await saveArchive();
+  renderHistoryPanel();
+  renderHistoryPageContent();
+  showToast('🗑️ ลบทั้งเดือนแล้ว');
 }
 
 function renderExportToolbar(scope) {
