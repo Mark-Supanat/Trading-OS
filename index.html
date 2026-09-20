@@ -1043,7 +1043,9 @@ select.field-sm option{background:#111827;color:var(--text)}
   display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 4px;border-radius:20px;
   background:rgba(59,130,246,.16);border:1px solid rgba(147,197,253,.35);
   font-family:var(--font-mono);font-size:12px;font-weight:700;color:#dbeafe;
+  cursor:pointer;transition:transform .12s,filter .12s;
 }
+.dash-focus-pill:hover{transform:translateY(-1px);filter:brightness(1.15)}
 .dash-focus-rank{
   width:18px;height:18px;border-radius:50%;background:rgba(147,197,253,.3);color:#0b0f1a;
   display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;
@@ -4238,6 +4240,24 @@ function focusDrop(e, targetId) {
   saveFocusDebounced();
 }
 
+const TV_SYMBOL_MAP = {
+  xauusd: 'OANDA:XAUUSD',
+  xagusd: 'OANDA:XAGUSD',
+  btcusdt: 'BINANCE:BTCUSDT',
+  s50: 'TFEX:S501!',
+  ndx: 'NASDAQ:NDX',
+  usoil: 'TVC:USOIL',
+  usdjpy: 'FX:USDJPY',
+  eurusd: 'FX:EURUSD',
+  gbpusd: 'FX:GBPUSD',
+};
+
+function openTradingViewChart(symId) {
+  const tv = TV_SYMBOL_MAP[symId];
+  if (!tv) return;
+  window.open(`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(tv)}`, '_blank');
+}
+
 function renderDashFocusLine() {
   const el = document.getElementById('dashFocusLine');
   if (!el) return;
@@ -4248,7 +4268,7 @@ function renderDashFocusLine() {
     const activeDay = activeDayState[sym.id] || 'PLAN';
     const bias = ((biasState[sym.id] || {})[activeDay]) || '';
     const biasCls = bias ? `bias-f-${bias}` : '';
-    return `<span class="dash-focus-pill ${biasCls}"><span class="dash-focus-rank">${i+1}</span>${shortSymName(sym)}</span>`;
+    return `<span class="dash-focus-pill ${biasCls}" onclick="openTradingViewChart('${sym.id}')" title="เปิดกราฟ ${sym.name} ใน TradingView"><span class="dash-focus-rank">${i+1}</span>${shortSymName(sym)}</span>`;
   }).filter(Boolean).join('');
   el.innerHTML = `<div class="dash-focus-label">🎯 FOCUS ON</div><div class="dash-focus-pills">${pills}</div>`;
 }
