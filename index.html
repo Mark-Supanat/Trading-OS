@@ -1285,8 +1285,8 @@ select.field-sm option{background:#111827;color:var(--text)}
     </div>
     <div style="display:flex;align-items:center;gap:14px">
       <div id="topbarGreeting" style="display:none;align-items:center;gap:7px;font-family:var(--font-body);font-size:12.5px;color:var(--text2)">
-        <span style="display:inline-block;animation:wave 1.6s ease-in-out infinite">👋</span>
-        Welcome back, <b id="topbarGreetingName" style="color:var(--text);font-weight:600">—</b>
+        <span id="topbarGreetingEmoji" style="display:inline-block;animation:wave 1.6s ease-in-out infinite">👋</span>
+        <span id="topbarGreetingText">Welcome back,</span> <b id="topbarGreetingName" style="color:var(--text);font-weight:600">—</b>
       </div>
       <div class="topbar-right" id="topbarActions"></div>
     </div>
@@ -1323,6 +1323,7 @@ select.field-sm option{background:#111827;color:var(--text)}
             </div>
             <div id="sessionProgressLabel" style="margin-top:6px;font-family:var(--font-mono);font-size:10px;color:var(--text3)">—</div>
           </div>
+          <div id="dashOpenPositionsLine" style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.08)"></div>
         </div>
       </div>
 
@@ -4003,6 +4004,12 @@ function updateDashboard() {
   // Focus On priority list
   renderDashFocusLine();
 
+  // Open Positions (reuses Journal's open-trade data)
+  renderDashOpenPositions();
+
+  // Time-of-day greeting
+  renderTopbarGreeting();
+
   // Position size calculator — restore saved balance/risk/contract settings
   loadCalcInputs();
 }
@@ -4256,6 +4263,31 @@ function openTradingViewChart(symId) {
   const tv = TV_SYMBOL_MAP[symId];
   if (!tv) return;
   window.open(`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(tv)}`, '_blank');
+}
+
+async function renderDashOpenPositions() {
+  const el = document.getElementById('dashOpenPositionsLine');
+  if (!el) return;
+  if (typeof anAllTrades === 'undefined') { el.innerHTML = ''; return; }
+  if (anAllTrades.length === 0) {
+    el.innerHTML = `<div class="dash-focus-label">📊 OPEN POSITIONS</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text3)">⏳ กำลังโหลด...</div>`;
+    await loadAnalytics();
+    // ถ้า user เปลี่ยนหน้าไปแล้วระหว่างรอโหลด ให้เช็ค element อีกรอบ
+    if (!document.getElementById('dashOpenPositionsLine')) return;
+  }
+  const open = anAllTrades.filter(t => !jnCleanDate(t.dateClose) && jnCleanDate(t.dateOpen));
+  if (!open.length) {
+    el.innerHTML = `<div class="dash-focus-label">📊 OPEN POSITIONS</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text3)">ไม่มี Position เปิดอยู่</div>`;
+    return;
+  }
+  const pills = open.map(t => {
+    const posVal = String(t.pos || '').trim().toUpperCase();
+    const cls = posVal.startsWith('L') ? 'bias-f-LONG' : posVal.startsWith('S') ? 'bias-f-SHORT' : '';
+    const symId = String(t.sym || '').toLowerCase();
+    const clickAttr = TV_SYMBOL_MAP[symId] ? ` onclick="openTradingViewChart('${symId}')" title="เปิดกราฟ ${t.sym} ใน TradingView"` : '';
+    return `<span class="dash-focus-pill ${cls}"${clickAttr}>${t.sym || '—'}</span>`;
+  }).join('');
+  el.innerHTML = `<div class="dash-focus-label">📊 OPEN POSITIONS (${open.length})</div><div class="dash-focus-pills">${pills}</div>`;
 }
 
 function renderDashFocusLine() {
@@ -4566,6 +4598,24 @@ function renderProfile(user) {
   currentUserFirstName = (meta.given_name || name.split(' ')[0] || name);
   const greetingName = document.getElementById('topbarGreetingName');
   if (greetingName) greetingName.textContent = currentUserFirstName;
+  renderTopbarGreeting();
+}
+
+function getTimeGreeting() {
+  const h = new Date().getHours();
+  if (h < 5) return { emoji: '💤', text: 'Time to Sleep,' };
+  if (h < 12) return { emoji: '☀️', text: 'Good morning,' };
+  if (h < 17) return { emoji: '👋', text: 'Good afternoon,' };
+  if (h < 21) return { emoji: '🌆', text: 'Good evening,' };
+  return { emoji: '🌙', text: 'Good evening,' };
+}
+
+function renderTopbarGreeting() {
+  const g = getTimeGreeting();
+  const emojiEl = document.getElementById('topbarGreetingEmoji');
+  const textEl = document.getElementById('topbarGreetingText');
+  if (emojiEl) emojiEl.textContent = g.emoji;
+  if (textEl) textEl.textContent = g.text;
 }
 
 async function checkAuthAndInit() {
