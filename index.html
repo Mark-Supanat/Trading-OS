@@ -430,13 +430,13 @@ body::before{
    ============================================ */
 #page-analytics{
   --text3:#96a1b8; /* override dim global --text3 (#374869) — invisible on the new dark cards */
-  --jn-accent:#2dd4bf;--jn-accent2:#5eead4;--jn-accent-dark:#0f766e;
+  --jn-accent:#f0b429;--jn-accent2:#ffd166;--jn-accent-dark:#5a4200;
   --jn-panel2:#151a26;
   --jn-border:#232c40;--jn-border2:#334160;
   --jn-text:#f3f5f9;--jn-text-dim:#9aa7c4;
   --an2-bg:#0b1220; --an2-card:#141d2e; --an2-border:#1e2740;
   --an2-text:#e6ebf5; --an2-text2:#8a94a6; --an2-text3:#6b7688; --an2-label:#aab4c8;
-  --an2-accent:#f5a623; --an2-accent-fg:#3a2400;
+  --an2-accent:#f0b429; --an2-accent-fg:#1a1200;
   --an2-good-bg:#1e6f5c; --an2-good-fg:#7ee6c4;
   --an2-warn-bg:#5a4a1e; --an2-warn-fg:#f5c56a;
   --an2-bad-bg:#5a2a2a; --an2-bad-fg:#f0a0a0;
@@ -488,7 +488,7 @@ body::before{
 /* ===== JOURNAL PAGE ===== */
 #page-journal{
   background:#04060a;
-  --jn-accent:#2dd4bf;--jn-accent2:#5eead4;--jn-accent-dark:#0f766e;
+  --jn-accent:#f0b429;--jn-accent2:#ffd166;--jn-accent-dark:#5a4200;
   --jn-panel2:#151a26;
   --jn-border:#232c40;--jn-border2:#334160;
   --jn-text:#f3f5f9;--jn-text-dim:#9aa7c4;
@@ -500,17 +500,17 @@ body::before{
 .jn-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
 .jn-tabs{display:flex;gap:2px;background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:8px;padding:3px}
 .jn-tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--jn-text-dim);border:none;background:none;font-family:var(--font-body);transition:all .15s}
-.jn-tab.active{background:var(--jn-accent-dark);color:#99f6e4}
+.jn-tab.active{background:var(--jn-accent-dark);color:var(--jn-accent2)}
 .jn-tab:hover:not(.active){background:var(--jn-border);color:var(--jn-text)}
 .jn-toolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.jn-sync-status{font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--jn-accent-dark);color:var(--jn-accent2);background:rgba(15,118,110,.12);font-family:var(--font-mono);white-space:nowrap}
+.jn-sync-status{font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--jn-accent-dark);color:var(--jn-accent2);background:rgba(90,66,0,.35);font-family:var(--font-mono);white-space:nowrap}
 .jn-sync-status.jn-err{border-color:#b91c1c88;color:#f87171;background:rgba(69,10,10,.2)}
 .jn-btn{padding:6px 12px;height:30px;border:1px solid var(--jn-border2);border-radius:7px;background:var(--jn-panel2);color:var(--jn-text);font-size:11px;font-family:var(--font-mono);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
 .jn-btn:hover{border-color:var(--jn-accent)}
 .jn-btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
 .jn-year-select{height:30px;padding:0 10px;border:1px solid var(--jn-border2);border-radius:7px;background:var(--jn-panel2);color:var(--jn-text);font-size:11px;font-family:var(--font-mono);font-weight:700;cursor:pointer}
 .jn-year-select:hover{border-color:var(--jn-accent)}
-.jn-btn-accent{background:var(--jn-accent-dark);border-color:#14b8a6;color:#99f6e4}
+.jn-btn-accent{background:var(--jn-accent-dark);border-color:var(--jn-accent);color:var(--jn-accent2)}
 .jn-btn-accent:hover{background:#115e59}
 
 .jn-mm-banner{background:var(--jn-panel2);border:1px solid var(--jn-border);border-radius:10px;padding:8px 14px;margin-bottom:14px}
@@ -566,7 +566,7 @@ body::before{
 .jn-tc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .jn-tc-sym{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:0;color:var(--jn-text)}
 .jn-tc-pnl{font-family:var(--font-mono);font-size:15px;font-weight:700;margin-left:auto}
-.jn-tc-setup{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--jn-text);background:rgba(45,212,191,.1);border-left:3px solid var(--jn-accent);padding:7px 10px;border-radius:0 6px 6px 0;margin-bottom:10px;line-height:1.5}
+.jn-tc-setup{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--jn-text);background:rgba(240,180,41,.1);border-left:3px solid var(--jn-accent);padding:7px 10px;border-radius:0 6px 6px 0;margin-bottom:10px;line-height:1.5}
 .jn-tc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 12px;margin-bottom:10px}
 @media(max-width:640px){.jn-tc-grid{grid-template-columns:repeat(2,1fr)}}
 .jn-tc-field label{display:block;font-family:var(--font-mono);font-size:9.5px;font-weight:700;color:var(--jn-text-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
@@ -2893,7 +2893,7 @@ function anBuildTradeCardHtml(t) {
   const tpslVal = (t.tpsl||'').toUpperCase();
   const tpslClass = tpslVal==='TP' ? 'an-pill-win' : tpslVal==='SL' ? 'an-pill-loss' : '';
   const wlAccent = isOpen ? '#fbbf24' : t.wl==='W' ? 'var(--green)' : t.wl==='L' ? 'var(--red)' : 'var(--jn-accent)';
-  const wlAccentBg = isOpen ? 'rgba(251,191,36,.1)' : t.wl==='W' ? 'rgba(52,211,153,.1)' : t.wl==='L' ? 'rgba(244,63,94,.1)' : 'rgba(45,212,191,.1)';
+  const wlAccentBg = isOpen ? 'rgba(251,191,36,.1)' : t.wl==='W' ? 'rgba(52,211,153,.1)' : t.wl==='L' ? 'rgba(244,63,94,.1)' : 'rgba(240,180,41,.1)';
   const posVal = (t.pos||'').toUpperCase();
   const posDisplay = posVal.startsWith('L') ? 'Long' : posVal.startsWith('S') ? 'Short' : (t.pos || '—');
   const posColor = posVal.startsWith('L') ? 'var(--green)' : posVal.startsWith('S') ? 'var(--red)' : 'var(--jn-text)';
@@ -3336,7 +3336,7 @@ function jnRenderTradeCard(t) {
     const tpslVal = (t.tpsl||'').toUpperCase();
     const tpslClass = tpslVal==='TP' ? 'an-pill-win' : tpslVal==='SL' ? 'an-pill-loss' : '';
     const wlAccent = isOpen ? '#fbbf24' : t.wl==='W' ? 'var(--green)' : t.wl==='L' ? 'var(--red)' : 'var(--jn-accent)';
-    const wlAccentBg = isOpen ? 'rgba(251,191,36,.1)' : t.wl==='W' ? 'rgba(52,211,153,.1)' : t.wl==='L' ? 'rgba(244,63,94,.1)' : 'rgba(45,212,191,.1)';
+    const wlAccentBg = isOpen ? 'rgba(251,191,36,.1)' : t.wl==='W' ? 'rgba(52,211,153,.1)' : t.wl==='L' ? 'rgba(244,63,94,.1)' : 'rgba(240,180,41,.1)';
     const posVal = (t.pos||'').toUpperCase();
     const posDisplay = posVal.startsWith('L') ? 'Long' : posVal.startsWith('S') ? 'Short' : (t.pos || '—');
     const posColor = posVal.startsWith('L') ? 'var(--green)' : posVal.startsWith('S') ? 'var(--red)' : 'var(--jn-text)';
@@ -3501,8 +3501,8 @@ function renderJournalEquityChart() {
   jnEquityChart = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets: [{
-      data: points, borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,.12)',
-      borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor:'#2dd4bf',
+      data: points, borderColor: '#f0b429', backgroundColor: 'rgba(240,180,41,.12)',
+      borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor:'#f0b429',
       tension: .25, fill: true,
     }] },
     options: { responsive: true, maintainAspectRatio: false,
