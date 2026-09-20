@@ -374,10 +374,10 @@ body::before{
 .dash-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 
 /* ANALYTICS */
-.an-tab{padding:7px 18px;border-radius:20px;font-size:13px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-weight:600;letter-spacing:.03em}
+.an-tab{padding:7px 18px;border-radius:8px;font-size:13px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-weight:600;letter-spacing:.03em}
 .an-tab.active{background:linear-gradient(135deg,#f0b429,#fb923c);color:#000;border-color:transparent;box-shadow:0 2px 10px rgba(240,180,41,.3)}
 .an-tab:hover:not(.active){border-color:var(--text2);color:var(--text)}
-.an-sym-pill{padding:6px 15px;border-radius:20px;font-size:13px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-weight:600;white-space:nowrap}
+.an-sym-pill{padding:6px 15px;border-radius:8px;font-size:13px;font-family:var(--font-mono);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-weight:600;white-space:nowrap}
 .an-sym-pill.active{background:linear-gradient(135deg,#3b82f6,#818cf8);color:#fff;border-color:transparent;box-shadow:0 2px 10px rgba(59,130,246,.35)}
 .an-sym-pill:hover:not(.active){border-color:var(--text2);color:var(--text)}
 .an-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
@@ -589,6 +589,7 @@ body::before{
 .jn-equity-total.neg{color:var(--red)}
 .jn-streaks-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .jn-streak-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.jn-streak-box[onclick]:hover{border-color:var(--jn-accent)}
 .jn-streak-label{font-size:9px;color:var(--jn-text-dim);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:var(--font-mono)}
 .jn-streak-value{font-family:var(--font-display);font-weight:700;font-size:16px}
 .jn-streak-value.pos{color:var(--green)}
@@ -3138,13 +3139,15 @@ function jnComputeStreaks(trades) {
     else if (closed[i].wl === currentType) current++;
     else break;
   }
-  let longestWin = 0, longestLoss = 0, run = 0, runType = '';
+  let longestWin = 0, longestLoss = 0, longestWinTrades = [], longestLossTrades = [];
+  let run = 0, runType = '', runTrades = [];
   closed.forEach(t => {
-    if (t.wl === runType) run++; else { run = 1; runType = t.wl; }
-    if (runType === 'W') longestWin = Math.max(longestWin, run);
-    if (runType === 'L') longestLoss = Math.max(longestLoss, run);
+    if (t.wl === runType) { run++; runTrades.push(t); }
+    else { run = 1; runType = t.wl; runTrades = [t]; }
+    if (runType === 'W' && run > longestWin) { longestWin = run; longestWinTrades = [...runTrades]; }
+    if (runType === 'L' && run > longestLoss) { longestLoss = run; longestLossTrades = [...runTrades]; }
   });
-  return { current, currentType, longestWin, longestLoss, hasData: closed.length > 0 };
+  return { current, currentType, longestWin, longestLoss, longestWinTrades, longestLossTrades, hasData: closed.length > 0 };
 }
 
 // ---- KPI ----
@@ -3477,9 +3480,25 @@ function renderJournalStreaks() {
   const currentLabel = !hasData ? '—' : `${current} ${currentType==='W'?'Win':'Loss'}`;
   el.innerHTML = `
     <div class="jn-streak-box"><div class="jn-streak-label">Current</div><div class="jn-streak-value ${currentCls}">${currentLabel}</div></div>
-    <div class="jn-streak-box"><div class="jn-streak-label">Longest Win</div><div class="jn-streak-value pos">${longestWin}</div></div>
-    <div class="jn-streak-box"><div class="jn-streak-label">Longest Loss</div><div class="jn-streak-value neg">${longestLoss}</div></div>
+    <div class="jn-streak-box"${longestWin>0?` onclick="jnShowStreakDetail('win')" style="cursor:pointer"`:''}><div class="jn-streak-label">Longest Win</div><div class="jn-streak-value pos">${longestWin}</div></div>
+    <div class="jn-streak-box"${longestLoss>0?` onclick="jnShowStreakDetail('loss')" style="cursor:pointer"`:''}><div class="jn-streak-label">Longest Loss</div><div class="jn-streak-value neg">${longestLoss}</div></div>
   `;
+}
+
+function jnShowStreakDetail(type) {
+  const { longestWin, longestLoss, longestWinTrades, longestLossTrades } = jnComputeStreaks(jnGetTrades());
+  const trades = type === 'win' ? longestWinTrades : longestLossTrades;
+  const count = type === 'win' ? longestWin : longestLoss;
+  const panel = document.getElementById('jnDayDetail');
+  const title = document.getElementById('jnDayDetailTitle');
+  const body = document.getElementById('jnDayDetailBody');
+  if (!panel || !title || !body || !trades.length) return;
+  panel.style.display = 'block';
+  title.textContent = type === 'win'
+    ? `🔥 Longest Win Streak — ${count} ไม้ติด`
+    : `🥶 Longest Loss Streak — ${count} ไม้ติด`;
+  body.innerHTML = trades.map(jnRenderTradeCard).join('');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // ---- Equity Curve ----
@@ -3501,9 +3520,14 @@ function renderJournalEquityChart() {
   jnEquityChart = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets: [{
-      data: points, borderColor: '#f0b429', backgroundColor: 'rgba(240,180,41,.12)',
-      borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor:'#f0b429',
-      tension: .25, fill: true,
+      data: points, borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,.1)',
+      borderWidth: 1.75, pointRadius: 0, pointHoverRadius: 4, pointHitRadius: 8,
+      pointBackgroundColor: c => (c.parsed && c.parsed.y < 0) ? '#f87171' : '#34d399',
+      tension: 0, fill: { target: 'origin' },
+      segment: {
+        borderColor: c => (c.p0.parsed.y < 0 || c.p1.parsed.y < 0) ? '#f87171' : '#34d399',
+        backgroundColor: c => (c.p0.parsed.y < 0 || c.p1.parsed.y < 0) ? 'rgba(248,113,113,.12)' : 'rgba(52,211,153,.1)'
+      }
     }] },
     options: { responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display:false }, tooltip: { callbacks: {
