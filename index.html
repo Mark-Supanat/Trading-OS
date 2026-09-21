@@ -379,7 +379,7 @@ body::before{
 [data-theme="light"] .dash-day-dot.done{background:#d1fae5;border-color:#6ee7b7;color:#059669}
 
 /* DASHBOARD GRID */
-.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;align-items:stretch}
 .dash-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 
 /* ANALYTICS */
@@ -1046,6 +1046,8 @@ select.field-sm option{background:#111827;color:var(--text)}
   cursor:pointer;transition:transform .12s,filter .12s;
 }
 .dash-focus-pill:hover{transform:translateY(-1px);filter:brightness(1.15)}
+.dash-focus-pill.static{cursor:default}
+.dash-focus-pill.static:hover{transform:none;filter:none}
 .dash-focus-rank{
   width:18px;height:18px;border-radius:50%;background:rgba(147,197,253,.3);color:#0b0f1a;
   display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;
@@ -3909,34 +3911,31 @@ function updateDashboard() {
   const minNow = now.getMinutes();
   const curMin = h*60 + minNow;
   const dowForSession = now.getDay(); // 0=Sun, 6=Sat
-  const ASIA_S=240, ASIA_E=660, LON_S=840, LON_E=1200, NY_S=1200, NY_E=1500;
+  const ASIA_S=300, ASIA_E=840, LON_S=840, LON_E=1140, NY_S=1140, NY_E=1620;
   let session, sessionTime, progressPct = 0, progressLabel = '—';
   if (dowForSession === 0 || dowForSession === 6) {
     session = '🏖️ HOLIDAY';
     sessionTime = 'ตลาด Forex ปิดสุดสัปดาห์';
     const daysToMonday = dowForSession === 0 ? 1 : 2;
-    const target = new Date(now); target.setDate(now.getDate()+daysToMonday); target.setHours(4,0,0,0);
+    const target = new Date(now); target.setDate(now.getDate()+daysToMonday); target.setHours(5,0,0,0);
     progressLabel = `ถัดไป: 🌏 ASIA เปิดในอีก ${fmtDuration((target-now)/60000)}`;
   } else if (curMin >= ASIA_S && curMin < ASIA_E) {
-    session = '🌏 ASIA'; sessionTime = '04:00 – 11:00 น.';
+    session = '🌏 ASIA'; sessionTime = '05:00 – 14:00 น.';
     progressPct = ((curMin-ASIA_S)/(ASIA_E-ASIA_S))*100;
     progressLabel = `เหลืออีก ${fmtDuration(ASIA_E-curMin)} ก่อนปิด session`;
   } else if (curMin >= LON_S && curMin < LON_E) {
-    session = '🌍 LONDON'; sessionTime = '14:00 – 20:00 น.';
+    session = '🌍 LONDON'; sessionTime = '14:00 – 19:00 น.';
     progressPct = ((curMin-LON_S)/(LON_E-LON_S))*100;
     progressLabel = `เหลืออีก ${fmtDuration(LON_E-curMin)} ก่อนปิด session`;
   } else if (curMin >= NY_S) {
-    session = '🌎 NEW YORK'; sessionTime = '20:00 – 01:00 น.';
+    session = '🌎 NEW YORK'; sessionTime = '19:00 – 03:00 น.';
     progressPct = ((curMin-NY_S)/(NY_E-NY_S))*100;
     progressLabel = `เหลืออีก ${fmtDuration(NY_E-curMin)} ก่อนปิด session`;
-  } else if (curMin < 60) {
-    session = '🌎 NEW YORK'; sessionTime = '20:00 – 01:00 น.';
+  } else if (curMin <= 180) {
+    session = '🌎 NEW YORK'; sessionTime = '19:00 – 03:00 น.';
     const elapsed = (1440-NY_S)+curMin;
     progressPct = (elapsed/(NY_E-NY_S))*100;
     progressLabel = `เหลืออีก ${fmtDuration((NY_E-NY_S)-elapsed)} ก่อนปิด session`;
-  } else if (curMin >= ASIA_E && curMin < LON_S) {
-    session = 'ตลาดปิด'; sessionTime = 'Between Sessions';
-    progressLabel = `ถัดไป: 🌍 LONDON ในอีก ${fmtDuration(LON_S-curMin)}`;
   } else {
     session = 'ตลาดปิด'; sessionTime = 'Between Sessions';
     progressLabel = `ถัดไป: 🌏 ASIA ในอีก ${fmtDuration(ASIA_S-curMin)}`;
@@ -4275,7 +4274,12 @@ async function renderDashOpenPositions() {
     // ถ้า user เปลี่ยนหน้าไปแล้วระหว่างรอโหลด ให้เช็ค element อีกรอบ
     if (!document.getElementById('dashOpenPositionsLine')) return;
   }
-  const open = anAllTrades.filter(t => !jnCleanDate(t.dateClose) && jnCleanDate(t.dateOpen));
+  const open = anAllTrades.filter(t =>
+    t.sym && String(t.sym).trim() &&
+    jnCleanDate(t.dateOpen) &&
+    !jnCleanDate(t.dateClose) &&
+    !t.wl
+  );
   if (!open.length) {
     el.innerHTML = `<div class="dash-focus-label">📊 OPEN POSITIONS</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text3)">ไม่มี Position เปิดอยู่</div>`;
     return;
@@ -4283,9 +4287,7 @@ async function renderDashOpenPositions() {
   const pills = open.map(t => {
     const posVal = String(t.pos || '').trim().toUpperCase();
     const cls = posVal.startsWith('L') ? 'bias-f-LONG' : posVal.startsWith('S') ? 'bias-f-SHORT' : '';
-    const symId = String(t.sym || '').toLowerCase();
-    const clickAttr = TV_SYMBOL_MAP[symId] ? ` onclick="openTradingViewChart('${symId}')" title="เปิดกราฟ ${t.sym} ใน TradingView"` : '';
-    return `<span class="dash-focus-pill ${cls}"${clickAttr}>${t.sym || '—'}</span>`;
+    return `<span class="dash-focus-pill static ${cls}">${t.sym || '—'}</span>`;
   }).join('');
   el.innerHTML = `<div class="dash-focus-label">📊 OPEN POSITIONS (${open.length})</div><div class="dash-focus-pills">${pills}</div>`;
 }
