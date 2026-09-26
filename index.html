@@ -573,11 +573,21 @@ body::before{
 @media(max-width:600px){.jn-cal-cell{min-height:52px;padding:5px}.jn-cal-pnl{font-size:10px}.jn-cal-tags{display:none}}
 
 /* MARKET CONDITION (weekly Trend/Sideway) */
-.mc-badge{display:inline-block;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:5px;margin-top:4px;white-space:nowrap}
+.jn-cal-week-title{font-family:var(--font-mono);font-size:11.5px;font-weight:700;color:var(--jn-text);letter-spacing:.02em;margin-bottom:2px}
+.mc-badge{display:inline-block;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:5px;margin-top:4px;white-space:nowrap;align-self:flex-start}
 .mc-badge.trend{background:rgba(52,211,153,.14);color:var(--green)}
-.mc-badge.sideway{background:rgba(240,180,41,.16);color:var(--jn-accent)}
+.mc-badge.sideway{background:rgba(240,180,41,.16);color:var(--jn-accent2)}
+.mc-badge.mixed{background:rgba(129,140,248,.16);color:#a5b4fc}
+.mc-badge.other{background:rgba(255,255,255,.08);color:var(--jn-text)}
 .mc-badge.empty{background:rgba(255,255,255,.05);color:var(--jn-text-dim);cursor:pointer}
 .mc-badge.empty:hover{background:rgba(255,255,255,.1);color:var(--jn-text)}
+.mc-card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.mc-card-tag{font-family:var(--font-mono);font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:4px;white-space:nowrap}
+.mc-card-tag.trend{background:rgba(52,211,153,.14);color:var(--green)}
+.mc-card-tag.sideway{background:rgba(240,180,41,.16);color:var(--jn-accent2)}
+.mc-card-tag.mixed{background:rgba(129,140,248,.16);color:#a5b4fc}
+.mc-card-tag.other{background:rgba(255,255,255,.08);color:var(--jn-text)}
+.mc-card-note{font-family:var(--font-body);font-size:9.5px;color:var(--jn-text-dim);line-height:1.35;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .mc-edit-btn{position:absolute;top:4px;right:4px;background:none;border:none;color:var(--jn-text-dim);cursor:pointer;font-size:11px;line-height:1;padding:3px 4px;border-radius:4px;opacity:0;transition:opacity .15s}
 .jn-week-cell:hover .mc-edit-btn{opacity:1}
 .mc-edit-btn:hover{color:var(--jn-text);background:rgba(255,255,255,.1)}
@@ -585,17 +595,18 @@ body::before{
 .mc-modal{width:340px;max-width:100%;max-height:82vh;overflow-y:auto;background:var(--jn-panel2);border:1px solid var(--jn-border2);border-radius:14px;padding:18px}
 .mc-modal-title{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--jn-text);margin-bottom:2px}
 .mc-modal-sub{font-family:var(--font-mono);font-size:10px;color:var(--jn-text-dim);letter-spacing:.04em;margin-bottom:14px}
-.mc-overall-row{display:flex;gap:8px;margin-bottom:16px}
+.mc-overall-row{display:flex;gap:8px;margin-bottom:8px}
 .mc-overall-btn{flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--jn-border2);background:rgba(255,255,255,.03);color:var(--jn-text-dim);font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:all .15s}
-.mc-overall-btn:hover{border-color:var(--jn-border2);color:var(--jn-text)}
-.mc-overall-btn.active.trend{background:rgba(52,211,153,.14);border-color:var(--green);color:var(--green)}
-.mc-overall-btn.active.sideway{background:rgba(240,180,41,.16);border-color:var(--jn-accent);color:var(--jn-accent2)}
+.mc-overall-btn:hover{border-color:var(--jn-accent);color:var(--jn-text)}
+.mc-overall-input{width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid var(--jn-border2);border-radius:8px;color:var(--jn-text);font-family:var(--font-body);font-size:13px;padding:8px 10px;margin-bottom:16px;outline:none}
+.mc-overall-input:focus{border-color:var(--jn-accent)}
 .mc-sym-list{margin-bottom:8px}
 .mc-sym-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--jn-border)}
 .mc-sym-row:last-child{border-bottom:none}
 .mc-sym-name{font-family:var(--font-body);font-size:12.5px;color:var(--jn-text);font-weight:600}
 .mc-sym-count{font-family:var(--font-mono);font-size:9.5px;color:var(--jn-text-dim);margin-left:6px;font-weight:400}
-.mc-sym-select{background:rgba(255,255,255,.05);border:1px solid var(--jn-border2);border-radius:6px;color:var(--jn-text);font-family:var(--font-body);font-size:11.5px;padding:4px 6px}
+.mc-sym-select{background:var(--jn-panel2);border:1px solid var(--jn-border2);border-radius:6px;color:var(--jn-text);font-family:var(--font-body);font-size:11.5px;padding:4px 6px}
+.mc-sym-select option{background:#151a26;color:#f3f5f9}
 .mc-empty-note{font-family:var(--font-body);font-size:11.5px;color:var(--jn-text-dim);padding:6px 0}
 .mc-note{width:100%;margin-top:10px;background:rgba(255,255,255,.05);border:1px solid var(--jn-border2);border-radius:8px;color:var(--jn-text);font-family:var(--font-body);font-size:12px;padding:8px;resize:vertical;min-height:52px;outline:none;box-sizing:border-box}
 .mc-note:focus{border-color:var(--jn-accent)}
@@ -3359,15 +3370,22 @@ function renderJournalCalendar() {
       : `${first.day} ${JN_MONTH_ABBR[first.month]}-${last.day} ${JN_MONTH_ABBR[last.month]}`;
     const mcWeekKeyForCell = rowMondayKey;
     const mc = marketConditionData[mcWeekKeyForCell];
-    const mcBadgeHtml = (mc && mc.overall)
-      ? `<div class="mc-badge ${mc.overall==='Trend'?'trend':'sideway'}">${mc.overall}</div>`
+    const overallText = mc && mc.overall ? mc.overall : '';
+    const mcBadgeHtml = overallText
+      ? `<div class="mc-badge ${mcBadgeClass(overallText)}">${mcEscHtml(overallText)}</div>`
       : `<div class="mc-badge empty" onclick="event.stopPropagation();mcOpenEditor('${mcWeekKeyForCell}')">+ Market</div>`;
+    const mcTagsHtml = (mc && mc.symbols && Object.keys(mc.symbols).length)
+      ? `<div class="mc-card-tags">${Object.entries(mc.symbols).map(([s,v]) => `<span class="mc-card-tag ${mcBadgeClass(v)}">${mcEscHtml(s)} · ${mcEscHtml(v)}</span>`).join('')}</div>`
+      : '';
+    const mcNoteHtml = (mc && mc.note) ? `<div class="mc-card-note">${mcEscHtml(mc.note)}</div>` : '';
     rowHtml += `<div class="jn-cal-cell jn-week-cell" style="position:relative" onclick="jnSelectWeek('${rowMondayKey}')">
       <button type="button" class="mc-edit-btn" title="แก้ไข Market Condition" onclick="event.stopPropagation();mcOpenEditor('${mcWeekKeyForCell}')">✎</button>
+      <div class="jn-cal-week-title">WEEK ${weekNum} · ${rangeLabel}</div>
       <div class="jn-cal-week-label">PNL$</div>
       <div class="jn-cal-pnl" style="color:${weekColor}">${weekPnl>=0?'+':'-'}$${Math.abs(weekPnl).toFixed(2)}</div>
-      <div class="jn-cal-week-range">WEEK ${weekNum} · ${rangeLabel}</div>
       ${mcBadgeHtml}
+      ${mcTagsHtml}
+      ${mcNoteHtml}
     </div>`;
 
     html += `<div class="jn-cal-week-row">${rowHtml}</div>`;
@@ -4457,6 +4475,21 @@ async function saveMarketConditionCloud() {
   } catch(e) { console.warn('Market condition save failed:', e); }
 }
 
+function mcEscHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// จัดกลุ่มสีของ badge/tag จากข้อความอิสระที่กรอก (รองรับ "Trend ใน Sideway" ฯลฯ ไม่ใช่แค่ 2 คำตายตัว)
+function mcBadgeClass(text) {
+  const t = String(text || '').toLowerCase();
+  const hasTrend = t.includes('trend');
+  const hasSideway = t.includes('sideway') || t.includes('side way');
+  if (hasTrend && hasSideway) return 'mixed';
+  if (hasTrend) return 'trend';
+  if (hasSideway) return 'sideway';
+  return 'other';
+}
+
 // สัปดาห์นั้น (Mon-Sun) มีเทรดอะไรปิดไปแล้วบ้าง — ใช้ประกอบ dropdown ต่อ symbol ในตัวแก้ไข
 function mcWeekAgg(mondayKey) {
   const trades = jnGetTrades();
@@ -4498,11 +4531,12 @@ function mcOpenEditor(mondayKey) {
       <div class="mc-modal-title">Market Condition</div>
       <div class="mc-modal-sub">WEEK OF ${mondayKey}</div>
       <div class="mc-overall-row">
-        <button type="button" class="mc-overall-btn trend${overall==='Trend'?' active':''}" onclick="mcToggleOverall('Trend')">Trend</button>
-        <button type="button" class="mc-overall-btn sideway${overall==='Sideway'?' active':''}" onclick="mcToggleOverall('Sideway')">Sideway</button>
+        <button type="button" class="mc-overall-btn" onclick="mcApplyPreset('Trend')">Trend</button>
+        <button type="button" class="mc-overall-btn" onclick="mcApplyPreset('Sideway')">Sideway</button>
       </div>
+      <input type="text" class="mc-overall-input" id="mcOverallInput" value="${escAttr(overall)}" placeholder="ภาพรวมสัปดาห์ พิมพ์เองได้ เช่น Trend ใน Sideway">
       <div class="mc-sym-list">${symRows}</div>
-      <textarea class="mc-note" id="mcNoteInput" placeholder="โน้ตสั้นๆ (ถ้ามี)...">${(existing.note || '').replace(/</g,'&lt;')}</textarea>
+      <textarea class="mc-note" id="mcNoteInput" placeholder="โน้ตสั้นๆ (ถ้ามี)...">${mcEscHtml(existing.note || '')}</textarea>
       <div class="mc-modal-actions">
         <button type="button" class="mc-btn" onclick="mcCloseEditor()">ยกเลิก</button>
         <button type="button" class="mc-btn primary" onclick="mcSaveEditor()">บันทึก</button>
@@ -4517,17 +4551,9 @@ function mcCloseEditor() {
   if (el) el.remove();
 }
 
-function mcToggleOverall(val) {
-  if (!mcEditingWeekKey) return;
-  const existing = marketConditionData[mcEditingWeekKey] || { overall: '', symbols: {}, note: '' };
-  existing.overall = existing.overall === val ? '' : val; // กดซ้ำ = ยกเลิกค่า
-  marketConditionData[mcEditingWeekKey] = existing;
-  const noteEl = document.getElementById('mcNoteInput');
-  const pendingNote = noteEl ? noteEl.value : (existing.note || '');
-  mcCloseEditor();
-  mcOpenEditor(mcEditingWeekKey);
-  const reopenedNote = document.getElementById('mcNoteInput');
-  if (reopenedNote) reopenedNote.value = pendingNote;
+function mcApplyPreset(val) {
+  const el = document.getElementById('mcOverallInput');
+  if (el) el.value = val;
 }
 
 async function mcSaveEditor() {
@@ -4540,6 +4566,8 @@ async function mcSaveEditor() {
     const val = sel.value;
     if (val) existing.symbols[sym] = val; else delete existing.symbols[sym];
   });
+  const overallEl = document.getElementById('mcOverallInput');
+  existing.overall = overallEl ? overallEl.value.trim() : (existing.overall || '');
   const noteEl = document.getElementById('mcNoteInput');
   existing.note = noteEl ? noteEl.value.trim() : '';
   marketConditionData[key] = existing;
