@@ -1751,6 +1751,7 @@ select.field-sm option{background:#111827;color:var(--text)}
       <div style="margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <select class="jn-year-select" id="anYearSelect" onchange="jnSetYear(this.value)"></select>
             <span style="font-family:var(--font-mono);font-size:9px;color:var(--text3);letter-spacing:.1em;margin-right:4px">QUARTER</span>
             <button class="an-tab" id="an-tab-all" onclick="setAnQuarter('all',this)">ทั้งหมด</button>
             <button class="an-tab" id="an-tab-q1" onclick="setAnQuarter('q1',this)">Q1</button>
@@ -2190,6 +2191,7 @@ let anSymbol = 'all';
 let anCharts = {};
 
 async function loadAnalytics() {
+  jnPopulateYearSelect(); // เผื่อเข้าหน้า Analytics มาก่อนหน้า Journal — เติม dropdown ปีให้ตรงกันเสมอ
   const btn = document.getElementById('anRefreshBtn');
   if (btn) { btn.textContent = '⏳ Loading...'; btn.disabled = true; }
   document.getElementById('anKpiGrid').innerHTML = '<div class="an-kpi-card"><div class="an-kpi-label">กำลังโหลดข้อมูล...</div></div>';
@@ -3155,17 +3157,21 @@ function jnUpdateQuarterLabels() {
   });
 }
 
+// เติมตัวเลือกปีให้ dropdown ทั้งของ Journal (#jnYearSelect) และ Analytics (#anYearSelect)
+// พร้อมกัน จากรายชื่อปีชุดเดียวกัน (YEAR_SHEET_URLS) เพื่อให้ 2 หน้านี้ไม่มีวันไม่ตรงกัน
 function jnPopulateYearSelect(force) {
-  const sel = document.getElementById('jnYearSelect');
-  if (!sel) return;
-  if (sel.options.length && !force) return; // already populated
-  sel.innerHTML = '';
-  Object.keys(YEAR_SHEET_URLS).sort().reverse().forEach(year => {
-    const opt = document.createElement('option');
-    opt.value = year;
-    opt.textContent = year;
-    if (year === anActiveYear) opt.selected = true;
-    sel.appendChild(opt);
+  ['jnYearSelect', 'anYearSelect'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    if (sel.options.length && !force) return; // already populated
+    sel.innerHTML = '';
+    Object.keys(YEAR_SHEET_URLS).sort().reverse().forEach(year => {
+      const opt = document.createElement('option');
+      opt.value = year;
+      opt.textContent = year;
+      if (year === anActiveYear) opt.selected = true;
+      sel.appendChild(opt);
+    });
   });
 }
 
