@@ -1296,6 +1296,9 @@ select.field-sm option{background:#111827;color:var(--text)}
       <span class="nav-icon">📊</span><span class="nav-label">ANALYTICS</span>
     </button>
     <div class="nav-section-label" style="margin-top:8px">System</div>
+    <button class="nav-item" id="nav-storage" onclick="switchPage('storage')">
+      <span class="nav-icon">🗄</span><span class="nav-label">STORAGE</span>
+    </button>
     <button class="nav-item" id="nav-settings" onclick="switchPage('settings')">
       <span class="nav-icon">⚙</span><span class="nav-label">SETTINGS</span>
     </button>
@@ -1938,6 +1941,29 @@ select.field-sm option{background:#111827;color:var(--text)}
         <div class="placeholder-icon">⚙</div>
         <div class="placeholder-title">SETTINGS</div>
         <div class="placeholder-sub">Coming Soon</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: STORAGE ===== -->
+  <div class="page" id="page-storage">
+    <div class="page-inner">
+      <div style="max-width:900px">
+        <div class="dash-widget" style="margin-bottom:16px">
+          <div class="dash-widget-title" style="margin-bottom:4px">📓 Trade Journal + Analytics Backup</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px">
+            สำเนาข้อมูลเทรดรายปี เก็บไว้นอกเว็บ (ดาวน์โหลดลงเครื่อง + เก็บสำรองใน Supabase) —
+            อ่านย้อนหลังได้แม้ Google Sheet/Apps Script มีปัญหา
+          </div>
+          <div id="storageYearList" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+        <div class="dash-widget">
+          <div class="dash-widget-title" style="margin-bottom:4px">🗂 Previous Weeks Archive</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px">
+            ตอนนี้ยังอยู่ที่หน้าเดิม (มี Export ZIP อยู่แล้ว) — ยังไม่ย้ายมาที่นี่
+          </div>
+          <button class="jn-btn" onclick="switchPage('history')">ไปที่หน้า Previous Weeks →</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3175,6 +3201,30 @@ function jnPopulateYearSelect(force) {
   });
 }
 
+// หน้า STORAGE — เพจ backup ของ Trade Journal/Analytics แต่ละปี
+// ตอนนี้ยังเป็นแค่โครงหน้า (list ปีที่มีอยู่) ปุ่ม Backup ยังไม่ทำงานจริง
+// รอ Mark เลือกรูปแบบไฟล์ (Excel / Excel+PDF) ก่อนถึงจะเขียนตัวสร้างไฟล์จริง
+function renderStoragePage() {
+  const el = document.getElementById('storageYearList');
+  if (!el) return;
+  const years = Object.keys(YEAR_SHEET_URLS).sort().reverse();
+  if (!years.length) {
+    el.innerHTML = `<div style="font-size:12px;color:var(--jn-text-dim)">ยังไม่มีปีเชื่อมไว้ — ไป Import ที่หน้า Journal ก่อน</div>`;
+    return;
+  }
+  el.innerHTML = years.map(year => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--jn-panel2);border:1px solid var(--jn-border2);border-radius:8px">
+      <div style="font-family:var(--font-mono);font-weight:700">${year}</div>
+      <div style="font-size:11px;color:var(--jn-text-dim)">ยังไม่เคย Backup</div>
+      <button class="jn-btn" onclick="storageBackupYear('${year}')">⬇ Backup ปีนี้</button>
+    </div>
+  `).join('');
+}
+
+function storageBackupYear(year) {
+  showToast(`🔧 ระบบ Backup ปี ${year} ยังอยู่ระหว่างออกแบบ (รอเลือกรูปแบบไฟล์ Excel/PDF) — เร็วๆ นี้`);
+}
+
 function jnSetYear(year) {
   if (!YEAR_SHEET_URLS[year] || year === anActiveYear) return;
   anActiveYear = year;
@@ -3885,6 +3935,7 @@ const PAGE_TITLES = {
   'journal': 'JOURNAL',
   'analytics': 'ANALYTICS',
   'settings': 'SETTINGS',
+  'storage': 'STORAGE',
 };
 const ACTION_PLAN_ACTIONS = `
   <button class="btn-archive" onclick="archiveWeek()">📦 Archive Week</button>
@@ -3912,6 +3963,7 @@ function switchPage(pageId) {
   if (pageId === 'analytics' && anAllTrades.length === 0) loadAnalytics();
   if (pageId === 'journal') loadJournalPage();
   if (pageId === 'history') renderHistoryPageContent();
+  if (pageId === 'storage') renderStoragePage();
   closeSidebar();
   localStorage.setItem('forex_active_page', pageId);
 }
