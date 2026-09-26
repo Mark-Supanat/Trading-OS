@@ -1670,6 +1670,7 @@ select.field-sm option{background:#111827;color:var(--text)}
         </div>
         <div class="jn-toolbar-right">
           <select class="jn-year-select" id="jnYearSelect" onchange="jnSetYear(this.value)"></select>
+          <button class="jn-btn" onclick="jnOpenImportModal()">➕ Import ปีใหม่</button>
           <div class="jn-sync-status" id="jnSyncStatus">⏳ กำลังโหลด...</div>
           <button class="jn-btn" onclick="jnExportCSV()">⬇ Export CSV</button>
           <button class="jn-btn" onclick="jnExportJSON()">⬇ Export JSON</button>
@@ -2056,12 +2057,122 @@ ${daysText}
 // ============================================
 // ANALYTICS
 // ============================================
-// เพิ่มปีใหม่ตรงนี้เวลาขึ้นปีถัดไป — สร้าง Sheet + Apps Script ใหม่ แล้วเอา URL มาใส่
-const YEAR_SHEET_URLS = {
+// ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
+// "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
+// ด้านล่าง — ค่าจริงถูกเก็บใน Supabase ตาราง `action_plan` แถว id='journal_sources')
+let YEAR_SHEET_URLS = {
   '2026': 'https://script.google.com/macros/s/AKfycbx80ZR30MAwLzz5DVkCAfmLrAdYfyP185No3AleBGAVh9B_eS4GF3F6MZq3pLlPOvEa/exec',
 };
 let anActiveYear = '2026';
 let GS_URL = YEAR_SHEET_URLS[anActiveYear];
+
+// ============================================
+// JOURNAL YEAR SOURCES — synced to Supabase (same `action_plan` table, row id='journal_sources')
+// data = { "2026": "https://script.google.com/.../exec", "2027": "..." }
+// ============================================
+const SB_SOURCES_ID = 'journal_sources';
+
+async function jnLoadYearSources() {
+  try {
+    const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_SOURCES_ID}&select=data`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
+    });
+    const rows = await res.json();
+    if (rows && rows[0] && rows[0].data && Object.keys(rows[0].data).length) {
+      YEAR_SHEET_URLS = rows[0].data;
+      if (!YEAR_SHEET_URLS[anActiveYear]) anActiveYear = Object.keys(YEAR_SHEET_URLS).sort().reverse()[0];
+      GS_URL = YEAR_SHEET_URLS[anActiveYear];
+    } else {
+      // ยังไม่เคยมีแถวนี้ใน Supabase — เอาค่า hardcode ด้านบนไปสร้างแถวแรกให้อัตโนมัติ
+      await jnSaveYearSources();
+    }
+  } catch(e) { console.warn('jnLoadYearSources failed (ใช้ค่า hardcode แทน):', e); }
+}
+
+async function jnSaveYearSources() {
+  try {
+    await fetch(`${SB_URL}/action_plan`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ id: SB_SOURCES_ID, data: YEAR_SHEET_URLS }),
+    });
+  } catch(e) { console.warn('jnSaveYearSources failed:', e); }
+}
+
+// เปิด modal ให้กรอกปี + Apps Script URL ของปีใหม่
+function jnOpenImportModal() {
+  const html = `<div class="mc-overlay" id="jnImportOverlay" onclick="if(event.target===this) jnCloseImportModal()">
+    <div class="mc-modal">
+      <div class="mc-modal-title">Import ปีใหม่</div>
+      <div class="mc-modal-sub">เชื่อม Google Sheet + Apps Script ของปีใหม่เข้ากับ Journal</div>
+      <input type="text" class="mc-overall-input" id="jnImportYear" placeholder="ปี เช่น 2027" inputmode="numeric" maxlength="4">
+      <input type="text" class="mc-overall-input" id="jnImportUrl" placeholder="วาง Apps Script Web App URL (ลงท้าย /exec)">
+      <div id="jnImportStatus" style="font-family:var(--font-mono);font-size:11px;color:var(--jn-text-dim);min-height:16px;margin-top:-6px;margin-bottom:10px"></div>
+      <div class="mc-modal-actions">
+        <button type="button" class="mc-btn" onclick="jnCloseImportModal()">ยกเลิก</button>
+        <button type="button" class="mc-btn primary" id="jnImportSaveBtn" onclick="jnSaveImportModal()">ทดสอบ + เชื่อม</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  const yearEl = document.getElementById('jnImportYear');
+  if (yearEl) yearEl.focus();
+}
+
+function jnCloseImportModal() {
+  const el = document.getElementById('jnImportOverlay');
+  if (el) el.remove();
+}
+
+// ทดสอบยิงไปที่ URL ที่กรอกก่อนบันทึกจริง กันพิมพ์ผิด/ยังไม่ Deploy เป็น "Anyone"
+async function jnSaveImportModal() {
+  const yearEl = document.getElementById('jnImportYear');
+  const urlEl = document.getElementById('jnImportUrl');
+  const statusEl = document.getElementById('jnImportStatus');
+  const btn = document.getElementById('jnImportSaveBtn');
+  const year = (yearEl.value || '').trim();
+  const url = (urlEl.value || '').trim();
+
+  if (!/^\d{4}$/.test(year)) {
+    statusEl.style.color = '#f87171';
+    statusEl.textContent = '⚠️ กรอกปีเป็นตัวเลข 4 หลัก เช่น 2027';
+    return;
+  }
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)) {
+    statusEl.style.color = '#f87171';
+    statusEl.textContent = '⚠️ URL ต้องเป็นลิงก์ Apps Script Web App ที่ลงท้ายด้วย /exec';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังทดสอบ...';
+  statusEl.style.color = 'var(--jn-text-dim)';
+  statusEl.textContent = 'กำลังเช็คว่า Sheet ปีนี้ตอบกลับหรือไม่...';
+
+  try {
+    const res = await fetch(`${url}?action=getTrades&quarter=q1`);
+    const data = await res.json();
+    if (!res.ok || !data || !Array.isArray(data.trades)) throw new Error('unexpected response shape');
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'ทดสอบ + เชื่อม';
+    statusEl.style.color = '#f87171';
+    statusEl.textContent = '⚠️ เชื่อมไม่สำเร็จ เช็ค URL หรือว่า Deploy เป็น "Anyone" หรือยัง';
+    return;
+  }
+
+  YEAR_SHEET_URLS[year] = url;
+  await jnSaveYearSources();
+  jnCloseImportModal();
+  showToast(`✅ เชื่อมปี ${year} สำเร็จ`);
+  jnPopulateYearSelect(true);
+  jnSetYear(year);
+}
 let anAllTrades = [];
 let anQuarter = 'q3'; // default Q3 (ปัจจุบัน)
 let anSymbol = 'all';
@@ -3033,9 +3144,11 @@ function jnUpdateQuarterLabels() {
   });
 }
 
-function jnPopulateYearSelect() {
+function jnPopulateYearSelect(force) {
   const sel = document.getElementById('jnYearSelect');
-  if (!sel || sel.options.length) return; // already populated
+  if (!sel) return;
+  if (sel.options.length && !force) return; // already populated
+  sel.innerHTML = '';
   Object.keys(YEAR_SHEET_URLS).sort().reverse().forEach(year => {
     const opt = document.createElement('option');
     opt.value = year;
@@ -4955,6 +5068,7 @@ async function initApp() {
   // Auto Load จาก Supabase ก่อน, fallback localStorage
   showToast('☁ กำลังโหลดข้อมูล...');
   const cloudData = await cloudLoad();
+  await jnLoadYearSources(); // โหลดรายชื่อปี+URL ของ Journal จาก Supabase ก่อนหน้าใดๆ จะเปิดหน้า Journal/Analytics
   routineData = await loadRoutineCloud();
   routineItems = await loadRoutineItemsCloud();
   marketConditionData = await loadMarketConditionCloud();
