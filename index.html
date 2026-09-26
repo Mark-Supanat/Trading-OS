@@ -2110,6 +2110,16 @@ function jnOpenImportModal() {
     <div class="mc-modal">
       <div class="mc-modal-title">Import ปีใหม่</div>
       <div class="mc-modal-sub">เชื่อม Google Sheet + Apps Script ของปีใหม่เข้ากับ Journal</div>
+      <details style="margin-bottom:12px;font-size:12px;color:var(--jn-text-dim);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 10px">
+        <summary style="cursor:pointer;color:var(--jn-text);font-weight:600">ℹ️ ทำปีใหม่ยังไง (ปีละครั้ง — กดดูถ้าลืมขั้นตอน)</summary>
+        <ol style="margin:8px 0 2px 18px;padding:0;line-height:1.6">
+          <li>เปิด Google Sheet ปีก่อนหน้า → File → Make a copy → เปลี่ยนชื่อไฟล์เป็นปีใหม่</li>
+          <li>เปลี่ยนชื่อแท็บด้านล่างในสำเนาเป็น "Q1 [ปีใหม่]", "Q2 [ปีใหม่]" ฯลฯ</li>
+          <li>เปิด Extensions → Apps Script ของสำเนานี้ → แก้ 4 บรรทัดใน <code>SHEET_NAMES</code> ให้เป็นปีใหม่ → กด 💾 บันทึก</li>
+          <li>กด "การทำให้ใช้งานได้" → "การทำให้ใช้งานได้แบบใหม่" (New deployment) → Deploy → คัดลอก URL ที่ลงท้าย /exec</li>
+          <li>กลับมาที่นี่ พิมพ์ปีใหม่ + วาง URL แล้วกด "ทดสอบ + เชื่อม" ด้านล่าง</li>
+        </ol>
+      </details>
       <input type="text" class="mc-overall-input" id="jnImportYear" placeholder="ปี เช่น 2027" inputmode="numeric" maxlength="4">
       <input type="text" class="mc-overall-input" id="jnImportUrl" placeholder="วาง Apps Script Web App URL (ลงท้าย /exec)">
       <div id="jnImportStatus" style="font-family:var(--font-mono);font-size:11px;color:var(--jn-text-dim);min-height:16px;margin-top:-6px;margin-bottom:10px"></div>
