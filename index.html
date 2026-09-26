@@ -5077,13 +5077,23 @@ async function initApp() {
 
   // Auto Load จาก Supabase ก่อน, fallback localStorage
   showToast('☁ กำลังโหลดข้อมูล...');
-  const cloudData = await cloudLoad();
-  await jnLoadYearSources(); // โหลดรายชื่อปี+URL ของ Journal จาก Supabase ก่อนหน้าใดๆ จะเปิดหน้า Journal/Analytics
-  routineData = await loadRoutineCloud();
-  routineItems = await loadRoutineItemsCloud();
-  marketConditionData = await loadMarketConditionCloud();
-  dashNoteCloudText = await loadNoteCloud();
-  focusList = await loadFocusCloud();
+  // โหลดทุกอย่างจาก Supabase พร้อมกัน (แทนที่จะรอทีละอย่าง) — แต่ละตัวเป็นคนละแถวในตาราง
+  // action_plan ไม่ได้ขึ้นต่อกัน เลยยิงพร้อมกันได้ ทำให้เร็วขึ้นมาก โดยเฉพาะตอนเน็ตช้า
+  const [cloudData, , routineDataR, routineItemsR, marketConditionDataR, dashNoteCloudTextR, focusListR] =
+    await Promise.all([
+      cloudLoad(),
+      jnLoadYearSources(), // โหลดรายชื่อปี+URL ของ Journal จาก Supabase (ไม่มีค่าคืน ใช้แค่ผลข้างเคียง)
+      loadRoutineCloud(),
+      loadRoutineItemsCloud(),
+      loadMarketConditionCloud(),
+      loadNoteCloud(),
+      loadFocusCloud(),
+    ]);
+  routineData = routineDataR;
+  routineItems = routineItemsR;
+  marketConditionData = marketConditionDataR;
+  dashNoteCloudText = dashNoteCloudTextR;
+  focusList = focusListR;
   if (!focusList.length) {
     try { focusList = JSON.parse(localStorage.getItem('forex_focus_list') || '[]'); } catch(e) { focusList = []; }
   }
