@@ -14,6 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -3201,10 +3202,10 @@ function jnPopulateYearSelect(force) {
   });
 }
 
-// หน้า STORAGE — เพจ backup ของ Trade Journal/Analytics แต่ละปี
-// ตอนนี้ยังเป็นแค่โครงหน้า (list ปีที่มีอยู่) ปุ่ม Backup ยังไม่ทำงานจริง
-// รอ Mark เลือกรูปแบบไฟล์ (Excel / Excel+PDF) ก่อนถึงจะเขียนตัวสร้างไฟล์จริง
-function renderStoragePage() {
+// หน้า STORAGE — Backup ข้อมูล Trade Journal/Analytics รายปี เป็นไฟล์ Excel
+// เก็บ 2 ที่: (1) ดาวน์โหลดลงเครื่องจริง (2) อัปโหลดสำรองไว้ใน Supabase Storage
+// (บักเก็ตเดียวกับที่เก็บรูปกราฟ แค่แยกโฟลเดอร์ backups/ ไว้ไม่ให้ปนกัน)
+async function renderStoragePage() {
   const el = document.getElementById('storageYearList');
   if (!el) return;
   const years = Object.keys(YEAR_SHEET_URLS).sort().reverse();
@@ -3215,14 +3216,117 @@ function renderStoragePage() {
   el.innerHTML = years.map(year => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--jn-panel2);border:1px solid var(--jn-border2);border-radius:8px">
       <div style="font-family:var(--font-mono);font-weight:700">${year}</div>
-      <div style="font-size:11px;color:var(--jn-text-dim)">ยังไม่เคย Backup</div>
-      <button class="jn-btn" onclick="storageBackupYear('${year}')">⬇ Backup ปีนี้</button>
+      <div style="font-size:11px;color:var(--jn-text-dim)" id="storageStatus_${year}">⏳ กำลังเช็คสถานะ...</div>
+      <button class="jn-btn" id="storageBtn_${year}" onclick="storageBackupYear('${year}', this)">⬇ Backup ปีนี้</button>
     </div>
   `).join('');
+
+  // เช็คว่าปีไหน backup ไว้แล้วบ้าง (ดูจากไฟล์จริงใน Supabase Storage ไม่ใช่ค่าที่จำไว้เฉยๆ)
+  const backups = await storageListBackups();
+  years.forEach(year => {
+    const statusEl = document.getElementById(`storageStatus_${year}`);
+    if (!statusEl) return;
+    const match = backups.find(f => f.name === `journal_${year}.xlsx`);
+    statusEl.textContent = match
+      ? `📦 Backup ล่าสุด: ${new Date(match.updated_at || match.created_at).toLocaleDateString('th-TH')}`
+      : 'ยังไม่เคย Backup';
+  });
 }
 
-function storageBackupYear(year) {
-  showToast(`🔧 ระบบ Backup ปี ${year} ยังอยู่ระหว่างออกแบบ (รอเลือกรูปแบบไฟล์ Excel/PDF) — เร็วๆ นี้`);
+// ดึงเทรดทั้งปี (Q1-Q4) ของปีใดก็ได้ในลิสต์ โดยไม่ยุ่งกับ anAllTrades/ปีที่กำลังดูอยู่ในหน้า Journal
+async function storageFetchYearTrades(year) {
+  const url = YEAR_SHEET_URLS[year];
+  if (!url) return [];
+  const quarters = ['q1', 'q2', 'q3', 'q4'];
+  const results = await Promise.all(quarters.map(q =>
+    fetch(`${url}?action=getTrades&quarter=${q}`)
+      .then(r => r.json())
+      .then(d => (d.trades || []).map(t => ({ ...t, _quarter: q })))
+      .catch(() => [])
+  ));
+  return results.flat();
+}
+
+// สร้างไฟล์ Excel: Sheet แรกสรุปภาพรวม, Sheet สองข้อมูลดิบทุกแถว (คอลัมน์ชุดเดียวกับ Export CSV)
+function buildJournalWorkbook(year, trades) {
+  const perQuarter = { q1: 0, q2: 0, q3: 0, q4: 0 };
+  trades.forEach(t => { if (perQuarter[t._quarter] !== undefined) perQuarter[t._quarter]++; });
+
+  const summaryRows = [
+    ['Trade Journal Backup'],
+    ['ปี', year],
+    ['สร้างเมื่อ', new Date().toISOString().slice(0, 19).replace('T', ' ')],
+    ['จำนวนเทรดรวม', trades.length],
+    ['Q1', perQuarter.q1],
+    ['Q2', perQuarter.q2],
+    ['Q3', perQuarter.q3],
+    ['Q4', perQuarter.q4],
+  ];
+
+  const rows = trades
+    .slice()
+    .sort((a, b) => String(a.dateOpen || '').localeCompare(String(b.dateOpen || '')) || (a.no || 0) - (b.no || 0))
+    .map(t => JN_EXPORT_COLS.map(c => (t[c] !== undefined ? t[c] : '')));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryRows), 'Summary');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([JN_EXPORT_COLS, ...rows]), 'Trades');
+  return wb;
+}
+
+async function storageBackupYear(year, btn) {
+  const originalLabel = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังทำ...'; }
+  showToast(`⏳ กำลังดึงข้อมูลปี ${year} ทั้งปี...`);
+  try {
+    const trades = await storageFetchYearTrades(year);
+    if (!trades.length) {
+      showToast(`⚠️ ปี ${year} ยังไม่มีข้อมูลเทรดเลย ไม่ได้สร้างไฟล์`);
+      return;
+    }
+    const wb = buildJournalWorkbook(year, trades);
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+
+    // 1) ดาวน์โหลดลงเครื่องจริง — สำเนาที่ปลอดภัยที่สุด ไม่ขึ้นกับระบบเราเลย
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `journal_${year}_backup.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    // 2) อัปโหลดสำรองไว้ใน Supabase Storage ด้วย เพื่อให้หน้านี้กดโหลดซ้ำได้ทีหลัง
+    const file = new File([blob], `journal_${year}.xlsx`, { type: 'application/octet-stream' });
+    const uploaded = await uploadImage(file, `backups/journal_${year}.xlsx`);
+
+    showToast(uploaded
+      ? `✅ Backup ปี ${year} เสร็จแล้ว (${trades.length} เทรด) — ดาวน์โหลดลงเครื่อง + สำรองใน Supabase แล้ว`
+      : `✅ ดาวน์โหลดลงเครื่องสำเร็จ แต่อัปโหลดสำรองขึ้น Supabase ไม่สำเร็จ (เช็คเน็ตแล้วลองใหม่ได้)`);
+    renderStoragePage();
+  } catch(e) {
+    console.error('storageBackupYear error:', e);
+    showToast(`⚠️ Backup ปี ${year} ไม่สำเร็จ: ${e.message || e}`);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = originalLabel || '⬇ Backup ปีนี้'; }
+  }
+}
+
+// เช็คว่าเคย backup ปีไหนไว้แล้วบ้าง จากรายการไฟล์จริงในโฟลเดอร์ backups/ ของ Supabase Storage
+async function storageListBackups() {
+  try {
+    const res = await fetch(`${SB_PROJECT_URL}/storage/v1/object/list/${SB_BUCKET}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prefix: 'backups', limit: 100 }),
+    });
+    const list = await res.json();
+    return Array.isArray(list) ? list : [];
+  } catch(e) { console.warn('storageListBackups failed:', e); return []; }
 }
 
 function jnSetYear(year) {
