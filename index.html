@@ -2109,10 +2109,10 @@ async function jnLoadYearSources() {
       YEAR_SHEET_URLS = rows[0].data;
       if (!YEAR_SHEET_URLS[anActiveYear]) anActiveYear = Object.keys(YEAR_SHEET_URLS).sort().reverse()[0];
       GS_URL = YEAR_SHEET_URLS[anActiveYear];
-    } else {
-      // ยังไม่เคยมีแถวนี้ใน Supabase — เอาค่า hardcode ด้านบนไปสร้างแถวแรกให้อัตโนมัติ
-      await jnSaveYearSources();
     }
+    // ถ้า rows ว่าง (โหลดไม่สำเร็จ/ยังไม่เคยมีแถวนี้) ตั้งใจ "ไม่เขียนทับ" Supabase โดยอัตโนมัติ —
+    // ปล่อยให้ YEAR_SHEET_URLS คงค่า hardcode เดิมไว้ชั่วคราวเฉยๆ (อ่านอย่างเดียว ไม่มีทางเขียนทับ
+    // ปีที่เคย Import ไว้จริงโดยไม่ตั้งใจ) การสร้างแถวนี้ครั้งแรกทำสำเร็จไปแล้วตอน Import ปีแรก
   } catch(e) { console.warn('jnLoadYearSources failed (ใช้ค่า hardcode แทน):', e); }
 }
 
