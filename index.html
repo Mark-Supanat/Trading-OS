@@ -1938,10 +1938,18 @@ select.field-sm option{background:#111827;color:var(--text)}
   <!-- ===== PAGE: SETTINGS ===== -->
   <div class="page" id="page-settings">
     <div class="page-inner">
-      <div class="placeholder-page">
-        <div class="placeholder-icon">⚙</div>
-        <div class="placeholder-title">SETTINGS</div>
-        <div class="placeholder-sub">Coming Soon</div>
+      <div style="max-width:900px">
+        <div class="dash-widget" style="margin-bottom:16px">
+          <div class="dash-widget-title" style="margin-bottom:4px">🔗 Data Sources — ปี ↔ Apps Script URL</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px">
+            รายการปีที่เชื่อมกับ Journal/Analytics อยู่ตอนนี้ — ลบปีที่เชื่อมผิด/เลิกใช้ได้ที่นี่
+          </div>
+          <div id="settingsDataSourcesList" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+        <div class="dash-widget">
+          <div class="dash-widget-title" style="margin-bottom:4px">ℹ️ Build Info</div>
+          <div id="settingsBuildInfo" style="font-size:12px;color:var(--text2);font-family:var(--font-mono)"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -2085,6 +2093,10 @@ ${daysText}
 // ============================================
 // ANALYTICS
 // ============================================
+// เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
+const APP_BUILD = '2.54';
+const APP_BUILD_DATE = '2026-09-27';
+
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
 // "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
 // ด้านล่าง — ค่าจริงถูกเก็บใน Supabase ตาราง `action_plan` แถว id='journal_sources')
@@ -3202,7 +3214,65 @@ function jnPopulateYearSelect(force) {
   });
 }
 
-// หน้า STORAGE — Backup ข้อมูล Trade Journal/Analytics รายปี เป็นไฟล์ Excel
+// หน้า SETTINGS — จัดการ Data Sources (ปี↔URL) + โชว์ข้อมูลเวอร์ชันไฟล์
+function renderSettingsPage() {
+  renderSettingsDataSources();
+  const buildEl = document.getElementById('settingsBuildInfo');
+  if (buildEl) buildEl.textContent = `เวอร์ชันไฟล์: ${APP_BUILD} · อัปเดต ${APP_BUILD_DATE}`;
+}
+
+function renderSettingsDataSources() {
+  const el = document.getElementById('settingsDataSourcesList');
+  if (!el) return;
+  const years = Object.keys(YEAR_SHEET_URLS).sort().reverse();
+  if (!years.length) {
+    el.innerHTML = `<div style="font-size:12px;color:var(--jn-text-dim)">ยังไม่มีปีเชื่อมไว้เลย</div>`;
+    return;
+  }
+  el.innerHTML = years.map(year => {
+    const url = YEAR_SHEET_URLS[year];
+    const short = url.length > 46 ? url.slice(0, 30) + '…' + url.slice(-10) : url;
+    return `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--jn-panel2);border:1px solid var(--jn-border2);border-radius:8px">
+      <div style="min-width:48px;font-family:var(--font-mono);font-weight:700">${year}</div>
+      <div style="flex:1;font-family:var(--font-mono);font-size:11px;color:var(--jn-text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${url}">${short}</div>
+      <button class="jn-btn" onclick="settingsCopyUrl('${year}')">📋 คัดลอก</button>
+      <button class="jn-btn" style="color:#f87171;border-color:rgba(248,113,113,.35)" onclick="settingsDeleteYear('${year}')">🗑 ลบ</button>
+    </div>`;
+  }).join('');
+}
+
+function settingsCopyUrl(year) {
+  const url = YEAR_SHEET_URLS[year];
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(
+    () => showToast(`📋 คัดลอก URL ปี ${year} แล้ว`),
+    () => showToast('⚠️ คัดลอกไม่สำเร็จ ลองก็อปเองจากช่องด้านบน')
+  );
+}
+
+async function settingsDeleteYear(year) {
+  const years = Object.keys(YEAR_SHEET_URLS);
+  if (years.length <= 1) {
+    showToast('⚠️ ต้องเหลืออย่างน้อย 1 ปีเสมอ ลบปีสุดท้ายไม่ได้');
+    return;
+  }
+  if (!confirm(`ลบปี ${year} ออกจากรายการเชื่อมต่อ?\n\n(ข้อมูลใน Google Sheet ปีนี้ไม่หาย แค่เอาออกจากลิสต์ในเว็บ — เชื่อมกลับได้ทุกเมื่อด้วยปุ่ม Import ปีใหม่)`)) return;
+
+  delete YEAR_SHEET_URLS[year];
+  await jnSaveYearSources();
+
+  if (anActiveYear === year) {
+    anActiveYear = Object.keys(YEAR_SHEET_URLS).sort().reverse()[0];
+    GS_URL = YEAR_SHEET_URLS[anActiveYear];
+    anAllTrades = []; // บังคับให้โหลดใหม่ตอนกลับไปหน้า Journal/Analytics
+  }
+  jnPopulateYearSelect(true);
+  renderSettingsDataSources();
+  showToast(`🗑 ลบปี ${year} ออกจากรายการแล้ว`);
+}
+
+
 // เก็บ 2 ที่: (1) ดาวน์โหลดลงเครื่องจริง (2) อัปโหลดสำรองไว้ใน Supabase Storage
 // (บักเก็ตเดียวกับที่เก็บรูปกราฟ แค่แยกโฟลเดอร์ backups/ ไว้ไม่ให้ปนกัน)
 async function renderStoragePage() {
@@ -4068,6 +4138,7 @@ function switchPage(pageId) {
   if (pageId === 'journal') loadJournalPage();
   if (pageId === 'history') renderHistoryPageContent();
   if (pageId === 'storage') renderStoragePage();
+  if (pageId === 'settings') renderSettingsPage();
   closeSidebar();
   localStorage.setItem('forex_active_page', pageId);
 }
