@@ -1946,6 +1946,14 @@ select.field-sm option{background:#111827;color:var(--text)}
           </div>
           <div id="settingsDataSourcesList" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
+        <div class="dash-widget" style="margin-bottom:16px">
+          <div class="dash-widget-title" style="margin-bottom:4px">🧩 Pattern / Strategy — Action Plan</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px">
+            เพิ่ม ลบ เปลี่ยนชื่อ หรือจัดลำดับรายการใน dropdown ของหน้า Action Plan — เปลี่ยนชื่อแล้วข้อมูลเก่าที่เคยเลือกไว้จะเปลี่ยนตามให้ ส่วนการลบจะไม่ทำให้ข้อมูลเก่าหาย
+          </div>
+          <div id="planOptionsEditor" style="display:grid;grid-template-columns:1fr 1fr;gap:20px"></div>
+          <div style="margin-top:12px"><button class="jn-btn" onclick="planOptReset()">↺ คืนค่าเริ่มต้น</button></div>
+        </div>
         <div class="dash-widget">
           <div class="dash-widget-title" style="margin-bottom:4px">ℹ️ Build Info</div>
           <div id="settingsBuildInfo" style="font-size:12px;color:var(--text2);font-family:var(--font-mono)"></div>
@@ -2094,7 +2102,7 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.55';
+const APP_BUILD = '2.56';
 const APP_BUILD_DATE = '2026-10-03';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
@@ -3217,6 +3225,7 @@ function jnPopulateYearSelect(force) {
 // หน้า SETTINGS — จัดการ Data Sources (ปี↔URL) + โชว์ข้อมูลเวอร์ชันไฟล์
 function renderSettingsPage() {
   renderSettingsDataSources();
+  renderPlanOptionsEditor();
   const buildEl = document.getElementById('settingsBuildInfo');
   if (buildEl) buildEl.textContent = `เวอร์ชันไฟล์: ${APP_BUILD} · อัปเดต ${APP_BUILD_DATE}`;
 }
@@ -4816,6 +4825,150 @@ const SB_MARKET_ID = 'market_condition';
 let marketConditionData = {}; // { 'YYYY-MM-DD' (Monday key): { overall:'Trend'|'Sideway'|'', symbols:{SYM:'Trend'|'Sideway'|...}, note:'' } }
 let mcEditingWeekKey = null;
 
+
+// ============================================
+// PATTERN / STRATEGY — editable lists (Supabase row 'plan_options' + localStorage fallback)
+// ============================================
+const SB_PLAN_OPT_ID = 'plan_options';
+const PLAN_OPT_META = {
+  pattern:  { label: 'Pattern',  list: () => PATTERNS,   set: v => { PATTERNS = v; },   def: () => PATTERNS_DEFAULT },
+  strategy: { label: 'Strategy', list: () => STRATEGIES, set: v => { STRATEGIES = v; }, def: () => STRATEGIES_DEFAULT },
+};
+
+async function loadPlanOptionsCloud() {
+  try {
+    const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_PLAN_OPT_ID}&select=data`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}` }
+    });
+    const rows = await res.json();
+    if (rows && rows[0] && rows[0].data) return rows[0].data;
+  } catch(e) { console.warn('Plan options load failed:', e); }
+  try { return JSON.parse(localStorage.getItem('forex_plan_options') || 'null'); } catch(e) { return null; }
+}
+function applyPlanOptions(o) {
+  if (!o) return;
+  if (Array.isArray(o.patterns) && o.patterns.length) PATTERNS = o.patterns;
+  if (Array.isArray(o.strategies) && o.strategies.length) STRATEGIES = o.strategies;
+}
+async function savePlanOptions() {
+  const payload = { patterns: PATTERNS, strategies: STRATEGIES };
+  try { localStorage.setItem('forex_plan_options', JSON.stringify(payload)); } catch(e) {}
+  try {
+    await fetch(`${SB_URL}/action_plan`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY, 'Authorization': `Bearer ${currentAccessToken || SB_KEY}`,
+        'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ id: SB_PLAN_OPT_ID, data: payload }),
+    });
+  } catch(e) { console.warn('Plan options save failed:', e); }
+}
+
+// rebuild every Pattern/Strategy <select> on the Action Plan page, keeping current values
+function refreshPlanSelects() {
+  ['pattern','strategy'].forEach(kind => {
+    const list = PLAN_OPT_META[kind].list();
+    document.querySelectorAll(`select[id$="_${kind}"]`).forEach(sel => {
+      const cur = sel.value;
+      const opts = ['<option value="">— เลือก —</option>'].concat(list.map(o => `<option value="${escAttr(o)}">${mcEscHtml(o)}</option>`));
+      if (cur && !list.includes(cur)) opts.push(`<option value="${escAttr(cur)}">${mcEscHtml(cur)}</option>`);
+      sel.innerHTML = opts.join('');
+      sel.value = cur;
+    });
+  });
+}
+
+function renderPlanOptionsEditor() {
+  const el = document.getElementById('planOptionsEditor');
+  if (!el) return;
+  el.innerHTML = ['pattern','strategy'].map(kind => {
+    const m = PLAN_OPT_META[kind];
+    const rows = m.list().map((o, i) => `<div style="display:flex;gap:4px;align-items:center;margin-bottom:4px">
+      <input type="text" class="field-sm" style="flex:1;min-width:0" value="${escAttr(o)}" onchange="planOptRename('${kind}',${i},this.value)">
+      <button class="routine-icon-btn" title="เลื่อนขึ้น" onclick="planOptMove('${kind}',${i},-1)">▲</button>
+      <button class="routine-icon-btn" title="เลื่อนลง" onclick="planOptMove('${kind}',${i},1)">▼</button>
+      <button class="routine-icon-btn" title="ลบ" onclick="planOptDelete('${kind}',${i})">✕</button>
+    </div>`).join('');
+    return `<div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text2);margin-bottom:8px">${m.label.toUpperCase()} (${m.list().length})</div>
+      ${rows}
+      <div style="display:flex;gap:4px;margin-top:8px">
+        <input type="text" class="field-sm" style="flex:1;min-width:0" id="planOptNew_${kind}" placeholder="เพิ่ม ${m.label} ใหม่..." onkeydown="if(event.key==='Enter')planOptAdd('${kind}')">
+        <button class="jn-btn" onclick="planOptAdd('${kind}')">+ เพิ่ม</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function planOptCommit() {
+  renderPlanOptionsEditor();
+  refreshPlanSelects();
+  savePlanOptions();
+}
+function planOptAdd(kind) {
+  const inp = document.getElementById('planOptNew_' + kind);
+  const v = (inp && inp.value || '').trim();
+  if (!v) return;
+  const list = PLAN_OPT_META[kind].list().slice();
+  if (list.includes(v)) { showToast('⚠ มีรายการนี้อยู่แล้ว'); return; }
+  list.push(v);
+  PLAN_OPT_META[kind].set(list);
+  planOptCommit();
+}
+function planOptDelete(kind, i) {
+  const list = PLAN_OPT_META[kind].list().slice();
+  const name = list[i];
+  if (!confirm(`ลบ "${name}" ออกจากรายการ?\\n(ข้อมูลเก่าที่เคยเลือกไว้ยังอยู่)`)) return;
+  list.splice(i, 1);
+  PLAN_OPT_META[kind].set(list);
+  planOptCommit();
+}
+function planOptMove(kind, i, dir) {
+  const list = PLAN_OPT_META[kind].list().slice();
+  const j = i + dir;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  PLAN_OPT_META[kind].set(list);
+  planOptCommit();
+}
+function planOptRename(kind, i, newVal) {
+  const list = PLAN_OPT_META[kind].list().slice();
+  const old = list[i];
+  const v = (newVal || '').trim();
+  if (!v || v === old) { renderPlanOptionsEditor(); return; }
+  if (list.includes(v)) { showToast('⚠ ชื่อซ้ำกับรายการที่มีอยู่'); renderPlanOptionsEditor(); return; }
+  list[i] = v;
+  PLAN_OPT_META[kind].set(list);
+  // migrate already-saved days (all weeks) + live selects to the new name
+  let changed = 0;
+  Object.keys(allData).forEach(wk => {
+    if (wk.startsWith('_')) return;
+    const w = allData[wk];
+    if (!w || typeof w !== 'object') return;
+    Object.keys(w).forEach(k => {
+      const days = w[k] && w[k].days;
+      if (!days) return;
+      Object.keys(days).forEach(d => { if (days[d] && days[d][kind] === old) { days[d][kind] = v; changed++; } });
+    });
+  });
+  document.querySelectorAll(`select[id$="_${kind}"]`).forEach(sel => {
+    if (sel.value === old) { sel.insertAdjacentHTML('beforeend', `<option value="${escAttr(v)}"></option>`); sel.value = v; }
+  });
+  if (changed) {
+    try { localStorage.setItem('forex_action_plan', JSON.stringify(allData)); } catch(e) {}
+    cloudSave(allData);
+  }
+  planOptCommit();
+  showToast(changed ? `✅ เปลี่ยนชื่อแล้ว (อัปเดตข้อมูลเก่า ${changed} จุด)` : '✅ เปลี่ยนชื่อแล้ว');
+}
+function planOptReset() {
+  if (!confirm('คืนค่า Pattern / Strategy เป็นรายการเริ่มต้น?\\n(ข้อมูลเก่าที่เคยเลือกไว้ยังอยู่)')) return;
+  PATTERNS = PATTERNS_DEFAULT.slice();
+  STRATEGIES = STRATEGIES_DEFAULT.slice();
+  planOptCommit();
+}
+
 async function loadMarketConditionCloud() {
   try {
     const res = await fetch(`${SB_URL}/action_plan?id=eq.${SB_MARKET_ID}&select=data`, {
@@ -5064,7 +5217,7 @@ const SYMBOLS = [
   {id:'ndx', name:'NDX', tf:'Day — H4', cls:'sym-ndx', icon:FLAG_IMG('us'), iconBg:'#1f2937', iconColor:'#fff'},
 ];
 
-const PATTERNS = [
+let PATTERNS = [
   // Trend Direction
   'Uptrend','Downtrend',
   'Uptrend Continuation','Downtrend Continuation',
@@ -5082,7 +5235,7 @@ const PATTERNS = [
   'Error'
 ];
 
-const STRATEGIES = [
+let STRATEGIES = [
   // Model
   'Model 1','Model 1.5','Model 2','Model 3','Model 4',
   // Buy/Sell Setup
@@ -5094,7 +5247,10 @@ const STRATEGIES = [
   // Risk Level
   'Aggressive','Conservative','Defensive',
   'Wait and See'
-];const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
+];
+const PATTERNS_DEFAULT = PATTERNS.slice();
+const STRATEGIES_DEFAULT = STRATEGIES.slice();
+const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
 
 // ============================================
 // SUPABASE CONFIG
@@ -5326,7 +5482,7 @@ async function initApp() {
   showToast('☁ กำลังโหลดข้อมูล...');
   // โหลดทุกอย่างจาก Supabase พร้อมกัน (แทนที่จะรอทีละอย่าง) — แต่ละตัวเป็นคนละแถวในตาราง
   // action_plan ไม่ได้ขึ้นต่อกัน เลยยิงพร้อมกันได้ ทำให้เร็วขึ้นมาก โดยเฉพาะตอนเน็ตช้า
-  const [cloudData, , routineDataR, routineItemsR, marketConditionDataR, dashNoteCloudTextR, focusListR] =
+  const [cloudData, , routineDataR, routineItemsR, marketConditionDataR, dashNoteCloudTextR, focusListR, planOptionsR] =
     await Promise.all([
       cloudLoad(),
       jnLoadYearSources(), // โหลดรายชื่อปี+URL ของ Journal จาก Supabase (ไม่มีค่าคืน ใช้แค่ผลข้างเคียง)
@@ -5335,7 +5491,9 @@ async function initApp() {
       loadMarketConditionCloud(),
       loadNoteCloud(),
       loadFocusCloud(),
+      loadPlanOptionsCloud(),
     ]);
+  applyPlanOptions(planOptionsR); // must run before renderSymbols builds the dropdowns
   routineData = routineDataR;
   routineItems = routineItemsR;
   marketConditionData = marketConditionDataR;
@@ -6000,14 +6158,14 @@ function renderSymbols() {
             <!-- Per-day fields -->
             <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr 1fr;gap:10px">
               <div class="field-group">
-                <label>Pattern</label>
+                <label>Pattern <span style="cursor:pointer;opacity:.6;text-transform:none" title="เพิ่ม/ลบ/แก้ไขรายการ" onclick="switchPage('settings')">✎</span></label>
                 <select class="field-sm" id="${sym.id}_${d}_pattern" onchange="touchDay('${sym.id}','${d}');autoSave();updateSummary()">
                   <option value="">— เลือก —</option>
                   ${PATTERNS.map(p=>`<option value="${p}">${p}</option>`).join('')}
                 </select>
               </div>
               <div class="field-group">
-                <label>Strategy</label>
+                <label>Strategy <span style="cursor:pointer;opacity:.6;text-transform:none" title="เพิ่ม/ลบ/แก้ไขรายการ" onclick="switchPage('settings')">✎</span></label>
                 <select class="field-sm" id="${sym.id}_${d}_strategy" onchange="touchDay('${sym.id}','${d}');autoSave();updateSummary()">
                   <option value="">— เลือก —</option>
                   ${STRATEGIES.map(s=>`<option value="${s}">${s}</option>`).join('')}
@@ -6787,6 +6945,9 @@ function exportData() {
 function setVal(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
+  if (el.tagName === 'SELECT' && val && ![...el.options].some(o => o.value === val)) {
+    el.insertAdjacentHTML('beforeend', `<option value="${escAttr(val)}">${mcEscHtml(val)}</option>`); // value no longer in the list (deleted/legacy)
+  }
   el.value = val;
 }
 function getVal(id) {
