@@ -2094,8 +2094,8 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.54';
-const APP_BUILD_DATE = '2026-09-27';
+const APP_BUILD = '2.55';
+const APP_BUILD_DATE = '2026-10-03';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
 // "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
@@ -3440,6 +3440,10 @@ async function loadJournalPage(forceReload) {
   jnSetSyncStatus('ok', `✅ โหลดแล้ว ${n} รายการ`);
 }
 
+// Calendar = time view: every trade of the active year, placed by close date,
+// regardless of which quarter-sheet owns it (a Q3 trade closed in Oct shows in Oct).
+function jnGetCalendarTrades() { return anAllTrades; }
+
 function jnGetTrades() {
   if (jnQuarter === 'all') return anAllTrades;
   return anAllTrades.filter(t => t._quarter === jnQuarter);
@@ -3596,11 +3600,8 @@ function renderJournalKPIs() {
 
 // ---- Calendar ----
 function jnCalNav(dir) {
-  const range = JN_QUARTER_MONTHS[jnQuarter];
-  if (range) {
-    const nextMonth = jnCalMonth + dir;
-    if (nextMonth < range[0] || nextMonth > range[range.length - 1]) return; // stay within the locked quarter
-  }
+  const nextMonth = jnCalMonth + dir;
+  if (nextMonth < 0 || nextMonth > 11) return; // free navigation within the active year
   jnCalMonth += dir;
   if (jnCalMonth > 11) { jnCalMonth = 0; jnCalYear++; }
   if (jnCalMonth < 0) { jnCalMonth = 11; jnCalYear--; }
@@ -3611,10 +3612,13 @@ const JN_MONTH_ABBR = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OC
 
 function jnGoThisWeek() {
   const now = new Date();
-  const range = JN_QUARTER_MONTHS[jnQuarter];
-  if (range && !(String(now.getFullYear()) === anActiveYear && range.includes(now.getMonth()))) {
-    showToast('⚠ วันนี้ไม่ได้อยู่ใน ' + jnQuarterLabel(jnQuarter) + ' — ลองสลับไปแท็บ All');
+  if (String(now.getFullYear()) !== anActiveYear) {
+    showToast('⚠ วันนี้ไม่ได้อยู่ในปี ' + anActiveYear + ' — สลับปีด้านบนก่อน');
     return;
+  }
+  const curQ = 'q' + (Math.floor(now.getMonth() / 3) + 1);
+  if (jnQuarter !== 'all' && jnQuarter !== curQ) {
+    jnSetQuarter(curQ, document.getElementById('jn-tab-' + curQ)); // auto-switch to the current quarter
   }
   jnCalYear = now.getFullYear();
   jnCalMonth = now.getMonth();
@@ -3641,16 +3645,15 @@ function renderJournalCalendar() {
   const monthNamesEN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   label.textContent = `${monthNamesEN[jnCalMonth]} ${jnCalYear}`;
 
-  const navRange = JN_QUARTER_MONTHS[jnQuarter];
   const prevBtn = document.getElementById('jnPrevBtn');
   const nextBtn = document.getElementById('jnNextBtn');
-  if (prevBtn) prevBtn.disabled = !!(navRange && jnCalMonth <= navRange[0]);
-  if (nextBtn) nextBtn.disabled = !!(navRange && jnCalMonth >= navRange[navRange.length - 1]);
+  if (prevBtn) prevBtn.disabled = jnCalMonth <= 0;
+  if (nextBtn) nextBtn.disabled = jnCalMonth >= 11;
 
   const dows = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'];
   dowRow.innerHTML = dows.map(d => `<div class="jn-cal-dow">${d}</div>`).join('') + `<div class="jn-cal-dow jn-week-dow">PNL$</div>`;
 
-  const trades = jnGetTrades();
+  const trades = jnGetCalendarTrades();
   const byDay = jnClosedByDay(trades);
   const openByDay = jnOpenByDay(trades);
   const firstOfMonth = new Date(jnCalYear, jnCalMonth, 1);
@@ -3694,7 +3697,7 @@ function renderJournalCalendar() {
 
     let rowHtml = '';
     weekdayCells.forEach(c => {
-      const { day, key, data, open, otherMonth } = c;
+      const { day, month, key, data, open, otherMonth } = c;
       let cls = 'jn-cal-cell';
       if (otherMonth) cls += ' jn-other-month';
       if (key === todayKey) cls += ' jn-today';
@@ -3704,13 +3707,19 @@ function renderJournalCalendar() {
         ? `<div class="jn-cal-pnl" style="color:${data.pnl>=0?'var(--green)':'var(--red)'}">${data.pnl>=0?'+':'-'}$${Math.abs(data.pnl).toFixed(2)}</div>`
         : '';
       const openBadge = (open && open.length) ? `<div class="jn-cal-open-badge">${open.length} OPEN</div>` : '';
+      // trades closed on this day but owned by a different quarter-sheet than this month's quarter
+      const dayQ = 'q' + (Math.floor(month / 3) + 1);
+      const foreignQs = data ? [...new Set(data.trades.map(t => t._quarter).filter(q => q && q !== dayQ))] : [];
+      const xqBadge = foreignQs.length
+        ? `<div class="jn-cal-open-badge" style="color:#60a5fa;background:rgba(96,165,250,.12);border-color:rgba(96,165,250,.3)" title="ปิดในวันนี้ แต่ออเดอร์เป็นของ ${foreignQs.map(q=>q.toUpperCase()).join(', ')}">↩ ${foreignQs.map(q=>q.toUpperCase()).join('/')}</div>`
+        : '';
       const syms = data ? [...data.syms].filter(Boolean) : [];
       const tagsHtml = syms.length
         ? `<div class="jn-cal-tags">${syms.map(s => `<span class="jn-cal-tag">${s}</span>`).join('')}</div>`
         : '';
       rowHtml += `<div class="${cls}" onclick="jnSelectDay('${key}')">
         <div class="jn-cal-daynum">${day}</div>
-        ${openBadge}
+        ${openBadge}${xqBadge}
         ${pnlHtml}
         ${tagsHtml}
       </div>`;
@@ -3828,7 +3837,7 @@ function jnRenderTradeCard(t) {
 function jnSelectDay(key) {
   jnSelectedDateKey = key;
   renderJournalCalendar();
-  const trades = jnGetTrades();
+  const trades = jnGetCalendarTrades();
   const byDay = jnClosedByDay(trades);
   const openByDay = jnOpenByDay(trades);
   const closedTrades = (byDay[key] && byDay[key].trades) || [];
@@ -3856,7 +3865,7 @@ function jnSelectDay(key) {
 function jnSelectWeek(mondayKey) {
   jnSelectedDateKey = mondayKey;
   renderJournalCalendar();
-  const trades = jnGetTrades();
+  const trades = jnGetCalendarTrades();
 
   // the 7 calendar days (Mon..Sun) that belong to this week
   const monday = new Date(mondayKey);
@@ -4038,7 +4047,7 @@ function jnExportThisWeekCSV() {
     dd.setDate(monday.getDate() + i);
     weekKeys.push(jnDateKey(dd));
   }
-  const trades = jnGetTrades();
+  const trades = jnGetCalendarTrades();
   const openTrades = trades.filter(t => !jnCleanDate(t.dateClose) && jnCleanDate(t.dateOpen));
   const closedTrades = trades
     .filter(t => { const d = jnCleanDate(t.dateClose); return d && weekKeys.includes(jnDateKey(d)); })
