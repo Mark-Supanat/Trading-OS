@@ -4858,7 +4858,7 @@ function mcBadgeClass(text) {
 
 // สัปดาห์นั้น (Mon-Sun) มีเทรดอะไรปิดไปแล้วบ้าง — ใช้ประกอบ dropdown ต่อ symbol ในตัวแก้ไข
 function mcWeekAgg(mondayKey) {
-  const trades = jnGetTrades();
+  const trades = jnGetCalendarTrades(); // same source as the calendar (cross-quarter weeks)
   const byDay = jnClosedByDay(trades);
   const monday = new Date(mondayKey);
   const symCounts = {};
