@@ -1939,14 +1939,19 @@ select.field-sm option{background:#111827;color:var(--text)}
   <div class="page" id="page-settings">
     <div class="page-inner">
       <div style="max-width:900px">
-        <div class="dash-widget" style="margin-bottom:16px">
+        <!-- Settings menu: sections are auto-listed from .settings-section[data-title]; add a new section = add a div with class + data-key + data-title -->
+        <div class="dash-widget" style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <label for="settingsSectionSelect" style="font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text2)">เลือกหัวข้อที่จะตั้งค่า</label>
+          <select class="field-sm" id="settingsSectionSelect" style="flex:1;min-width:220px;max-width:420px" onchange="settingsShowSection(this.value)"></select>
+        </div>
+        <div class="dash-widget settings-section" data-key="datasources" data-title="🔗 Data Sources — ปี ↔ Apps Script URL" style="margin-bottom:16px">
           <div class="dash-widget-title" style="margin-bottom:4px">🔗 Data Sources — ปี ↔ Apps Script URL</div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:14px">
             รายการปีที่เชื่อมกับ Journal/Analytics อยู่ตอนนี้ — ลบปีที่เชื่อมผิด/เลิกใช้ได้ที่นี่
           </div>
           <div id="settingsDataSourcesList" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
-        <div class="dash-widget" style="margin-bottom:16px">
+        <div class="dash-widget settings-section" data-key="planoptions" data-title="🧩 Pattern / Strategy — Action Plan" style="margin-bottom:16px">
           <div class="dash-widget-title" style="margin-bottom:4px">🧩 Pattern / Strategy — Action Plan</div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:14px">
             เพิ่ม ลบ เปลี่ยนชื่อ หรือจัดลำดับรายการใน dropdown ของหน้า Action Plan — เปลี่ยนชื่อแล้วข้อมูลเก่าที่เคยเลือกไว้จะเปลี่ยนตามให้ ส่วนการลบจะไม่ทำให้ข้อมูลเก่าหาย
@@ -1954,7 +1959,7 @@ select.field-sm option{background:#111827;color:var(--text)}
           <div id="planOptionsEditor" style="display:grid;grid-template-columns:1fr 1fr;gap:20px"></div>
           <div style="margin-top:12px"><button class="jn-btn" onclick="planOptReset()">↺ คืนค่าเริ่มต้น</button></div>
         </div>
-        <div class="dash-widget">
+        <div class="dash-widget settings-section" data-key="buildinfo" data-title="ℹ️ Build Info">
           <div class="dash-widget-title" style="margin-bottom:4px">ℹ️ Build Info</div>
           <div id="settingsBuildInfo" style="font-size:12px;color:var(--text2);font-family:var(--font-mono)"></div>
         </div>
@@ -2102,7 +2107,7 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.56';
+const APP_BUILD = '2.57';
 const APP_BUILD_DATE = '2026-10-03';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
@@ -3223,7 +3228,26 @@ function jnPopulateYearSelect(force) {
 }
 
 // หน้า SETTINGS — จัดการ Data Sources (ปี↔URL) + โชว์ข้อมูลเวอร์ชันไฟล์
+function settingsShowSection(key) {
+  const secs = [...document.querySelectorAll('#page-settings .settings-section')];
+  if (!secs.length) return;
+  if (!secs.some(x => x.dataset.key === key)) key = secs[0].dataset.key;
+  secs.forEach(x => { x.style.display = (x.dataset.key === key) ? '' : 'none'; });
+  const sel = document.getElementById('settingsSectionSelect');
+  if (sel) sel.value = key;
+  try { localStorage.setItem('forex_settings_section', key); } catch(e) {}
+}
+function settingsInitMenu() {
+  const sel = document.getElementById('settingsSectionSelect');
+  if (!sel) return;
+  const secs = [...document.querySelectorAll('#page-settings .settings-section')];
+  sel.innerHTML = secs.map(x => `<option value="${x.dataset.key}">${x.dataset.title}</option>`).join('');
+  let saved = null; try { saved = localStorage.getItem('forex_settings_section'); } catch(e) {}
+  settingsShowSection(saved);
+}
+
 function renderSettingsPage() {
+  settingsInitMenu();
   renderSettingsDataSources();
   renderPlanOptionsEditor();
   const buildEl = document.getElementById('settingsBuildInfo');
