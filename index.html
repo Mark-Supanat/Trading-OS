@@ -4874,19 +4874,23 @@ function mcWeekAgg(mondayKey) {
 function mcOpenEditor(mondayKey) {
   mcEditingWeekKey = mondayKey;
   const symCounts = mcWeekAgg(mondayKey);
-  const syms = Object.keys(symCounts);
   const existing = marketConditionData[mondayKey] || { overall: '', symbols: {}, note: '' };
+  // traded symbols first, then the rest of the watchlist (and any previously tagged symbol) even with no trades
+  const MC_WATCHLIST = ['XAUUSD','XAGUSD','USOIL','BTCUSDT','EURUSD','GBPUSD','USDJPY','NDX','S50'];
+  const syms = Object.keys(symCounts);
+  MC_WATCHLIST.concat(Object.keys(existing.symbols || {})).forEach(x => { if (x && !syms.includes(x)) syms.push(x); });
   const overall = existing.overall || '';
   const condOptions = ['Trend', 'Sideway', 'Sideway Up', 'Sideway Down'];
 
   const symRows = syms.length
     ? syms.map(sym => {
+        const cnt = symCounts[sym] || 0;
         const val = (existing.symbols && existing.symbols[sym]) || '';
         const opts = ['<option value="">—</option>']
           .concat(condOptions.map(o => `<option value="${o}"${val===o?' selected':''}>${o}</option>`))
           .join('');
         return `<div class="mc-sym-row">
-          <span class="mc-sym-name">${sym}<span class="mc-sym-count">${symCounts[sym]} เทรด</span></span>
+          <span class="mc-sym-name">${sym}<span class="mc-sym-count">${cnt ? cnt + ' เทรด' : 'ไม่มีเทรด'}</span></span>
           <select class="mc-sym-select" data-sym="${sym}">${opts}</select>
         </div>`;
       }).join('')
