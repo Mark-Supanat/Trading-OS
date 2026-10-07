@@ -815,10 +815,12 @@ textarea.field-input{min-height:80px;line-height:1.6}
 .bias-pill.selected-SHORT{background:rgba(244,63,94,.2);color:#f87171;border-color:rgba(244,63,94,.4)}
 .bias-pill.selected-NEUTRAL{background:rgba(129,140,248,.2);color:#a5b4fc;border-color:rgba(129,140,248,.4)}
 .bias-pill.selected-WAIT{background:rgba(251,146,60,.2);color:#fb923c;border-color:rgba(251,146,60,.4)}
+.bias-pill.selected-HOLD{background:rgba(56,189,248,.2);color:#38bdf8;border-color:rgba(56,189,248,.45)}
 [data-theme="light"] .bias-pill.selected-LONG{background:#d1fae5;color:#065f46;border-color:#6ee7b7}
 [data-theme="light"] .bias-pill.selected-SHORT{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
 [data-theme="light"] .bias-pill.selected-NEUTRAL{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd}
 [data-theme="light"] .bias-pill.selected-WAIT{background:#ffedd5;color:#9a3412;border-color:#fed7aa}
+[data-theme="light"] .bias-pill.selected-HOLD{background:#e0f2fe;color:#075985;border-color:#7dd3fc}
 
 /* SYMBOLS GRID */
 .symbols-grid{display:grid;grid-template-columns:1fr;gap:14px}
@@ -852,6 +854,7 @@ select.field-sm option{background:#111827;color:var(--text)}
 .bias-SHORT{background:rgba(244,63,94,.2);color:#f87171;border:1px solid rgba(244,63,94,.3)}
 .bias-NEUTRAL{background:rgba(129,140,248,.2);color:#a5b4fc;border:1px solid rgba(129,140,248,.3)}
 .bias-WAIT{background:rgba(251,146,60,.2);color:#fb923c;border:1px solid rgba(251,146,60,.3);animation:pulse-wait 2s infinite}
+.bias-HOLD{background:rgba(56,189,248,.2);color:#38bdf8;border:1px solid rgba(56,189,248,.35)}
 
 /* TF SELECTOR */
 .tf-selector{display:flex;gap:3px;flex-wrap:wrap}
@@ -1099,6 +1102,7 @@ select.field-sm option{background:#111827;color:var(--text)}
 .dash-focus-pill.bias-f-LONG{background:rgba(16,185,129,.18);border-color:rgba(16,185,129,.45);color:#34d399}
 .dash-focus-pill.bias-f-SHORT{background:rgba(244,63,94,.18);border-color:rgba(244,63,94,.45);color:#f87171}
 .dash-focus-pill.bias-f-NEUTRAL{background:rgba(129,140,248,.18);border-color:rgba(129,140,248,.45);color:#a5b4fc}
+.dash-focus-pill.bias-f-HOLD{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.45);color:#38bdf8}
 .dash-focus-pill.bias-f-WAIT{background:rgba(251,146,60,.18);border-color:rgba(251,146,60,.45);color:#fb923c;animation:pulse-wait 2s infinite}
 
 /* NEWS WARNING BANNER */
@@ -1135,6 +1139,7 @@ select.field-sm option{background:#111827;color:var(--text)}
 .bias-tag-LONG{background:rgba(16,185,129,.25);color:#34d399;box-shadow:0 1px 6px rgba(16,185,129,.2)}
 .bias-tag-SHORT{background:rgba(244,63,94,.25);color:#f87171;box-shadow:0 1px 6px rgba(244,63,94,.2)}
 .bias-tag-NEUTRAL{background:rgba(129,140,248,.25);color:#a5b4fc;box-shadow:0 1px 6px rgba(129,140,248,.2)}
+.bias-tag-HOLD{background:rgba(56,189,248,.25);color:#38bdf8;box-shadow:0 1px 6px rgba(56,189,248,.25)}
 .bias-tag-WAIT{background:rgba(251,146,60,.25);color:#fb923c;animation:pulse-wait 2s infinite}
 @keyframes pulse-wait{0%,100%{box-shadow:0 1px 4px rgba(251,146,60,.2)}50%{box-shadow:0 1px 12px rgba(251,146,60,.6)}}
 .bias-tag-none{background:rgba(255,255,255,.04);color:var(--text3);border:1px solid var(--border)}
@@ -2104,8 +2109,8 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.59';
-const APP_BUILD_DATE = '2026-10-03';
+const APP_BUILD = '2.60';
+const APP_BUILD_DATE = '2026-10-07';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
 // "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
@@ -5271,7 +5276,7 @@ let STRATEGIES = [
 ];
 const PATTERNS_DEFAULT = PATTERNS.slice();
 const STRATEGIES_DEFAULT = STRATEGIES.slice();
-const BIASES = ['LONG','SHORT','NEUTRAL','WAIT'];
+const BIASES = ['LONG','SHORT','NEUTRAL','HOLD','WAIT'];
 
 // ============================================
 // SUPABASE CONFIG
@@ -6077,8 +6082,8 @@ function renderHistoryWeekContent(w, wi, scope) {
     const contentHtml = days.map((d,i) => {
       const dd = symDays[d] || {};
       const imgUrl = imgs[`${sym.id}__${d}`];
-      const biasColor = dd.bias === 'LONG' ? '#065f46' : dd.bias === 'SHORT' ? '#991b1b' : dd.bias === 'NEUTRAL' ? '#5b21b6' : 'var(--text2)';
-      const biasBg = dd.bias === 'LONG' ? '#d1fae5' : dd.bias === 'SHORT' ? '#fee2e2' : dd.bias === 'NEUTRAL' ? '#ede9fe' : 'var(--bg3)';
+      const biasColor = dd.bias === 'LONG' ? '#065f46' : dd.bias === 'SHORT' ? '#991b1b' : dd.bias === 'NEUTRAL' ? '#5b21b6' : dd.bias === 'HOLD' ? '#075985' : 'var(--text2)';
+      const biasBg = dd.bias === 'LONG' ? '#d1fae5' : dd.bias === 'SHORT' ? '#fee2e2' : dd.bias === 'NEUTRAL' ? '#ede9fe' : dd.bias === 'HOLD' ? '#e0f2fe' : 'var(--bg3)';
       return `<div id="hday_${scope}_${wi}_${sym.id}_${d}" style="display:${i===0?'flex':'none'};flex-direction:column;gap:10px">
         <div class="history-field-row">
           <div><div class="history-field-label">Pattern</div><div class="history-field-value">${dd.pattern || '—'}</div></div>
