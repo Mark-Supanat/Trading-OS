@@ -2074,7 +2074,7 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.61';
+const APP_BUILD = '2.62';
 const APP_BUILD_DATE = '2026-10-10';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
@@ -2995,11 +2995,14 @@ function renderBestWorstTrades(trades) {
   const decided = trades.filter(t => t.wl === 'W' || t.wl === 'L');
   const byPnl = [...decided].sort((a,b) => (parseFloat(b.pnlUsd)||0) - (parseFloat(a.pnlUsd)||0));
 
-  const best = byPnl.slice(0, 5);
-  const worst = byPnl.slice(-5).reverse();
+  // Best = only trades that actually made money, Worst = only trades that lost money — up to 5 each,
+  // never padded (so the same trade can't show up on both sides when there are few trades)
+  const pnlOf = t => parseFloat(t.pnlUsd) || 0;
+  const best = byPnl.filter(t => pnlOf(t) > 0).slice(0, 5);
+  const worst = byPnl.filter(t => pnlOf(t) < 0).reverse().slice(0, 5);
 
-  bestEl.innerHTML = best.length ? best.map(anBuildTradeCardHtml).join('') : '<div style="padding:16px;text-align:center;font-size:12px;color:var(--an2-text3)">ยังไม่มีข้อมูลพอ</div>';
-  worstEl.innerHTML = worst.length ? worst.map(anBuildTradeCardHtml).join('') : '<div style="padding:16px;text-align:center;font-size:12px;color:var(--an2-text3)">ยังไม่มีข้อมูลพอ</div>';
+  bestEl.innerHTML = best.length ? best.map(anBuildTradeCardHtml).join('') : '<div style="padding:16px;text-align:center;font-size:12px;color:var(--an2-text3)">ไม่มีเทรดที่ทำกำไร</div>';
+  worstEl.innerHTML = worst.length ? worst.map(anBuildTradeCardHtml).join('') : '<div style="padding:16px;text-align:center;font-size:12px;color:var(--an2-text3)">ไม่มีเทรดที่ขาดทุน</div>';
 }
 
 // ============================================
