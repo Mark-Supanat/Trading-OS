@@ -1767,7 +1767,12 @@ select.field-sm option{background:#111827;color:var(--text)}
             <button class="an-tab" id="an-tab-q2" onclick="setAnQuarter('q2',this)">Q2</button>
             <button class="an-tab active" id="an-tab-q3" onclick="setAnQuarter('q3',this)">Q3</button>
             <button class="an-tab" id="an-tab-q4" onclick="setAnQuarter('q4',this)">Q4</button>
-            <button class="an-tab" id="btnToggleWeek" onclick="toggleWeekSummary()">📅 สรุปสัปดาห์นี้ ▾</button>
+            <button class="an-tab" id="an-tab-week" onclick="setAnQuarter('week',this)">📅 สัปดาห์นี้</button>
+            <span id="anWeekNav" style="display:none;align-items:center;gap:4px;font-family:var(--font-mono);font-size:11px;color:var(--text2)">
+              <button class="an-tab" style="padding:4px 8px" onclick="anWeekShift(-1)" title="สัปดาห์ก่อน">◀</button>
+              <span id="anWeekLabel" style="min-width:150px;text-align:center;font-weight:600">—</span>
+              <button class="an-tab" style="padding:4px 8px" id="anWeekNext" onclick="anWeekShift(1)" title="สัปดาห์ถัดไป">▶</button>
+            </span>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
             <button class="btn-save" id="anExportBtn" onclick="anExportCSV()" style="font-size:11px;padding:5px 14px">⬇ Export CSV</button>
@@ -1779,46 +1784,6 @@ select.field-sm option{background:#111827;color:var(--text)}
           <button class="an-sym-pill active" onclick="setAnSymbol('all')">ทั้งหมด</button>
         </div>
 
-        <!-- THIS WEEK SUMMARY (collapsed by default, opens via the button above) -->
-        <div id="weekSummaryPanel" style="display:none;margin-top:14px">
-          <div class="dash-widget" style="padding:20px 22px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-              <div class="dash-widget-title" style="margin-bottom:0;font-size:12px">📅 สรุปสัปดาห์นี้ — <span id="weekRangeLabel">—</span></div>
-              <div id="weekTradeCount" style="font-family:var(--font-mono);font-size:11px;color:var(--text2)">—</div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
-              <div style="text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
-                <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Trades</div>
-                <div id="weekTotalTrades" style="font-family:var(--font-display);font-weight:700;font-size:26px">—</div>
-              </div>
-              <div style="text-align:center;padding:10px;border-radius:12px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15)">
-                <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Win Rate</div>
-                <div id="weekWinRate" style="font-family:var(--font-display);font-weight:700;font-size:26px;color:#34d399">—</div>
-              </div>
-              <div style="text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
-                <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">W / L</div>
-                <div id="weekWL" style="font-family:var(--font-display);font-weight:700;font-size:26px">—</div>
-              </div>
-            </div>
-
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-              <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase">Grade</span>
-              <div id="weekGradeBreakdown" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-            </div>
-
-            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Symbol Breakdown</div>
-            <div id="weekSymbolTable" style="display:flex;flex-direction:column;gap:6px"></div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;margin-bottom:8px">
-              <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase">Trade Detail</span>
-              <div style="display:flex;gap:6px">
-                <button class="btn-save" onclick="exportThisWeekCSV()" style="font-size:10px;padding:4px 10px">⬇ CSV</button>
-                <button class="btn-save" onclick="exportThisWeekJSON()" style="font-size:10px;padding:4px 10px">⬇ JSON</button>
-              </div>
-            </div>
-            <div id="weekTradeCards" style="display:flex;flex-direction:column;gap:6px"></div>
-          </div>
-        </div>
       </div>
 
       <!-- SUB-TAB NAV -->
@@ -2109,8 +2074,8 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.60';
-const APP_BUILD_DATE = '2026-10-07';
+const APP_BUILD = '2.61';
+const APP_BUILD_DATE = '2026-10-10';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
 // "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
@@ -2242,6 +2207,7 @@ async function jnSaveImportModal() {
 let anAllTrades = [];
 let anQuarter = 'q3'; // default Q3 (ปัจจุบัน)
 let anSymbol = 'all';
+let anWeekOffset = 0; // 0 = this week, -1 = last week ... (used when anQuarter === 'week')
 let anCharts = {};
 
 async function loadAnalytics() {
@@ -2260,7 +2226,6 @@ async function loadAnalytics() {
     ));
     anAllTrades = results.flat();
     anAllTrades.forEach(t => { if (t.sym) t.sym = normalizeSymbol(t.sym); });
-    renderThisWeekSummary();
     renderAnalytics();
   } catch(e) {
     document.getElementById('anKpiGrid').innerHTML = '<div class="an-kpi-card"><div class="an-kpi-label" style="color:#dc2626">โหลดข้อมูลไม่ได้</div></div>';
@@ -2277,184 +2242,8 @@ function getWeekRange(d = new Date()) {
   return { start: mon, end: nextMon };
 }
 
-function getThisWeekTrades() {
-  const { start, end } = getWeekRange();
-  return anAllTrades.filter(t => {
-    if (!t.dateOpen) return false;
-    const d = new Date(t.dateOpen);
-    return d >= start && d < end;
-  });
-}
-
-function renderThisWeekSummary() {
-  const { start, end } = getWeekRange();
-  const trades = getThisWeekTrades();
-
-  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  const fri = new Date(start); fri.setDate(start.getDate() + 4);
-  const rangeLabel = document.getElementById('weekRangeLabel');
-  if (rangeLabel) rangeLabel.textContent = `${start.getDate()}-${fri.getDate()} ${months[fri.getMonth()]} ${fri.getFullYear()}`;
-
-  const countEl = document.getElementById('weekTradeCount');
-  const totalEl = document.getElementById('weekTotalTrades');
-  const winRateEl = document.getElementById('weekWinRate');
-  const wlEl = document.getElementById('weekWL');
-  const gradeEl = document.getElementById('weekGradeBreakdown');
-  const symTableEl = document.getElementById('weekSymbolTable');
-  if (!totalEl) return;
-
-  if (!trades.length) {
-    countEl.textContent = '';
-    totalEl.textContent = '0';
-    winRateEl.textContent = '—';
-    wlEl.textContent = '—';
-    gradeEl.innerHTML = `<span style="font-family:var(--font-mono);font-size:11px;color:var(--text3)">ยังไม่มีเทรดในสัปดาห์นี้</span>`;
-    symTableEl.innerHTML = '';
-    const cardsEl = document.getElementById('weekTradeCards');
-    if (cardsEl) cardsEl.innerHTML = '';
-    return;
-  }
-
-  countEl.textContent = `${trades.length} ไม้`;
-  totalEl.textContent = trades.length;
-
-  const wins = trades.filter(t => t.wl === 'W').length;
-  const losses = trades.filter(t => t.wl === 'L').length;
-  const decided = wins + losses;
-  winRateEl.textContent = decided ? `${((wins/decided)*100).toFixed(1)}%` : '—';
-  wlEl.innerHTML = `<span style="color:#34d399">${wins}</span><span style="color:var(--text3);font-size:16px"> / </span><span style="color:#fb7185">${losses}</span>`;
-
-  // Grade breakdown
-  const gradeCount = {};
-  trades.forEach(t => { const g = t.gradeFinal || t.grade || '—'; gradeCount[g] = (gradeCount[g]||0) + 1; });
-  const gradeClassMap = { A:'an-pill-grade-a', B:'an-pill-grade-b', C:'an-pill-grade-c' };
-  gradeEl.innerHTML = Object.entries(gradeCount).sort((a,b)=>a[0].localeCompare(b[0])).map(([g,c]) =>
-    `<span class="an-pill ${gradeClassMap[g]||''}" style="${!gradeClassMap[g]?'background:rgba(255,255,255,.06);color:var(--text3)':''}">${g} · ${c}</span>`
-  ).join('');
-
-  // Per-symbol breakdown
-  const bySym = {};
-  trades.forEach(t => {
-    const s = t.sym || '—';
-    if (!bySym[s]) bySym[s] = { count:0, w:0, l:0, pnl:0 };
-    bySym[s].count++;
-    if (t.wl === 'W') bySym[s].w++;
-    if (t.wl === 'L') bySym[s].l++;
-    bySym[s].pnl += parseFloat(t.pnlPct) || 0;
-  });
-  symTableEl.innerHTML = Object.entries(bySym).sort((a,b)=>b[1].count-a[1].count).map(([sym, s]) => {
-    const pnlColor = s.pnl>0?'#34d399':s.pnl<0?'#fb7185':'var(--text2)';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)">
-      <div style="font-family:var(--font-mono);font-size:12px;font-weight:600">${sym}</div>
-      <div style="display:flex;align-items:center;gap:14px;font-family:var(--font-mono);font-size:11px;color:var(--text2)">
-        <span>${s.count} ไม้</span>
-        <span><span style="color:#34d399">${s.w}W</span> / <span style="color:#fb7185">${s.l}L</span></span>
-        <span style="color:${pnlColor};font-weight:600;min-width:56px;text-align:right">${s.pnl>=0?'+':''}${s.pnl.toFixed(1)}%</span>
-      </div>
-    </div>`;
-  }).join('');
-
-  renderWeekTradeCards(trades);
-}
-
-// ============================================
-// THIS WEEK — PER-TRADE CARDS
-// ============================================
-const WK_SYM_COLOR = { XAUUSD:'#fbbf24', XAGUSD:'#94a3b8', BTCUSDT:'#fb923c', USOIL:'#a3e635', NDX:'#22d3ee', USDJPY:'#60a5fa', EURUSD:'#60a5fa', GBPUSD:'#60a5fa', S50:'#60a5fa' };
-
-function renderWeekTradeCards(trades) {
-  const el = document.getElementById('weekTradeCards');
-  if (!el) return;
-  const sorted = [...trades].sort((a,b) => new Date(a.dateOpen) - new Date(b.dateOpen));
-  el.innerHTML = sorted.map((t, i) => {
-    const pnlPct = parseFloat(t.pnlPct) || 0;
-    const pnlUsd = parseFloat(t.pnlUsd) || 0;
-    const pnlColor = pnlPct > 0 ? '#34d399' : pnlPct < 0 ? '#fb7185' : 'var(--text2)';
-    const grade = t.gradeFinal || t.grade || '—';
-    const gradeClass = grade==='A'?'an-pill-grade-a':grade==='B'?'an-pill-grade-b':grade==='C'?'an-pill-grade-c':'';
-    const symColor = WK_SYM_COLOR[t.sym] || 'var(--text)';
-    const posColor = t.pos === 'BUY' ? '#34d399' : '#fb7185';
-    const dateStr = t.dateOpen ? new Date(t.dateOpen).toLocaleDateString('th-TH',{day:'2-digit',month:'short'}) : '—';
-
-    const chartLinks = [];
-    if (t.chartEnter) chartLinks.push(`<a class="wk-card-chart-link" href="${escAttr(t.chartEnter)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📈 View entry chart</a>`);
-    if (t.chartExit) chartLinks.push(`<a class="wk-card-chart-link" href="${escAttr(t.chartExit)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📈 View exit chart</a>`);
-
-    return `<div class="wk-card">
-      <div class="wk-card-head" onclick="toggleWeekCard(${i})">
-        <div class="wk-card-head-left">
-          <span class="an-pill ${gradeClass}" style="flex-shrink:0">${grade}</span>
-          <span class="wk-card-sym" style="color:${symColor}">${t.sym||'—'}</span>
-          <span class="wk-card-meta"><span style="color:${posColor}">${t.pos||'—'}</span> · ${t.dur||'—'} · ${dateStr}</span>
-        </div>
-        <div class="wk-card-right">
-          <span class="wk-card-pnl" style="color:${pnlColor}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1)}%</span>
-          <span class="wk-card-chev" id="wkChev${i}">▾</span>
-        </div>
-      </div>
-      <div class="wk-card-body" id="wkBody${i}">
-        <div class="wk-card-grid">
-          <div><div class="wk-card-grid-label">Enter</div>${t.enter ?? '—'}</div>
-          <div><div class="wk-card-grid-label">Exit</div>${t.exit ?? '—'}</div>
-          <div><div class="wk-card-grid-label">Lot</div>${t.lot ?? '—'}</div>
-          <div><div class="wk-card-grid-label">Session</div>${t.session || '—'}</div>
-          <div><div class="wk-card-grid-label">Exit Type</div>${t.tpsl || '—'}</div>
-          <div><div class="wk-card-grid-label">PNL$</div><span style="color:${pnlColor}">${pnlUsd>=0?'+':''}${pnlUsd.toFixed(2)}</span></div>
-        </div>
-        <div class="wk-card-setup">Setup: ${t.setup || '—'}</div>
-        ${t.note ? `<div class="wk-card-note">${t.note}</div>` : ''}
-        <div class="wk-card-charts">${chartLinks.length ? chartLinks.join('') : '<span style="font-family:var(--font-mono);font-size:10.5px;color:var(--text3)">ไม่มีลิงก์กราฟ</span>'}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toggleWeekCard(i) {
-  const body = document.getElementById('wkBody' + i);
-  const chev = document.getElementById('wkChev' + i);
-  if (!body) return;
-  const isOpen = body.classList.toggle('show');
-  if (chev) chev.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-}
-
 function escAttr(s) {
   return String(s || '').replace(/"/g, '&quot;');
-}
-
-// ============================================
-// THIS WEEK — EXPORT (CSV / JSON)
-// ============================================
-const WK_EXPORT_FIELDS = ['no','dateOpen','dateClose','dur','sym','pos','lot','order','enter','session','exit','tpsl','pnlPct','pnlUsd','grade','setup','chartEnter','chartExit','wl','gradeFinal','note'];
-
-function weekExportFilename(ext) {
-  const label = (document.getElementById('weekRangeLabel')?.textContent || 'this-week').replace(/\s+/g,'-');
-  return `trading-os-week-${label}.${ext}`;
-}
-
-function exportThisWeekCSV() {
-  const trades = getThisWeekTrades();
-  if (!trades.length) { showToast('⚠ ไม่มีเทรดในสัปดาห์นี้ให้ export'); return; }
-  const header = WK_EXPORT_FIELDS.join(',');
-  const rows = trades.map(t => WK_EXPORT_FIELDS.map(f => {
-    let v = t[f] ?? '';
-    v = String(v).replace(/"/g, '""');
-    return /[",\n]/.test(v) ? `"${v}"` : v;
-  }).join(','));
-  const csv = [header, ...rows].join('\n');
-  downloadBlob(csv, weekExportFilename('csv'), 'text/csv;charset=utf-8');
-  showToast('⬇ Export CSV แล้ว');
-}
-
-function exportThisWeekJSON() {
-  const trades = getThisWeekTrades();
-  if (!trades.length) { showToast('⚠ ไม่มีเทรดในสัปดาห์นี้ให้ export'); return; }
-  const data = trades.map(t => {
-    const o = {};
-    WK_EXPORT_FIELDS.forEach(f => o[f] = t[f] ?? '');
-    return o;
-  });
-  downloadBlob(JSON.stringify(data, null, 2), weekExportFilename('json'), 'application/json;charset=utf-8');
-  showToast('⬇ Export JSON แล้ว');
 }
 
 function downloadBlob(content, filename, mime) {
@@ -2469,8 +2258,39 @@ function downloadBlob(content, filename, mime) {
   URL.revokeObjectURL(url);
 }
 
+function anWeekRange() {
+  const base = new Date(); base.setDate(base.getDate() + anWeekOffset * 7);
+  return getWeekRange(base);
+}
+function anWeekLabel() {
+  const { start } = anWeekRange();
+  const fri = new Date(start); fri.setDate(start.getDate() + 4);
+  const M = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const left = start.getMonth() === fri.getMonth() ? `${start.getDate()}` : `${start.getDate()} ${M[start.getMonth()]}`;
+  return `${left}-${fri.getDate()} ${M[fri.getMonth()]} ${fri.getFullYear()}` + (anWeekOffset === 0 ? ' · สัปดาห์นี้' : '');
+}
+function anWeekShift(dir) {
+  if (dir > 0 && anWeekOffset >= 0) return; // no future weeks
+  anWeekOffset += dir;
+  renderAnalytics();
+}
+function anSyncWeekNav() {
+  const nav = document.getElementById('anWeekNav');
+  if (!nav) return;
+  nav.style.display = anQuarter === 'week' ? 'inline-flex' : 'none';
+  const lbl = document.getElementById('anWeekLabel'); if (lbl) lbl.textContent = anWeekLabel();
+  const nx = document.getElementById('anWeekNext'); if (nx) nx.disabled = anWeekOffset >= 0;
+}
+
 function getFilteredTrades() {
-  let trades = anQuarter === 'all' ? anAllTrades : anAllTrades.filter(t => t._quarter === anQuarter);
+  let trades;
+  if (anQuarter === 'week') {
+    // week view = every trade CLOSED in that Mon–Sun week, whichever quarter-sheet owns it
+    const { start, end } = anWeekRange();
+    trades = anAllTrades.filter(t => { const d = jnCleanDate(t.dateClose); return d && d >= start && d < end; });
+  } else {
+    trades = anQuarter === 'all' ? anAllTrades : anAllTrades.filter(t => t._quarter === anQuarter);
+  }
   if (anSymbol !== 'all') trades = trades.filter(t => t.sym === anSymbol);
   return trades;
 }
@@ -2803,20 +2623,9 @@ function switchAnTab(tab, btn) {
   }
 }
 
-function toggleWeekSummary() {
-  const panel = document.getElementById('weekSummaryPanel');
-  const btn = document.getElementById('btnToggleWeek');
-  if (!panel) return;
-  const isOpen = panel.style.display !== 'none';
-  panel.style.display = isOpen ? 'none' : 'block';
-  if (btn) {
-    btn.classList.toggle('active', !isOpen);
-    btn.innerHTML = isOpen ? '📅 สรุปสัปดาห์นี้ ▾' : '📅 สรุปสัปดาห์นี้ ▴';
-  }
-}
-
 function setAnQuarter(q, btn) {
   anQuarter = q;
+  if (q === 'week') anWeekOffset = 0;
   document.querySelectorAll('.an-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderAnalytics();
@@ -2828,6 +2637,7 @@ function setAnSymbol(sym) {
 }
 
 function renderAnalytics() {
+  anSyncWeekNav();
   const trades = getFilteredTrades().map(enrichTrade);
 
   // Build symbol filter pills
@@ -3185,8 +2995,8 @@ function renderBestWorstTrades(trades) {
   const decided = trades.filter(t => t.wl === 'W' || t.wl === 'L');
   const byPnl = [...decided].sort((a,b) => (parseFloat(b.pnlUsd)||0) - (parseFloat(a.pnlUsd)||0));
 
-  const best = byPnl.slice(0, 3);
-  const worst = byPnl.slice(-3).reverse();
+  const best = byPnl.slice(0, 5);
+  const worst = byPnl.slice(-5).reverse();
 
   bestEl.innerHTML = best.length ? best.map(anBuildTradeCardHtml).join('') : '<div style="padding:16px;text-align:center;font-size:12px;color:var(--an2-text3)">ยังไม่มีข้อมูลพอ</div>';
   worstEl.innerHTML = worst.length ? worst.map(anBuildTradeCardHtml).join('') : '<div style="padding:16px;text-align:center;font-size:12px;color:var(--an2-text3)">ยังไม่มีข้อมูลพอ</div>';
