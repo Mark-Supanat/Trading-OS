@@ -2074,8 +2074,8 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.62';
-const APP_BUILD_DATE = '2026-10-10';
+const APP_BUILD = '2.63';
+const APP_BUILD_DATE = '2026-10-17';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
 // "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
@@ -2205,7 +2205,8 @@ async function jnSaveImportModal() {
   jnSetYear(year);
 }
 let anAllTrades = [];
-let anQuarter = 'q3'; // default Q3 (ปัจจุบัน)
+let anQuarter = 'q3'; // placeholder — replaced on first load by autoSelectCurrentPeriod()
+let anPeriodAutoSet = false; // reset when the year changes
 let anSymbol = 'all';
 let anWeekOffset = 0; // 0 = this week, -1 = last week ... (used when anQuarter === 'week')
 let anCharts = {};
@@ -2226,12 +2227,24 @@ async function loadAnalytics() {
     ));
     anAllTrades = results.flat();
     anAllTrades.forEach(t => { if (t.sym) t.sym = normalizeSymbol(t.sym); });
+    if (!anPeriodAutoSet) { anPeriodAutoSet = true; autoSelectCurrentPeriod(); }
     renderAnalytics();
   } catch(e) {
     document.getElementById('anKpiGrid').innerHTML = '<div class="an-kpi-card"><div class="an-kpi-label" style="color:#dc2626">โหลดข้อมูลไม่ได้</div></div>';
   } finally {
     if (btn) { btn.textContent = '🔄 Refresh'; btn.disabled = false; }
   }
+}
+
+// On first load (and after switching year) open Journal + Analytics on the CURRENT quarter —
+// no more stale Q3 lock once Q4 starts. A past year has no "current" quarter, so it opens on All.
+function autoSelectCurrentPeriod() {
+  const now = new Date();
+  const q = String(now.getFullYear()) === anActiveYear ? 'q' + (Math.floor(now.getMonth() / 3) + 1) : 'all';
+  jnQuarter = q;
+  anQuarter = q;
+  document.querySelectorAll('.jn-tab').forEach(el => el.classList.toggle('active', el.id === 'jn-tab-' + q || (q === 'all' && /All/i.test(el.textContent))));
+  document.querySelectorAll('.an-tab').forEach(el => el.classList.toggle('active', el.id === 'an-tab-' + q));
 }
 
 function getWeekRange(d = new Date()) {
@@ -3253,6 +3266,7 @@ function jnSetYear(year) {
   GS_URL = YEAR_SHEET_URLS[year];
   anAllTrades = [];
   jnCalInited = false; // reseed the calendar month for the newly-loaded year's data
+  anPeriodAutoSet = false; // and re-pick the quarter tab for that year
   jnUpdateQuarterLabels();
   loadJournalPage(true);
 }
@@ -3273,6 +3287,12 @@ async function loadJournalPage(forceReload) {
       // today falls within the default quarter tab — open straight to today's month
       jnCalYear = now.getFullYear();
       jnCalMonth = now.getMonth();
+    } else if (jnQuarter === 'all' && String(now.getFullYear()) !== anActiveYear) {
+      // a past/other year — open on the month of its latest closed trade
+      const ds = anAllTrades.map(t => jnCleanDate(t.dateClose)).filter(Boolean);
+      const last = ds.length ? new Date(Math.max(...ds)) : new Date(parseInt(anActiveYear, 10), 11, 1);
+      jnCalYear = last.getFullYear();
+      jnCalMonth = last.getMonth();
     } else if (range) {
       // today isn't in this quarter/year — fall back to the quarter's own latest month
       jnCalYear = parseInt(anActiveYear, 10);
