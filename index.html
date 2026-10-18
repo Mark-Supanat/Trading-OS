@@ -870,6 +870,7 @@ select.field-sm option{background:#111827;color:var(--text)}
 .sym-jpy .sym-name{color:#34d399}
 .sym-eur .sym-name{color:#60a5fa}
 .sym-gbp .sym-name{color:#a78bfa}
+.sym-thb .sym-name{color:#2dd4bf}
 .sym-s50 .sym-name{color:#f472b6}
 .sym-oil .sym-name{color:#a3e635}
 .sym-ndx .sym-name{color:#22d3ee}
@@ -880,6 +881,7 @@ select.field-sm option{background:#111827;color:var(--text)}
 .sym-jpy{border-left:4px solid #10b981}
 .sym-eur{border-left:4px solid #3b82f6}
 .sym-gbp{border-left:4px solid #8b5cf6}
+.sym-thb{border-left:4px solid #14b8a6}
 .sym-s50{border-left:4px solid #ec4899}
 .sym-oil{border-left:4px solid #84cc16}
 .sym-ndx{border-left:4px solid #06b6d4}
@@ -1396,7 +1398,8 @@ select.field-sm option{background:#111827;color:var(--text)}
               { "proName": "TVC:USOIL", "title": "USOIL" },
               { "proName": "FX:USDJPY", "title": "USDJPY" },
               { "proName": "FX:EURUSD", "title": "EURUSD" },
-              { "proName": "FX:GBPUSD", "title": "GBPUSD" }
+              { "proName": "FX:GBPUSD", "title": "GBPUSD" },
+              { "proName": "FX_IDC:USDTHB", "title": "USDTHB" }
             ],
             "colorTheme": "dark",
             "isTransparent": true,
@@ -2074,8 +2077,8 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.63';
-const APP_BUILD_DATE = '2026-10-17';
+const APP_BUILD = '2.64';
+const APP_BUILD_DATE = '2026-10-18';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
 // "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
@@ -2409,7 +2412,7 @@ function normalizeSymbol(sym) {
 }
 
 // เรียงสินทรัพย์ตามลำดับที่ผู้ใช้กำหนด แล้วตามด้วยตัวที่เหลือ (เรียง A-Z)
-const AN_SYMBOL_ORDER = ['XAUUSD','XAGUSD','BTCUSDT','NDX','USOIL','USDJPY'];
+const AN_SYMBOL_ORDER = ['XAUUSD','XAGUSD','BTCUSDT','NDX','USOIL','USDJPY','USDTHB'];
 function anSortSymbols(syms) {
   return [...syms].sort((a,b) => {
     const ia = AN_SYMBOL_ORDER.indexOf(a);
@@ -4544,6 +4547,7 @@ const TV_SYMBOL_MAP = {
   usdjpy: 'FX:USDJPY',
   eurusd: 'FX:EURUSD',
   gbpusd: 'FX:GBPUSD',
+  usdthb: 'FX_IDC:USDTHB',
 };
 
 function openTradingViewChart(symId) {
@@ -4888,7 +4892,7 @@ function mcOpenEditor(mondayKey) {
   const symCounts = mcWeekAgg(mondayKey);
   const existing = marketConditionData[mondayKey] || { overall: '', symbols: {}, note: '' };
   // traded symbols first, then the rest of the watchlist (and any previously tagged symbol) even with no trades
-  const MC_WATCHLIST = ['XAUUSD','XAGUSD','USOIL','BTCUSDT','EURUSD','GBPUSD','USDJPY','NDX','S50'];
+  const MC_WATCHLIST = ['XAUUSD','XAGUSD','USOIL','BTCUSDT','EURUSD','GBPUSD','USDJPY','USDTHB','NDX','S50'];
   const syms = Object.keys(symCounts);
   MC_WATCHLIST.concat(Object.keys(existing.symbols || {})).forEach(x => { if (x && !syms.includes(x)) syms.push(x); });
   const overall = existing.overall || '';
@@ -5071,6 +5075,7 @@ const SYMBOLS = [
   {id:'usdjpy', name:'USDJPY', tf:'Day — H4', cls:'sym-jpy', icon:FLAG_IMG('jp'), iconBg:'#1f2937', iconColor:'#fff'},
   {id:'eurusd', name:'EURUSD', tf:'Day — H4', cls:'sym-eur', icon:FLAG_IMG('eu'), iconBg:'#1f2937', iconColor:'#fff'},
   {id:'gbpusd', name:'GBPUSD', tf:'H4 — H1', cls:'sym-gbp', icon:FLAG_IMG('gb'), iconBg:'#1f2937', iconColor:'#fff'},
+  {id:'usdthb', name:'USDTHB', tf:'Day — H4', cls:'sym-thb', icon:FLAG_IMG('th'), iconBg:'#1f2937', iconColor:'#fff'},
   {id:'s50', name:'S50', tf:'H1', cls:'sym-s50', icon:FLAG_IMG('th'), iconBg:'#1f2937', iconColor:'#fff'},
   {id:'usoil', name:'USOIL', tf:'H4', cls:'sym-oil', icon:'🛢️', iconBg:'#292524', iconColor:'#fff'},
   {id:'ndx', name:'NDX', tf:'Day — H4', cls:'sym-ndx', icon:FLAG_IMG('us'), iconBg:'#1f2937', iconColor:'#fff'},
