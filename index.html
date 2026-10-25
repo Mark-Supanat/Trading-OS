@@ -801,7 +801,18 @@ body::before{
 .field-input:focus{border-color:rgba(59,130,246,.6);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
 .field-input::placeholder{color:var(--text3)}
 textarea.field-input{min-height:80px;line-height:1.6}
-#ov_analysis{min-height:130px;font-size:14.5px;line-height:1.8}
+#ov_analysis{min-height:190px;font-size:14.5px;line-height:1.8;border-radius:0 0 10px 10px;overflow-y:auto;outline:none}
+#ov_analysis:empty::before{content:attr(data-placeholder);color:var(--text3);pointer-events:none}
+#ov_analysis ul{margin:4px 0;padding-left:22px}
+.rt-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0}
+.rt-sep{width:1px;height:18px;background:var(--border);margin:0 4px}
+.rt-lbl{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
+.rt-sw{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.2);cursor:pointer;padding:0}
+.rt-sw:hover{transform:scale(1.15)}
+.rt-hl{width:20px;height:20px;border-radius:6px;border:2px solid rgba(255,255,255,.2);cursor:pointer;padding:0;color:var(--text2);font-size:10px;line-height:1;background:transparent}
+.rt-btn{min-width:28px;height:26px;padding:0 8px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text);font-family:var(--font-mono);font-size:12px;font-weight:700;cursor:pointer}
+.rt-btn:hover{background:rgba(255,255,255,.08);border-color:var(--border)}
+.rt-btn.on{background:rgba(96,165,250,.2);border-color:rgba(96,165,250,.5);color:#60a5fa}
 [data-theme="light"] .field-input{background:#f5f7ff}
 
 /* DXY BIAS BAR */
@@ -1578,7 +1589,29 @@ select.field-sm option{background:#111827;color:var(--text)}
     <div style="margin-top:12px">
       <div class="overview-field ov-box ov-box-analysis">
         <label>📊 MARKET ANALYSIS (DXY / OVERALL BIAS)</label>
-        <textarea class="field-input" id="ov_analysis" placeholder="วิเคราะห์ภาพรวม อิง DXY เป็นหลัก..." rows="8" oninput="autoSave()"></textarea>
+        <div class="rt-toolbar" id="rtToolbar">
+          <span class="rt-lbl">สี</span>
+          <button type="button" class="rt-sw" style="background:#e8ecf5" data-c="#e8ecf5" title="ขาว"></button>
+          <button type="button" class="rt-sw" style="background:#34d399" data-c="#34d399" title="เขียว (Long)"></button>
+          <button type="button" class="rt-sw" style="background:#f87171" data-c="#f87171" title="แดง (Short)"></button>
+          <button type="button" class="rt-sw" style="background:#38bdf8" data-c="#38bdf8" title="ฟ้า (Hold)"></button>
+          <button type="button" class="rt-sw" style="background:#fb923c" data-c="#fb923c" title="ส้ม (Wait)"></button>
+          <button type="button" class="rt-sw" style="background:#fbbf24" data-c="#fbbf24" title="เหลือง"></button>
+          <button type="button" class="rt-sw" style="background:#a78bfa" data-c="#a78bfa" title="ม่วง"></button>
+          <span class="rt-sep"></span>
+          <span class="rt-lbl">ไฮไลต์</span>
+          <button type="button" class="rt-hl" style="background:rgba(251,191,36,.35)" data-h="rgba(251,191,36,.35)" title="เหลือง"></button>
+          <button type="button" class="rt-hl" style="background:rgba(52,211,153,.3)" data-h="rgba(52,211,153,.3)" title="เขียว"></button>
+          <button type="button" class="rt-hl" style="background:rgba(248,113,113,.3)" data-h="rgba(248,113,113,.3)" title="แดง"></button>
+          <button type="button" class="rt-hl" data-h="transparent" title="เอาไฮไลต์ออก">✕</button>
+          <span class="rt-sep"></span>
+          <button type="button" class="rt-btn" data-cmd="bold" title="ตัวหนา (Ctrl+B)"><b>B</b></button>
+          <button type="button" class="rt-btn" data-cmd="insertUnorderedList" title="ลิสต์หัวข้อ">• ≡</button>
+          <button type="button" class="rt-btn" id="rtBig" title="ขยายตัวอักษร">A⁺</button>
+          <span class="rt-sep"></span>
+          <button type="button" class="rt-btn" id="rtClear" title="ล้างรูปแบบ">⌫ ล้าง</button>
+        </div>
+        <div class="field-input" id="ov_analysis" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="วิเคราะห์ภาพรวม อิง DXY เป็นหลัก..." oninput="autoSave()"></div>
       </div>
     </div>
     <div class="dxy-bar">
@@ -2010,7 +2043,7 @@ async function connectTheDots(symId) {
 
   const weekLabel = getVal('ov_week') || currentWeek;
   const dxyBias = biasState['dxy'] || '—';
-  const marketAnalysis = getVal('ov_analysis') || '';
+  const marketAnalysis = rtToPlain(getVal('ov_analysis')) || '';
 
   const daysText = dayNotes.map((d, i) => {
     const prev = i > 0 ? dayNotes[i-1] : null;
@@ -2077,8 +2110,8 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.64';
-const APP_BUILD_DATE = '2026-10-18';
+const APP_BUILD = '2.65';
+const APP_BUILD_DATE = '2026-10-25';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
 // "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
@@ -4258,7 +4291,7 @@ function updateDashboard() {
   if (progLabel) progLabel.textContent = `${doneCount} / 5 วัน`;
 
   // Market Pulse
-  const analysis = getVal('ov_analysis') || '';
+  const analysis = rtToPlain(getVal('ov_analysis')) || '';
   const pulseEl = document.getElementById('dashPulse');
   if (pulseEl) {
     if (analysis) {
@@ -5338,6 +5371,7 @@ window.onload = async function() {
 };
 
 async function initApp() {
+  rtInitToolbar();
   // โหลด images จาก localStorage
   const savedImgs = localStorage.getItem('forex_action_plan_imgs');
   if (savedImgs) chartImages = JSON.parse(savedImgs);
@@ -5717,7 +5751,7 @@ async function buildWeekExportEntry(w, imgFolder, failedImages) {
     overview: {
       weekRange: data.ov_week || '',
       keyRisk: data.ov_risk || '',
-      analysis: data.ov_analysis || '',
+      analysis: rtToPlain(data.ov_analysis) || '',
       summary: data.ov_summary || '',
       dxyBias: data.dxy_bias || '',
     },
@@ -5901,7 +5935,7 @@ function renderHistoryWeekContent(w, wi, scope) {
   </div>
   <div style="margin-bottom:14px">
     <div class="history-field-label" style="color:#1d4ed8">📊 DXY Bias: ${data.dxy_bias || '—'}</div>
-    <div class="history-note-text">${data.ov_analysis || '—'}</div>
+    <div class="history-note-text">${rtToDisplayHtml(data.ov_analysis) || '—'}</div>
   </div>`;
 
   // Symbol cards
@@ -6780,7 +6814,7 @@ function exportData() {
   text += `WEEK: ${data.ov_week}\n`;
   text += `KEY RISK: ${data.ov_risk}\n`;
   text += `DXY BIAS: ${data.dxy_bias}\n`;
-  text += `ANALYSIS: ${data.ov_analysis}\n\n`;
+  text += `ANALYSIS: ${rtToPlain(data.ov_analysis)}\n\n`;
   SYMBOLS.forEach(sym => {
     text += `${sym.name}\n`;
     DAYS.forEach(day => {
@@ -6806,9 +6840,89 @@ function exportData() {
 // ============================================
 // HELPERS
 // ============================================
+// ============================================
+// RICH TEXT (Market Analysis) — sanitised HTML stored in the same field; plain text stays plain
+// ============================================
+const RT_ALLOWED = new Set(['B','STRONG','I','EM','U','SPAN','UL','OL','LI','BR','DIV','P']);
+function rtSanitize(html) {
+  const root = document.createElement('div');
+  root.innerHTML = String(html || '');
+  (function clean(node) {
+    [...node.childNodes].forEach(ch => {
+      if (ch.nodeType === 3) return;
+      if (ch.nodeType !== 1) { ch.remove(); return; }
+      const tag = ch.tagName;
+      if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'IFRAME' || tag === 'OBJECT') { ch.remove(); return; }
+      clean(ch);
+      if (!RT_ALLOWED.has(tag)) { ch.replaceWith(...ch.childNodes); return; }
+      const st = ch.style;
+      const keep = [];
+      if (st.color) keep.push('color:' + st.color);
+      if (st.backgroundColor && st.backgroundColor !== 'transparent') keep.push('background-color:' + st.backgroundColor);
+      if (st.fontSize) keep.push('font-size:' + st.fontSize);
+      if (st.fontWeight) keep.push('font-weight:' + st.fontWeight);
+      [...ch.attributes].forEach(a => ch.removeAttribute(a.name));
+      if (keep.length) ch.setAttribute('style', keep.join(';'));
+    });
+  })(root);
+  return root.innerHTML;
+}
+function rtToPlain(html) {
+  const root = document.createElement('div');
+  root.innerHTML = rtSanitize(html);
+  root.querySelectorAll('br').forEach(b => b.replaceWith('\n'));
+  root.querySelectorAll('div,p').forEach(b => { // a block that follows inline text starts on a new line
+    const prev = b.previousSibling;
+    if (prev && !(prev.nodeType === 1 && /^(DIV|P|UL|OL|LI)$/.test(prev.tagName))) b.prepend('\n');
+  });
+  root.querySelectorAll('div,p,li').forEach(b => b.append('\n'));
+  return root.textContent.replace(/\n{3,}/g, '\n\n').trim();
+}
+function rtLooksLikeHtml(v) { return /<\/?(b|strong|i|em|u|span|ul|ol|li|br|div|p)\b/i.test(String(v || '')); }
+// stored value -> safe HTML for display (history view etc.)
+function rtToDisplayHtml(v) {
+  if (!v) return '';
+  return rtLooksLikeHtml(v) ? rtSanitize(v) : mcEscHtml(v).replace(/\n/g, '<br>');
+}
+// editor -> stored value: plain text if nothing is formatted, otherwise sanitised HTML
+function rtReadEditor(el) {
+  const html = rtSanitize(el.innerHTML);
+  const formatted = /<(span|b|strong|i|em|u|ul|ol|li)\b/i.test(html);
+  return formatted ? html.trim() : rtToPlain(html);
+}
+function rtInitToolbar() {
+  const tb = document.getElementById('rtToolbar');
+  const ed = document.getElementById('ov_analysis');
+  if (!tb || !ed || tb.dataset.ready) return;
+  tb.dataset.ready = '1';
+  let saved = null;
+  document.addEventListener('selectionchange', () => {
+    const s = getSelection();
+    if (s.rangeCount && ed.contains(s.anchorNode)) saved = s.getRangeAt(0).cloneRange();
+  });
+  tb.addEventListener('mousedown', e => e.preventDefault()); // keep the text selection while clicking the toolbar
+  tb.addEventListener('click', e => {
+    const t = e.target.closest('button'); if (!t) return;
+    ed.focus();
+    if (saved) { const s = getSelection(); s.removeAllRanges(); s.addRange(saved); }
+    document.execCommand('styleWithCSS', false, true);
+    if (t.dataset.c) document.execCommand('foreColor', false, t.dataset.c);
+    else if (t.dataset.h) document.execCommand('hiliteColor', false, t.dataset.h);
+    else if (t.dataset.cmd) document.execCommand(t.dataset.cmd);
+    else if (t.id === 'rtBig') { const on = t.classList.toggle('on'); document.execCommand('fontSize', false, on ? '5' : '3'); }
+    else if (t.id === 'rtClear') { document.execCommand('removeFormat'); document.execCommand('hiliteColor', false, 'transparent'); }
+    autoSave();
+  });
+  ed.addEventListener('paste', e => { // paste as plain text — drop styles that come along
+    e.preventDefault();
+    document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
+  });
+}
+
 function setVal(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
+  if (el.isContentEditable) { el.innerHTML = rtToDisplayHtml(val); return; }
   if (el.tagName === 'SELECT' && val && ![...el.options].some(o => o.value === val)) {
     el.insertAdjacentHTML('beforeend', `<option value="${escAttr(val)}">${mcEscHtml(val)}</option>`); // value no longer in the list (deleted/legacy)
   }
@@ -6816,6 +6930,7 @@ function setVal(id, val) {
 }
 function getVal(id) {
   const el = document.getElementById(id);
+  if (el && el.isContentEditable) return rtReadEditor(el);
   return el ? el.value.trim() : '';
 }
 
