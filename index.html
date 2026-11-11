@@ -2110,8 +2110,8 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.65';
-const APP_BUILD_DATE = '2026-10-25';
+const APP_BUILD = '2.66';
+const APP_BUILD_DATE = '2026-11-11';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
 // "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
@@ -6086,7 +6086,7 @@ function renderSymbols() {
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
                   <span class="chart-section-label" style="margin-bottom:0">Chart</span>
                   <div class="tf-selector" id="tfselector_${sym.id}_${d}">
-                    ${['Week','Day','H4','H1','M30','M15'].map(tf =>
+                    ${['Week','Day','H4','H2','H1','M30','M15'].map(tf =>
                       `<button class="tf-pill" onclick="setTFDay('${sym.id}','${d}','${tf}',this)">${tf}</button>`
                     ).join('')}
                   </div>
