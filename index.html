@@ -2111,7 +2111,7 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.67';
+const APP_BUILD = '2.68';
 const APP_BUILD_DATE = '2026-11-22';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
@@ -2361,11 +2361,12 @@ function anExportCSV() {
 // ANALYTICS v2 — parsing helpers (Model / TF / Duration)
 // ============================================
 function extractEntryPlanInfo(raw) {
-  const text = (raw || '').trim();
+  // strip invisible characters / odd spaces that Google Sheets cells sometimes carry (zero-width, NBSP, full-width space)
+  const text = String(raw || '').replace(/[\u200B-\u200D\u2060\uFEFF]/g, '').replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, ' ').trim();
   if (!text) return { tf: '', reason: '', risk: '', exitPlan: '' };
   // The ENTER cell can hold "... TF.. RISK: ... EXITPLAN: ..." (either order). Split on both markers.
   const riskM = /RISK\s*[:：]\s*/i.exec(text);
-  const planM = /EXIT\s*-?\s*PLAN\s*[:：]?\s*/i.exec(text);
+  const planM = /EXIT[\s._\-–—]*PLAN\s*[:：]?\s*/i.exec(text);
   const marks = [];
   if (riskM) marks.push({ k: 'risk', i: riskM.index, len: riskM[0].length });
   if (planM) marks.push({ k: 'exitPlan', i: planM.index, len: planM[0].length });
