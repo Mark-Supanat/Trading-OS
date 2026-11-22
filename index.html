@@ -627,6 +627,7 @@ body::before{
 .jn-tc-field div{font-family:var(--font-mono);font-size:13px;color:var(--jn-text);font-weight:600}
 .jn-tc-entryplan{font-family:var(--font-body);font-size:11.5px;color:var(--jn-text-dim);background:rgba(255,255,255,.03);border-left:2px solid var(--jn-border2);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
 .jn-tc-tf{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--jn-accent2);background:rgba(59,130,246,.1);display:inline-block;padding:4px 9px;border-radius:6px;margin-bottom:8px}
+.jn-tc-plan{font-family:var(--font-body);font-size:11.5px;color:#99f6e4;background:rgba(45,212,191,.09);border-left:2px solid #2dd4bf;padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
 .jn-tc-risk{font-family:var(--font-body);font-size:11.5px;color:#fca5a5;background:rgba(244,63,94,.08);border-left:2px solid var(--red);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
 .jn-tc-exit-reason{font-family:var(--font-body);font-size:11.5px;color:var(--jn-text-dim);background:rgba(255,255,255,.03);border-left:2px solid #fb923c;padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;line-height:1.6}
 .jn-tc-note{font-family:var(--font-body);font-size:11.5px;color:var(--jn-text-dim);font-style:italic;margin-top:8px;line-height:1.6}
@@ -2110,8 +2111,8 @@ ${daysText}
 // ANALYTICS
 // ============================================
 // เวอร์ชันไฟล์ปัจจุบัน — อัปเดตทุกครั้งที่ส่งไฟล์ใหม่ให้ Mark กันสับสนว่า deploy ตัวล่าสุดจริงมั้ย
-const APP_BUILD = '2.66';
-const APP_BUILD_DATE = '2026-11-11';
+const APP_BUILD = '2.67';
+const APP_BUILD_DATE = '2026-11-22';
 
 // ปีเริ่มต้น (2026) hardcode ไว้เป็น fallback ครั้งแรกเท่านั้น — ปีใหม่ๆ หลังจากนี้เพิ่มได้จากปุ่ม
 // "➕ Import ปีใหม่" ในหน้า Journal โดยตรง ไม่ต้องแก้โค้ดตรงนี้อีก (ดู jnLoadYearSources/jnSaveYearSources
@@ -2361,15 +2362,25 @@ function anExportCSV() {
 // ============================================
 function extractEntryPlanInfo(raw) {
   const text = (raw || '').trim();
-  if (!text) return { tf: '', reason: '', risk: '' };
-  const riskMatch = text.match(/RISK\s*[:：]\s*([\s\S]*)$/i);
-  const risk = riskMatch ? riskMatch[1].trim() : '';
-  let beforeRisk = riskMatch ? text.slice(0, riskMatch.index) : text;
+  if (!text) return { tf: '', reason: '', risk: '', exitPlan: '' };
+  // The ENTER cell can hold "... TF.. RISK: ... EXITPLAN: ..." (either order). Split on both markers.
+  const riskM = /RISK\s*[:：]\s*/i.exec(text);
+  const planM = /EXIT\s*-?\s*PLAN\s*[:：]?\s*/i.exec(text);
+  const marks = [];
+  if (riskM) marks.push({ k: 'risk', i: riskM.index, len: riskM[0].length });
+  if (planM) marks.push({ k: 'exitPlan', i: planM.index, len: planM[0].length });
+  marks.sort((a, b) => a.i - b.i);
+  const out = { risk: '', exitPlan: '' };
+  marks.forEach((m, idx) => {
+    const end = idx + 1 < marks.length ? marks[idx + 1].i : text.length;
+    out[m.k] = text.slice(m.i + m.len, end).trim();
+  });
+  const beforeRisk = marks.length ? text.slice(0, marks[0].i) : text;
   const tfMatch = beforeRisk.match(/TF\s*([A-Za-z0-9]+(?:-[A-Za-z0-9]+)?|Day)/i);
   const tf = tfMatch ? tfMatch[1].trim() : '';
   const reason = (tfMatch ? beforeRisk.slice(0, tfMatch.index) + beforeRisk.slice(tfMatch.index + tfMatch[0].length) : beforeRisk)
     .replace(/\s{2,}/g, ' ').trim();
-  return { tf, reason, risk };
+  return { tf, reason, risk: out.risk, exitPlan: out.exitPlan };
 }
 
 // แยกข้อความ setup ออกเป็น primaryModel / approach (Follow-Reversal) / modelKey
@@ -3029,6 +3040,7 @@ function anBuildTradeCardHtml(t) {
     </div>
     ${entryInfo.reason ? `<div class="jn-tc-entryplan">📥 Entry reason: ${entryInfo.reason}</div>` : ''}
     ${entryInfo.risk ? `<div class="jn-tc-risk">⚠️ Risk: ${entryInfo.risk}</div>` : ''}
+    ${entryInfo.exitPlan ? `<div class="jn-tc-plan">🧭 Exit plan: ${entryInfo.exitPlan}</div>` : ''}
     ${t.exitExecution ? `<div class="jn-tc-exit-reason">🚪 Exit reason: ${t.exitExecution}</div>` : ''}
     ${t.note ? `<div class="jn-tc-note">📝 ${t.note}</div>` : ''}
     ${links.length ? `<div class="jn-tc-links">${links.join('')}</div>` : ''}
@@ -3732,6 +3744,7 @@ function jnRenderTradeCard(t) {
       </div>
       ${entryInfo.reason ? `<div class="jn-tc-entryplan">📥 เหตุผลที่เข้า: ${entryInfo.reason}</div>` : ''}
       ${entryInfo.risk ? `<div class="jn-tc-risk">⚠️ Risk: ${entryInfo.risk}</div>` : ''}
+      ${entryInfo.exitPlan ? `<div class="jn-tc-plan">🧭 Exit plan: ${entryInfo.exitPlan}</div>` : ''}
       ${t.exitExecution ? `<div class="jn-tc-exit-reason">🚪 เหตุผลที่ออก: ${t.exitExecution}</div>` : ''}
       ${t.note ? `<div class="jn-tc-note">📝 ${t.note}</div>` : ''}
       ${links.length ? `<div class="jn-tc-links">${links.join('')}</div>` : ''}
